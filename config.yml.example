@@ -64,14 +64,16 @@ client:
   mcp_base_url: http://localhost:9001
   
   # LLM model configuration (at least one of OpenAI and Ollama must be configured, the configured model needs to support tool calling)
-  # OpenAI configuration
+  # Any model compatible with the OpenAI API and supporting tool calls is acceptable
   openai_base_url: https://api.openai.com/v1
   openai_api_key: ""
   # List OpenAI models to be used, if multiple, separate with English commas
   chainlit_chat_openai_models: "gpt-4.1"
+  
   # Ollama configuration (local models)
   ollama_base_url: http://localhost:11434/v1
   # List Ollama models to be used, if multiple, separate with English commas
   ollama_models: "qwen3:latest"
+  
   # Optional, default model for conversations (must be in chainlit_chat_openai_models or ollama_models above)
   chainlit_chat_default_model: ""
