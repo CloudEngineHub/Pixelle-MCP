@@ -8,22 +8,6 @@
       "title": "Load Checkpoint"
     }
   },
-  "2": {
-    "inputs": {
-      "text": [
-        "12",
-        0
-      ],
-      "clip": [
-        "1",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
   "3": {
     "inputs": {
       "filename_prefix": "ComfyUI",
@@ -67,7 +51,7 @@
         0
       ],
       "negative": [
-        "2",
+        "15",
         0
       ],
       "latent_image": [
@@ -115,7 +99,10 @@
   },
   "8": {
     "inputs": {
-      "text": "a dog",
+      "text": [
+        "12",
+        0
+      ],
       "clip": [
         "1",
         1
@@ -174,6 +161,18 @@
     "class_type": "PrimitiveStringMultiline",
     "_meta": {
       "title": "MCP"
+    }
+  },
+  "15": {
+    "inputs": {
+      "conditioning": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
     }
   }
 }
