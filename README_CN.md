@@ -131,8 +131,8 @@ uv run main.py
 启动完成后，各服务地址如下：
 
 - **客户端**: 🌐 http://localhost:9003 (Chainlit Web UI，默认用户名密码均为`dev`，可以在 [`auth.py`](mcp-client/auth/auth.py) 中更改)
-- **服务端**: 🗄️ http://localhost:9002 (MCP Server)
-- **基础服务**: 🔧 http://localhost:9001 (文件存储和基础API)
+- **服务端**: 🗄️ http://localhost:9002/sse (MCP Server)
+- **基础服务**: 🔧 http://localhost:9001/docs (文件存储和基础API)
 
 ## 🛠️ 添加自己的MCP Tool
 

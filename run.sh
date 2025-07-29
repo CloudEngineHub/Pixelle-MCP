@@ -140,8 +140,8 @@ start_services() {
     
     print_success "All services started successfully!"
     echo "🌐 Client: http://localhost:9003"
-    echo "🗄️ Server: http://localhost:9002"  
-    echo "🔧 Base Service: http://localhost:9001"
+    echo "🗄️ Server: http://localhost:9002/sse"  
+    echo "🔧 Base Service: http://localhost:9001/docs"
     
     if [ "$daemon_mode" = "true" ]; then
         echo "📋 Log directory: $LOG_DIR"
