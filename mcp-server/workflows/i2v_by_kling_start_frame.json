@@ -53,7 +53,7 @@
   },
   "6": {
     "inputs": {
-      "value": " [ALTERNATIVE CHOICE] Generate video from image using Kling Start Frame model.\n    \n    ** ONLY USE THIS MODEL WHEN USER SPECIFICALLY REQUESTS KLING **\n    The default and preferred model for i2v is WAN2.1 FusionX.\n    \n    This tool creates a video from a single image based on your text prompt.\n    The video will be generated with a smooth transition and a natural flow.\n    \n    提示词技巧：详细描述动作、表情、镜头运动和环境变化\n    \n    示例：\n    - \"让图片中的人物缓缓转头微笑，头发随风飘动\"\n    - \"猫咪慢慢眨眼，尾巴轻轻摆动，阳光洒在毛发上\"\n    - \"镜头从远景拉近到特写，人物深呼吸后微笑挥手\"\n    - \"Camera slowly zooms in while the person smiles and waves\"\n    - \"Wind gently blows through hair as the character looks into distance\""
+      "value": "Generate video from image using Kling Start Frame model.\n    \n    ** ONLY USE THIS MODEL WHEN USER SPECIFICALLY REQUESTS KLING **\n    The default and preferred model for i2v is WAN2.1 FusionX.\n    \n    This tool creates a video from a single image based on your text prompt.\n    The video will be generated with a smooth transition and a natural flow.\n    \n    提示词技巧：详细描述动作、表情、镜头运动和环境变化\n    \n    示例：\n    - \"让图片中的人物缓缓转头微笑，头发随风飘动\"\n    - \"猫咪慢慢眨眼，尾巴轻轻摆动，阳光洒在毛发上\"\n    - \"镜头从远景拉近到特写，人物深呼吸后微笑挥手\"\n    - \"Camera slowly zooms in while the person smiles and waves\"\n    - \"Wind gently blows through hair as the character looks into distance\""
     },
     "class_type": "PrimitiveStringMultiline",
     "_meta": {
