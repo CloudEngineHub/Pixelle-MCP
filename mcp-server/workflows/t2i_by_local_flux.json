@@ -110,7 +110,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode (Prompt),$prompt.text"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "9": {
