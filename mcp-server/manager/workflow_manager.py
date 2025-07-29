@@ -176,14 +176,14 @@ class WorkflowManager:
             exec_locals = {}
             
             # 生成工作流执行函数
-            func_def, workflow_path = self._generate_workflow_function(title, params_str)
+            func_def, target_workflow_path = self._generate_workflow_function(title, params_str)
             # 执行函数定义，将工作流路径作为变量传入执行环境
             exec(func_def, {
                 "metadata": metadata, 
                 "logger": logger, 
                 "Field": Field,
                 "execute_workflow": execute_workflow,
-                "WORKFLOW_PATH": workflow_path  # 安全传入路径，避免转义问题
+                "WORKFLOW_PATH": target_workflow_path,
             }, exec_locals)
             
             dynamic_function = exec_locals[title]
