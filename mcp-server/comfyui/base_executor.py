@@ -64,6 +64,7 @@ class ComfyUIExecutor(ABC):
                             raise Exception(f"从URL获取cookies失败: HTTP {response.status}")
                         content = await response.text()
                         content = content.strip()
+                        logger.info(f"从URL获取cookies成功: {content}")
             
             # 解析cookies内容
             if content.startswith('{'):
