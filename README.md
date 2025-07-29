@@ -84,6 +84,8 @@ Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) environme
 # Start all services (foreground)
 ./run.sh
 
+# Or
+
 # Start all services (background)
 ./run.sh start --daemon
 ```

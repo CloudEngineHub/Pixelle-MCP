@@ -84,6 +84,8 @@ docker compose up -d
 # 启动所有服务（前台运行）
 ./run.sh
 
+# 或
+
 # 启动所有服务（后台运行）
 ./run.sh start --daemon
 ```
