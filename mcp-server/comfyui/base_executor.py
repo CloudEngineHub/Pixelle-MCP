@@ -36,7 +36,7 @@ class ComfyUIExecutor(ABC):
     """ComfyUI 执行器抽象基类"""
     
     def __init__(self, base_url: str = None):
-        self.base_url = base_url or COMFYUI_BASE_URL
+        self.base_url = (base_url or COMFYUI_BASE_URL).rstrip('/')
         
     @abstractmethod
     async def execute_workflow(self, workflow_file: str, params: Dict[str, Any] = None) -> ExecuteResult:
