@@ -73,17 +73,11 @@ cp -r mcp-server/workflows/* mcp-server/data/custom_workflows/
 ```shell
 # 启动所有服务
 docker compose up -d
-
-# 查看服务状态
-docker compose ps
-
-# 查看服务日志
-docker compose logs -f
 ```
 
 #### 🛠️ 3.2 一键脚本启动
 
-需要先安装 [uv](https://github.com/astral-sh/uv) 环境。
+需要先安装 [uv](https://docs.astral.sh/uv/getting-started/installation/) 环境。
 
 **Linux/macOS 用户**：
 ```shell
@@ -100,7 +94,7 @@ docker compose logs -f
 
 #### 🛠️ 3.3 手动启动服务
 
-需要先安装 [uv](https://github.com/astral-sh/uv) 环境。
+需要先安装 [uv](https://docs.astral.sh/uv/getting-started/installation/) 环境。
 
 **启动基础服务（mcp-base）**：
 ```shell

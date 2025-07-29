@@ -73,17 +73,11 @@ cp -r mcp-server/workflows/* mcp-server/data/custom_workflows/
 ```shell
 # Start all services
 docker compose up -d
-
-# Check service status
-docker compose ps
-
-# View service logs
-docker compose logs -f
 ```
 
 #### 🛠️ 3.2 One-click Script Start
 
-Requires [uv](https://github.com/astral-sh/uv) environment.
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) environment.
 
 **Linux/macOS users:**
 ```shell
@@ -100,7 +94,7 @@ Simply double-click the `run.bat` script in the root directory
 
 #### 🛠️ 3.3 Manual Service Start
 
-Requires [uv](https://github.com/astral-sh/uv) environment.
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) environment.
 
 **Start Basic Service (mcp-base):**
 ```shell
