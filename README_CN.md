@@ -83,6 +83,8 @@ docker compose logs -f
 
 #### 🛠️ 3.2 一键脚本启动
 
+需要先安装 [uv](https://github.com/astral-sh/uv) 环境。
+
 **Linux/macOS 用户**：
 ```shell
 # 启动所有服务（前台运行）

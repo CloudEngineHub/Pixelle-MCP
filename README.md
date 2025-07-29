@@ -83,6 +83,8 @@ docker compose logs -f
 
 #### 🛠️ 3.2 One-click Script Start
 
+Requires [uv](https://github.com/astral-sh/uv) environment.
+
 **Linux/macOS users:**
 ```shell
 # Start all services (foreground)
