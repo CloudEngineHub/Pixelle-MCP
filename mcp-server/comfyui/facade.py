@@ -23,7 +23,7 @@ class ComfyUIClient:
             base_url: ComfyUI 服务的基础URL
             executor_type: 执行器类型，'websocket' 或 'http'
         """
-        self.base_url = base_url
+        self.base_url = base_url.rstrip('/')
         self.executor_type = executor_type or COMFYUI_EXECUTOR_TYPE
         self._executor = None
         

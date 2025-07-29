@@ -33,12 +33,16 @@ class WebSocketExecutor(ComfyUIExecutor):
         ws_scheme = 'wss' if parsed.scheme == 'https' else 'ws'
         http_scheme = 'https' if parsed.scheme == 'https' else 'http'
         
+        # 原始路径
+        base_path = parsed.path.rstrip('/')
+
         # 构建WebSocket URL，添加 /ws 路径
         ws_netloc = parsed.netloc
-        self.ws_base_url = urlunparse((ws_scheme, ws_netloc, "/ws", '', '', ''))
+        ws_path = f"{base_path}/ws"
+        self.ws_base_url = urlunparse((ws_scheme, ws_netloc, ws_path, '', '', ''))
         
         # 构建HTTP URL，保持原有结构
-        self.http_base_url = urlunparse((http_scheme, ws_netloc, '', '', '', ''))
+        self.http_base_url = urlunparse((http_scheme, ws_netloc, base_path, '', '', ''))
 
     async def _queue_prompt(self, workflow: Dict[str, Any], client_id: str, prompt_ext_params: Optional[Dict[str, Any]] = None) -> str:
         """将工作流提交到队列"""
