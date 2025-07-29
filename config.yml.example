@@ -42,7 +42,7 @@ server:
   # ComfyUI API Key (required if API Nodes are used in workflows, 
   # get it from: https://platform.comfy.org/profile/api-keys)
   comfyui_api_key: ""
-  # Cookies used when calling ComfyUI interface, configure this if ComfyUI service requires authentication
+  # Cookies used when calling ComfyUI interface, configure this if ComfyUI service requires authentication, supports URL/JSON/string formats
   comfyui_cookies: ""
   # Executor type for calling ComfyUI interface, supports http and websocket (both are generally supported)
   comfyui_executor_type: http

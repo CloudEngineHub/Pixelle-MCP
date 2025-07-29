@@ -43,13 +43,29 @@ class ComfyUIExecutor(ABC):
         """执行工作流的抽象方法"""
         pass
     
-    def _parse_comfyui_cookies(self) -> Optional[Dict[str, str]]:
-        """解析 COMFYUI_COOKIES 配置并返回 cookies 字典"""
+    async def _parse_comfyui_cookies(self) -> Optional[Dict[str, str]]:
+        """解析 COMFYUI_COOKIES 配置并返回 cookies 字典
+        支持三种格式：
+        1. HTTP URL - 发起GET请求获取cookies内容
+        2. JSON字符串格式 - 直接解析
+        3. 键值对字符串格式 - 解析为字典
+        """
         if not COMFYUI_COOKIES:
             return None
         
         try:
             content = COMFYUI_COOKIES.strip()
+            
+            # 检查是否是HTTP URL
+            if content.startswith(('http://', 'https://')):
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(content) as response:
+                        if response.status != 200:
+                            raise Exception(f"从URL获取cookies失败: HTTP {response.status}")
+                        content = await response.text()
+                        content = content.strip()
+            
+            # 解析cookies内容
             if content.startswith('{'):
                 return json.loads(content)
             else:
@@ -66,16 +82,16 @@ class ComfyUIExecutor(ABC):
     @asynccontextmanager
     async def get_comfyui_session(self) -> AsyncGenerator[aiohttp.ClientSession, None]:
         """带cookie的aiohttp session，如果COMFYUI_COOKIES存在则自动加载"""
-        cookies = self._parse_comfyui_cookies()
+        cookies = await self._parse_comfyui_cookies()
         async with aiohttp.ClientSession(cookies=cookies) as session:
             yield session
 
-    def transfer_result_files(self, result: ExecuteResult) -> ExecuteResult:
+    async def transfer_result_files(self, result: ExecuteResult) -> ExecuteResult:
         """转存结果文件到新的URL"""
         url_cache: Dict[str, str] = {}
         
         # 解析 ComfyUI cookies，用于下载需要认证的文件
-        cookies = self._parse_comfyui_cookies()
+        cookies = await self._parse_comfyui_cookies()
 
         def transfer_urls(urls: List[str]) -> List[str]:
             # 去重，保留顺序
