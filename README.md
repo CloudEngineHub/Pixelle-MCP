@@ -4,7 +4,7 @@
 
 <p align="center"><b>English</b> | <a href="README_CN.md">中文</a></p>
 
-https://github.com/user-attachments/assets/fb827ad2-69f9-4ef9-8c8b-f7f1fc8d9074
+https://github.com/user-attachments/assets/8039a329-b2ba-491c-97aa-94e799074ffa
 
 ## 📁 Project Structure
 
