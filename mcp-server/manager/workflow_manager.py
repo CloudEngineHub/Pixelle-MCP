@@ -57,18 +57,23 @@ class WorkflowManager:
         # 必需参数在前，可选参数在后
         return ", ".join(required_params + optional_params)
     
-    def _generate_workflow_function(self, title: str, params_str: str) -> str:
-        """生成工作流执行函数代码"""
+    def _generate_workflow_function(self, title: str, params_str: str) -> tuple[str, str]:
+        """生成工作流执行函数代码
+        
+        Returns:
+            tuple: (function_code, workflow_path) - 函数代码和工作流路径
+        """
         final_workflow_path = os.path.join(CUSTOM_WORKFLOW_DIR, f"{title}.json")
         
-        # 使用字符串模板而不是f-string来避免大括号冲突
+        # 使用更安全的模板，避免所有转义字符问题
+        # 将工作流路径作为变量传入执行环境，而不是字符串格式化
         template = '''async def {title}({params_str}):
     try:
         # 获取传入的参数（排除特殊参数）
         params = {{k: v for k, v in locals().items() if not k.startswith('_')}}
         
-        # 执行工作流
-        result = await execute_workflow("{workflow_path}", params)
+        # 执行工作流 - workflow_path从外部环境获取
+        result = await execute_workflow(WORKFLOW_PATH, params)
         
         # 转换结果格式为LLM友好的格式
         if result.status == "completed":
@@ -77,15 +82,17 @@ class WorkflowManager:
             return "工作流执行失败: " + str(result.msg or result.status)
             
     except Exception as e:
-        logger.error("工作流执行失败 {title}: " + str(e), exc_info=True)
+        logger.error("工作流执行失败 {title_safe}: " + str(e), exc_info=True)
         return "工作流执行异常: " + str(e)
 '''
         
-        return template.format(
+        function_code = template.format(
             title=title,
             params_str=params_str,
-            workflow_path=final_workflow_path
+            title_safe=repr(title)  # 使用repr确保title在日志中安全显示
         )
+        
+        return function_code, final_workflow_path
     
     def _register_workflow(self, title: str, workflow_handler, metadata: WorkflowMetadata) -> None:
         """注册并记录工作流"""
@@ -169,13 +176,14 @@ class WorkflowManager:
             exec_locals = {}
             
             # 生成工作流执行函数
-            func_def = self._generate_workflow_function(title, params_str)
-            # 执行函数定义
+            func_def, workflow_path = self._generate_workflow_function(title, params_str)
+            # 执行函数定义，将工作流路径作为变量传入执行环境
             exec(func_def, {
                 "metadata": metadata, 
                 "logger": logger, 
                 "Field": Field,
-                "execute_workflow": execute_workflow
+                "execute_workflow": execute_workflow,
+                "WORKFLOW_PATH": workflow_path  # 安全传入路径，避免转义问题
             }, exec_locals)
             
             dynamic_function = exec_locals[title]
