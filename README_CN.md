@@ -1,5 +1,7 @@
 <h1 align="center">🎨 Pixelle MCP</h1>
 
+<p align="center">✨ 全模态融合智能体框架</p>
+
 <p align="center">✨ 基于 MCP 协议的 AIGC 方案，0代码将 ComfyUI 工作流无缝转化为 MCP Tool，让 LLM 与 ComfyUI 强强联合。</p>
 
 <p align="center"><a href="README.md">English</a> | <b>中文</b></p>
