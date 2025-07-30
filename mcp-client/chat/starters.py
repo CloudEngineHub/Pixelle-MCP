@@ -47,6 +47,18 @@ class StarterModel(BaseModel):
             icon=self.icon,
         )
 
+# 打字机效果配置
+TYPING_EFFECT_CONFIG = {
+    "user_message": {
+        "delay_per_char": 0.05,
+        "max_total_duration": 1.0
+    },
+    "assistant_message": {
+        "delay_per_char": 0.02,
+        "max_total_duration": 2.0
+    }
+}
+
 # 文件操作相关函数
 SYSTEM_STARTERS_DIR = Path("./starters")
 CUSTOM_STARTERS_DIR = Path("./data/custom_starters")
@@ -441,8 +453,15 @@ async def handle_step_item(item: Dict[str, Any]) -> None:
         
         step.output = step_output
 
-async def stream_content_with_typing_effect(content: str, delay_per_char: float = 0.02, message_type: str = "assistant_message") -> cl.Message:
-    """使用打字机效果流式输出内容"""
+async def stream_content_with_typing_effect(content: str, delay_per_char: float = 0.02, message_type: str = "assistant_message", max_total_duration: float = 3.0) -> cl.Message:
+    """使用打字机效果流式输出内容
+    
+    Args:
+        content: 要输出的内容
+        delay_per_char: 每个字符的延迟时间（秒）
+        message_type: 消息类型
+        max_total_duration: 最大总时长（秒），超过此时间会加速输出
+    """
     if not content:
         message = cl.Message(content="", type=message_type)
         await message.send()
@@ -451,11 +470,19 @@ async def stream_content_with_typing_effect(content: str, delay_per_char: float 
     # 创建空消息，指定消息类型
     message = cl.Message(content="", type=message_type)
     
+    # 计算理论总时长
+    theoretical_duration = len(content) * delay_per_char
+    
+    # 如果理论时长超过最大时长，调整延迟
+    if theoretical_duration > max_total_duration:
+        adjusted_delay = max_total_duration / len(content)
+    else:
+        adjusted_delay = delay_per_char
+    
     # 逐字符流式输出
     for char in content:
         await message.stream_token(char)
-        # 添加小延时使打字效果更自然
-        await asyncio.sleep(delay_per_char)
+        await asyncio.sleep(adjusted_delay)
     
     # 完成流式输出
     await message.send()
@@ -482,11 +509,23 @@ async def handle_message_item(item: Dict[str, Any], role: str) -> None:
     
     # user 和 ai 消息都使用打字机效果
     if role == "user":
-        # 用户消息 - 使用打字机效果，速度稍快一些
-        message = await stream_content_with_typing_effect(content, delay_per_char=0.05, message_type="user_message")
+        # 用户消息 - 使用打字机效果
+        config = TYPING_EFFECT_CONFIG["user_message"]
+        message = await stream_content_with_typing_effect(
+            content, 
+            delay_per_char=config["delay_per_char"], 
+            message_type="user_message", 
+            max_total_duration=config["max_total_duration"]
+        )
     else:
-        # AI助手消息 - 使用打字机效果，正常速度
-        message = await stream_content_with_typing_effect(content, delay_per_char=0.02, message_type="assistant_message")
+        # AI助手消息 - 使用打字机效果
+        config = TYPING_EFFECT_CONFIG["assistant_message"]
+        message = await stream_content_with_typing_effect(
+            content, 
+            delay_per_char=config["delay_per_char"], 
+            message_type="assistant_message", 
+            max_total_duration=config["max_total_duration"]
+        )
     
     # content 输出完成后，一次性添加 elements
     if elements:
