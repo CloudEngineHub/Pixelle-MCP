@@ -208,7 +208,7 @@ class HttpExecutor(ComfyUIExecutor):
             result = await self._wait_for_results(prompt_id, client_id, None, output_id_2_var)
             
             # 转存结果文件
-            result = self.transfer_result_files(result)
+            result = await self.transfer_result_files(result)
             return result
             
         except Exception as e:

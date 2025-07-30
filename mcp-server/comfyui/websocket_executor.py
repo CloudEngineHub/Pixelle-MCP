@@ -225,7 +225,7 @@ class WebSocketExecutor(ComfyUIExecutor):
             try:
                 # 准备WebSocket连接的额外头部，包含cookies
                 additional_headers = {}
-                cookies = self._parse_comfyui_cookies()
+                cookies = await self._parse_comfyui_cookies()
                 if cookies:
                     try:
                         if isinstance(cookies, dict):
@@ -333,7 +333,7 @@ class WebSocketExecutor(ComfyUIExecutor):
                                     result = self._build_result_from_collected_outputs(collected_outputs, prompt_id, output_id_2_var)
                                     result.duration = duration
                                     # 转存结果文件
-                                    result = self.transfer_result_files(result)
+                                    result = await self.transfer_result_files(result)
                                     return result
                                 else:
                                     # WebSocket方式没有收集到输出，返回错误
