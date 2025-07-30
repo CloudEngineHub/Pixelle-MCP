@@ -56,8 +56,10 @@ client:
   # MCP Client Web service configuration
   # Chainlit framework configuration (used for chainlit auth, can be reused or randomly generated)
   chainlit_auth_secret: "8Z$9@,BzJv*sxlyfj9JVWDIltov5kx%Buc*kA>O>.oLDsEwGuD.Zm~2y3vBk,m_A"
+  # Chainlit configuration, see: https://docs.chainlit.io/backend/command-line
   chainlit_host: 127.0.0.1
   chainlit_port: 9003
+  chainlit_root_path: ""
   chainlit_auth_enabled: true
   
   # Base service configuration, update here accordingly if you changed server_host or server_port in base section, 
