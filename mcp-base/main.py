@@ -7,6 +7,7 @@ Pixelle Base Service
 """
 
 import uvicorn
+import logging
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import Response, StreamingResponse
@@ -17,6 +18,21 @@ from config.settings import settings
 from services.file_service import file_service
 from storage import FileInfo
 
+
+# 配置日志 - 过滤健康检查的访问日志
+class HealthCheckFilter(logging.Filter):
+    """过滤健康检查的访问日志"""
+    def filter(self, record):
+        if hasattr(record, 'getMessage'):
+            message = record.getMessage()
+            # 过滤掉健康检查的访问日志
+            if 'GET /health HTTP/1.1' in message:
+                return False
+        return True
+
+# 应用过滤器到访问日志记录器
+access_logger = logging.getLogger("uvicorn.access")
+access_logger.addFilter(HealthCheckFilter())
 
 # 创建FastAPI应用
 app = FastAPI(
