@@ -2,8 +2,10 @@
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
 import json
+import keyword
 import os
 from pathlib import Path
+import re
 import shutil
 from pydantic import Field
 from core import mcp, logger
@@ -19,16 +21,29 @@ async def save_workflow_tool(
     """
     Add or update a workflow to MCP tools.
     """
+    def error(msg: str):
+        return json.dumps({ "success": False, "error": msg })
+    
     try:
+        # 合法格式：字母或下划线开头，其后可包含字母、数字、下划线
+        pattern = r'^[A-Za-z_][A-Za-z0-9_]*$'
+        
+        if not re.match(pattern, uploaded_filename):
+            return error(
+                f"上传文件的名称格式不符合要求：仅允许使用字母、数字、下划线，且必须以字母或下划线开头。"
+            )
+        
+        if keyword.iskeyword(uploaded_filename):
+            return error(
+                f"上传文件的名称不能为 Python 关键字：'{uploaded_filename}'。"
+            )
+
         with download_files(workflow_url) as temp_workflow_path:
             return workflow_manager.load_workflow(temp_workflow_path, tool_name=uploaded_filename)
             
     except Exception as e:
         logger.error(f"保存工作流失败: {e}")
-        return json.dumps({
-            "success": False,
-            "error": f"保存工作流失败: {str(e)}"
-        })
+        return error(f"保存工作流失败: {str(e)}")
         
 @mcp.tool(name="reload_workflows_tool")
 async def reload_workflows_tool():
