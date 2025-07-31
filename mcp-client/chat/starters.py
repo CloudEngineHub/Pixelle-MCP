@@ -257,7 +257,10 @@ async def save_conversation_as_starter(label: str, user_message: str) -> bool:
                     break
             if first_user_msg and first_user_msg.get("content"):
                 # 添加零宽度空格前缀标识这是starter消息
-                first_user_msg["content"] = "\u200B" + first_user_msg["content"]
+                starter_prefix = "\u200B"
+                msg_content = first_user_msg["content"]
+                if not msg_content.startswith(starter_prefix):
+                    first_user_msg["content"] = starter_prefix + msg_content
         
         # 创建 starter 数据
         starter_data = {
