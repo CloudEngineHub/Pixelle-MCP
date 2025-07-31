@@ -81,7 +81,7 @@ default_theme = "light"
 cot = "full"
 
 # Link to your github repo. This will add a github button in the UI's header.
-github = "https://github.com/puke3615/Pixelle-MCP"
+github = "https://github.com/AIDC-AI/Pixelle-MCP"
 
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
