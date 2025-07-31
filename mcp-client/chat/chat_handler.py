@@ -3,6 +3,7 @@
 
 from datetime import timedelta
 import json
+import os
 import time
 import chainlit as cl
 from typing import Any, Dict, List
@@ -14,6 +15,10 @@ from utils.llm_util import ModelInfo
 from chat.starters import build_save_action
 from utils.time_util import format_duration
 from core.core import logger
+
+
+save_starter_enabled = os.getenv("CHAINLIT_SAVE_STARTER_ENABLED", "false").lower() == "true"
+
 
 def get_all_tools() -> List[Dict[str, Any]]:
     """获取所有可用的 MCP 工具"""
@@ -373,10 +378,11 @@ async def _handle_stream_response(client, api_params, enhanced_messages, message
                         # 处理媒体标记并发送消息
                         await _process_media_markers(msg)
                         if msg.content and msg.content.strip():
-                            # 在AI回复消息上直接添加保存Action
-                            msg.actions = [
-                                build_save_action()
-                            ]
+                            if save_starter_enabled:
+                                # 在AI回复消息上添加保存Action
+                                msg.actions = [
+                                    build_save_action()
+                                ]
                             await msg.send()
                         return messages, False  # 结束处理
                         
@@ -399,10 +405,11 @@ async def _handle_stream_response(client, api_params, enhanced_messages, message
     # 如果没有工具调用，处理媒体标记并发送消息
     if not has_tool_call:
         await _process_media_markers(msg)
-        # 在AI回复消息上直接添加保存Action
-        msg.actions = [
-            build_save_action()
-        ]
+        if save_starter_enabled:
+            # 在AI回复消息上添加保存Action
+            msg.actions = [
+                build_save_action()
+            ]
         await msg.send()
         return messages, False
     

@@ -61,6 +61,7 @@ client:
   chainlit_port: 9003
   chainlit_root_path: ""
   chainlit_auth_enabled: true
+  chaintlit_save_starter_enabled: false
   
   # Base service configuration, update here accordingly if you changed server_host or server_port in base section, 
   mcp_base_url: http://localhost:9001
