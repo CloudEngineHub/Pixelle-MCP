@@ -51,11 +51,11 @@ class StarterModel(BaseModel):
 TYPING_EFFECT_CONFIG = {
     "user_message": {
         "delay_per_char": 0.05,
-        "max_total_duration": 1.0
+        "max_total_duration": 5.0
     },
     "assistant_message": {
         "delay_per_char": 0.02,
-        "max_total_duration": 2.0
+        "max_total_duration": 20.0
     }
 }
 
