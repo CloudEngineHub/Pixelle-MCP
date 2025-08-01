@@ -1,8 +1,8 @@
 <h1 align="center">🎨 Pixelle MCP - Omnimodal Agent Framework</h1>
 
-<p align="center">✨ An AIGC solution based on the MCP protocol, seamlessly converting ComfyUI workflows into MCP tools with zero code, empowering LLM and ComfyUI integration.</p>
-
 <p align="center"><b>English</b> | <a href="README_CN.md">中文</a></p>
+
+<p align="center">✨ An AIGC solution based on the MCP protocol, seamlessly converting ComfyUI workflows into MCP tools with zero code, empowering LLM and ComfyUI integration.</p>
 
 https://github.com/user-attachments/assets/8039a329-b2ba-491c-97aa-94e799074ffa
 
