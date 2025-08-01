@@ -6,6 +6,10 @@
 
 https://github.com/user-attachments/assets/8b7e3d9e-dcf3-4ac4-be23-17d59eb3ea24
 
+https://github.com/user-attachments/assets/75d80326-191a-4133-8b04-d69e91a3c6b3
+
+https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
+
 ## 📁 项目结构
 
 - **mcp-base**: 🔧 基础服务，提供文件存储和共用服务能力
