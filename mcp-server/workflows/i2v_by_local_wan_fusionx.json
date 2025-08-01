@@ -42,7 +42,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode (Positive Prompt),$prompt.text"
+      "title": "CLIP Text Encode (Positive Prompt)"
     }
   },
   "7": {
@@ -170,7 +170,7 @@
     },
     "class_type": "WanImageToVideo",
     "_meta": {
-      "title": "WanImageToVideo,$width.width,$height.height"
+      "title": "WanImageToVideo"
     }
   },
   "51": {
