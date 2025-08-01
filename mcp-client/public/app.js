@@ -76,8 +76,6 @@ function initMessage() {
                                document.querySelectorAll('[id^="starter-"]').length > 0; // 至少有一个starter按钮
             
             if (isPageReady) {
-                // 诊断页面状态
-                diagnosePage();
                 // 检查URL参数并自动触发starter
                 checkAndTriggerUrlStarter();
             } else {
