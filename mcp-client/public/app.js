@@ -11,7 +11,6 @@ function initMessage() {
         BUTTON_CHECK_INTERVAL: 100,  // 按钮查找重试间隔 (ms) - starter按钮检测频率
         BASIC_ELEMENT_CHECK_INTERVAL: 200,  // 基础元素检查间隔 (ms) - 页面初始化检测频率
         MAX_RETRY_COUNT: 50,         // 最大重试次数 - 避免无限循环
-        URL_CLEAR_DELAY: 1000        // 清除URL参数的延迟时间 (ms) - 确保操作完成
     };
 
     // 获取URL参数
@@ -88,13 +87,6 @@ function initMessage() {
                                     console.log('最终确认按钮可用，执行点击:', targetElementId);
                                     buttonCheck.click();
                                     console.log('已触发starter按钮:', buttonCheck.id);
-                                    
-                                    // 延迟清除URL参数，确保点击操作完全完成
-                                    setTimeout(() => {
-                                        const newUrl = window.location.origin + window.location.pathname;
-                                        window.history.replaceState({}, document.title, newUrl);
-                                        console.log('已清除URL参数');
-                                    }, TIMING_CONFIG.URL_CLEAR_DELAY);
                                 } else {
                                     console.warn('最终检查时按钮不可用:', targetElementId);
                                     diagnosePage(); // 诊断最终检查失败时的状态
