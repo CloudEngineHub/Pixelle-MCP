@@ -1,7 +1,7 @@
 {
   "3": {
     "inputs": {
-      "seed": 1002959892432282,
+      "seed": 121110126638218,
       "steps": 10,
       "cfg": 1,
       "sampler_name": "uni_pc",
@@ -98,7 +98,7 @@
   },
   "37": {
     "inputs": {
-      "unet_name": "wan-fusionx/WanT2V_MasterModel.safetensors",
+      "unet_name": "WanT2V_MasterModel.safetensors",
       "weight_dtype": "default"
     },
     "class_type": "UNETLoader",
