@@ -51,7 +51,7 @@
         0
       ],
       "negative": [
-        "15",
+        "14",
         0
       ],
       "latent_image": [
@@ -94,7 +94,7 @@
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "Empty Latent Image,$width.width,$height.height"
+      "title": "Empty Latent Image"
     }
   },
   "8": {
@@ -142,7 +142,7 @@
     },
     "class_type": "easy int",
     "_meta": {
-      "title": "$width.value:The height of the image"
+      "title": "$height.value:The height of the image"
     }
   },
   "12": {
@@ -163,7 +163,7 @@
       "title": "MCP"
     }
   },
-  "15": {
+  "14": {
     "inputs": {
       "conditioning": [
         "8",

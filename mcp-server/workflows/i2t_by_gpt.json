@@ -2,11 +2,14 @@
   "1": {
     "inputs": {
       "prompt": [
-        "5",
+        "7",
         0
       ],
       "persist_context": false,
-      "model": "gpt-4.1-mini",
+      "model": [
+        "9",
+        0
+      ],
       "images": [
         "2",
         0
@@ -14,7 +17,7 @@
     },
     "class_type": "OpenAIChatNode",
     "_meta": {
-      "title": "$model.model:The model to use, must be one of the following: 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o', 'o1', 'o1-pro', 'o3', 'o4-mini'"
+      "title": "OpenAI Chat"
     }
   },
   "2": {
@@ -40,6 +43,15 @@
   },
   "5": {
     "inputs": {
+      "value": "Analyze image using OpenAI's GPT model."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "MCP"
+    }
+  },
+  "7": {
+    "inputs": {
       "value": "Describe the image detailedly"
     },
     "class_type": "PrimitiveStringMultiline",
@@ -47,13 +59,25 @@
       "title": "$prompt.value:The prompt to analyze"
     }
   },
-  "6": {
+  "8": {
     "inputs": {
-      "value": "Analyze image using OpenAI's GPT model."
+      "value": ""
     },
     "class_type": "PrimitiveStringMultiline",
     "_meta": {
-      "title": "MCP"
+      "title": "$model.value:The model to use, must be one of the following: \"gpt-4.1-mini \", \"gpt-4.1 \",\"gpt-4o\""
+    }
+  },
+  "9": {
+    "inputs": {
+      "anything": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
     }
   }
 }
