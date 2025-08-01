@@ -72,10 +72,6 @@ def get_system_starters_dir() -> Path:
     """获取系统预置starter目录"""
     return SYSTEM_STARTERS_DIR
 
-def get_custom_starters_dir() -> Path:
-    """获取用户自定义starter目录"""
-    return CUSTOM_STARTERS_DIR
-
 def parse_filename(filename: str) -> Tuple[bool, int, str]:
     """
     解析文件名格式：[_]xxx_label.json
@@ -220,68 +216,6 @@ def convert_step_to_dict(step: cl.Step) -> Dict[str, Any]:
         "output": step.output if step.output else ""
     }
 
-async def save_conversation_as_starter(label: str, user_message: str) -> bool:
-    """保存当前对话为 starter"""
-    try:
-        ensure_starters_dirs()
-        
-        # 获取对话历史
-        chat_context = cl.chat_context.get()
-        # 构建消息数组
-        pure_messages = []
-        for item in chat_context:
-            if not item.content and not item.elements:
-                continue
-            if item.type == "system_message":
-                continue
-            else:
-                pure_messages.append(convert_message_to_dict(item))
-        
-        
-        
-        # 从 user_session 获取 steps
-        current_steps = cl.user_session.get("current_steps", [])
-        step_messages = []
-        for step in current_steps:
-            step_messages.append(convert_step_to_dict(step))
-            
-        all_messages = pure_messages + step_messages
-        all_messages.sort(key=lambda x: x.get("created_at", ""))
-        
-        # 为首条用户消息添加\u200B前缀以标识starter
-        if all_messages:
-            first_user_msg = None
-            for msg in all_messages:
-                if msg.get("role") == "user" and msg.get("type") == "message":
-                    first_user_msg = msg
-                    break
-            if first_user_msg and first_user_msg.get("content"):
-                # 添加零宽度空格前缀标识这是starter消息
-                starter_prefix = "\u200B"
-                msg_content = first_user_msg["content"]
-                if not msg_content.startswith(starter_prefix):
-                    first_user_msg["content"] = starter_prefix + msg_content
-        
-        # 创建 starter 数据
-        starter_data = {
-            "icon": "/public/tool.svg",
-            "messages": all_messages
-        }
-        
-        # 生成文件名
-        order = get_next_order_number()
-        filename = f"{order:03d}_{label}.json"
-        filepath = CUSTOM_STARTERS_DIR / filename
-        
-        # 保存文件
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(starter_data, f, ensure_ascii=False, indent=2)
-        
-        return True
-        
-    except Exception as e:
-        print(f"Error saving starter: {e}")
-        return False
 
 def build_save_action():
     return cl.Action(
@@ -358,75 +292,6 @@ async def on_prompt_confirmed(action):
             dialog_info["result"] = value
             cl.user_session.set(f"prompt_dialog_{dialog_id}", dialog_info)
 
-@cl.action_callback("save_as_starter")
-async def on_save_starter(action):
-    """处理保存为Starter的action"""
-    try:
-        # 获取对话历史
-        chat_context = cl.chat_context.get()
-        if not chat_context or len(chat_context) < 2:
-            await show_alert("error", "无法保存", "需要有对话内容才能保存为 Starter")
-            return
-        
-        # 获取第一条用户消息的内容作为显示用
-        first_user_message = None
-        for msg in chat_context:
-            if isinstance(msg, cl.Message) and msg.type == "user_message":
-                first_user_message = msg.content
-                break
-        
-        if not first_user_message:
-            await show_alert("error", "无法保存", "无法找到用户消息")
-            return
-        
-        # 显示自定义prompt对话框
-        dialog_id, cancel_callback = await show_prompt_dialog(
-            title="保存为 Starter",
-            message="请输入Starter的标签名（用于显示在首页）",
-            placeholder="如：图片编辑教程"
-        )
-        
-        # 等待用户输入（一直等待，无超时）
-        import asyncio
-        while True:
-            await asyncio.sleep(0.1)
-            dialog_info = cl.user_session.get(f"prompt_dialog_{dialog_id}")
-            if dialog_info and dialog_info.get("resolved"):
-                label = dialog_info.get("result")
-                break
-        
-        if not label:
-            # 用户取消，清理prompt消息
-            await cancel_callback()
-            return
-        
-        # 验证标签名
-        import re
-        if not re.match(r'^[\w\u4e00-\u9fff\-_\s]+$', label):
-            # 输入无效，清理prompt消息
-            await cancel_callback()
-            await show_alert("warning", "输入无效", "标签名只能包含中英文、数字、下划线、横线和空格")
-            return
-        
-        # 保存完成后清理prompt消息
-        await cancel_callback()
-        
-        # 保存 starter（传入label即可，user_message参数已不再使用）
-        success = await save_conversation_as_starter(label, first_user_message)
-        
-        
-        if success:
-            await show_alert("success", "保存成功", f"已成功保存为 Starter：{label}")
-            # 移除action按钮
-            await action.remove()
-        else:
-            await show_alert("error", "保存失败", "请检查文件权限或联系管理员")
-            
-    except Exception as e:
-        # 异常时也要清理状态
-        if 'cancel_callback' in locals():
-            await cancel_callback()
-        await show_alert("error", "操作失败", str(e))
 
 async def handle_messages(messages: List[Dict[str, Any]]) -> None:
     """处理预置回答数组"""
