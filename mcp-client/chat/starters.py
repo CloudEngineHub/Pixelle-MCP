@@ -54,11 +54,10 @@ TYPING_EFFECT_CONFIG = {
         "max_total_duration": 5.0
     },
     "assistant_message": {
-        "delay_per_char": 0.05,
+        "delay_per_char": 0.02,
         "max_total_duration": 20.0
     }
 }
-FIXED_DELAY_PER_CHAR = 0.05
 
 # 文件操作相关函数
 SYSTEM_STARTERS_DIR = Path("./starters")
@@ -343,11 +342,10 @@ async def stream_content_with_typing_effect(content: str, delay_per_char: float 
     theoretical_duration = len(content) * delay_per_char
     
     # 如果理论时长超过最大时长，调整延迟
-    # if theoretical_duration > max_total_duration:
-    #     adjusted_delay = max_total_duration / len(content)
-    # else:
-    #     adjusted_delay = delay_per_char
-    adjusted_delay = FIXED_DELAY_PER_CHAR
+    if theoretical_duration > max_total_duration:
+        adjusted_delay = max_total_duration / len(content)
+    else:
+        adjusted_delay = delay_per_char
     
     # 逐字符流式输出
     for char in content:
