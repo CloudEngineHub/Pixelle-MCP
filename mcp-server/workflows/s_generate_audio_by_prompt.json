@@ -51,7 +51,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode (Prompt),$prompt.text"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "7": {
@@ -88,7 +88,7 @@
     },
     "class_type": "EmptyLatentAudio",
     "_meta": {
-      "title": "EmptyLatentAudio,$seconds.seconds"
+      "title": "EmptyLatentAudio"
     }
   },
   "12": {

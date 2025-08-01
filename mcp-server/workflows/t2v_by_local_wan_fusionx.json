@@ -42,7 +42,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode (Positive Prompt),$prompt.text"
+      "title": "CLIP Text Encode (Positive Prompt)"
     }
   },
   "7": {
@@ -141,7 +141,7 @@
     },
     "class_type": "EmptyHunyuanLatentVideo",
     "_meta": {
-      "title": "EmptyHunyuanLatentVideo,$width.width,$height.height"
+      "title": "EmptyHunyuanLatentVideo"
     }
   },
   "48": {
