@@ -29,6 +29,8 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 
 ## 🏃‍♂️ 快速开始
 
+> 安装教程也可以参考 [文档](https://e1xa5p6s6k.feishu.cn/wiki/Q7kXwoe7YifW01kmGkVcaMfonZ8?from=from_copylink)，这里提供更详细的安装步骤和示例。
+
 ### 📥 1. 克隆源码 & 配置服务
 
 #### 📦 1.1 克隆源码
