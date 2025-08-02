@@ -46,6 +46,7 @@ cd Pixelle-MCP
 
 ```shell
 # 复制配置示例文件
+# 或者直接复制一份并修改名字
 cp config.yml.example config.yml
 # 根据需要修改配置项
 ```
