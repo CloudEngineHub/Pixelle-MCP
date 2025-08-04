@@ -16,6 +16,9 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-client**: 🌐 MCP 客户端，基于 Chainlit 构建的 Web 界面
 - **mcp-server**: 🗄️ MCP 服务端，提供各种 AIGC 工具和服务
 
+<p align="center">项目架构图</p>
+<img width="1808" height="883" alt=" mcp structure4" src="https://github.com/user-attachments/assets/fdd46b2d-b867-4022-9520-5d976f84681b" />
+
 ## 🚀 功能特性
 
 - [x] 🔄 **全模态支持**: 支持TISV（Text、Image、Sound/Speech、Video）全模态的互转和生成
