@@ -17,7 +17,8 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-server**: 🗄️ MCP 服务端，提供各种 AIGC 工具和服务
 
 <p align="center">项目架构图</p>
-<img width="1808" height="883" alt=" mcp structure4" src="https://github.com/user-attachments/assets/fdd46b2d-b867-4022-9520-5d976f84681b" />
+<img width="1808" height="883" alt=" mcp structure5" src="https://github.com/user-attachments/assets/356afb45-bc6c-4e36-914a-cf2a743ca8f6" />
+
 
 ## 🚀 功能特性
 
