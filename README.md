@@ -17,6 +17,7 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-server**: 🗄️ MCP server, provides various AIGC tools and services
 
 <img width="1808" height="883" alt=" mcp structure5" src="https://github.com/user-attachments/assets/356afb45-bc6c-4e36-914a-cf2a743ca8f6" />
+
 <p align="center">Project Structure</p>
 
 ## 🚀 Features
