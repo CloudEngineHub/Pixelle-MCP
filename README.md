@@ -15,9 +15,10 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-base**: 🔧 Basic service, provides file storage and shared service capabilities
 - **mcp-client**: 🌐 MCP client, a web interface built on Chainlit
 - **mcp-server**: 🗄️ MCP server, provides various AIGC tools and services
-
-<img width="1808" height="883" alt=" mcp structure5" src="https://github.com/user-attachments/assets/356afb45-bc6c-4e36-914a-cf2a743ca8f6" />
-
+  
+<div align="center">
+<img src="docs/mcp_structure.png"/>
+</div>
 <p align="center">Project Structure</p>
 
 ## 🚀 Features
