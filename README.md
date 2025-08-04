@@ -15,18 +15,19 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-base**: 🔧 Basic service, provides file storage and shared service capabilities
 - **mcp-client**: 🌐 MCP client, a web interface built on Chainlit
 - **mcp-server**: 🗄️ MCP server, provides various AIGC tools and services
-<p align="center">Project Structure</p>
+
 <img width="1808" height="883" alt=" mcp structure4" src="https://github.com/user-attachments/assets/fdd46b2d-b867-4022-9520-5d976f84681b" />
+<p align="center">Project Structure</p>
 
 ## 🚀 Features
 
-- [x] 🔄 **Full-modal Support**: Supports TISV (Text, Image, Sound/Speech, Video) full-modal conversion and generation
-- [x] 🧩 **ComfyUI Ecosystem**: Server-side is built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI), inheriting all capabilities from the open ComfyUI ecosystem
-- [x] 🔧 **Zero-code Development**: Defines and implements the Workflow-as-MCP Tool solution, enabling zero-code development and dynamic addition of new MCP Tools
-- [x] 🗄️ **MCP Server**: Server provides functionality based on the [MCP](https://modelcontextprotocol.io/introduction) protocol, supporting integration with any MCP client (including but not limited to Cursor, Claude Desktop, etc.)
-- [x] 🌐 **MCP Client**: Client is developed based on the [Chainlit](https://github.com/Chainlit/chainlit) framework, inheriting Chainlit's UI controls and supporting integration with more MCP Servers
-- [x] 🔄 **Flexible Deployment**: Supports standalone deployment of Server-side only as MCP Server, or standalone deployment of Client-side only as MCP Client, or combined deployment
-- [x] ⚙️ **Unified Configuration**: Uses YAML configuration scheme, one config file manages all services
+- ✅ 🔄 **Full-modal Support**: Supports TISV (Text, Image, Sound/Speech, Video) full-modal conversion and generation
+- ✅ 🧩 **ComfyUI Ecosystem**: Server-side is built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI), inheriting all capabilities from the open ComfyUI ecosystem
+- ✅ 🔧 **Zero-code Development**: Defines and implements the Workflow-as-MCP Tool solution, enabling zero-code development and dynamic addition of new MCP Tools
+- ✅ 🗄️ **MCP Server**: Server provides functionality based on the [MCP](https://modelcontextprotocol.io/introduction) protocol, supporting integration with any MCP client (including but not limited to Cursor, Claude Desktop, etc.)
+- ✅ 🌐 **MCP Client**: Client is developed based on the [Chainlit](https://github.com/Chainlit/chainlit) framework, inheriting Chainlit's UI controls and supporting integration with more MCP Servers
+- ✅ 🔄 **Flexible Deployment**: Supports standalone deployment of Server-side only as MCP Server, or standalone deployment of Client-side only as MCP Client, or combined deployment
+- ✅ ⚙️ **Unified Configuration**: Uses YAML configuration scheme, one config file manages all services
 
 
 ## 🏃‍♂️ Quick Start
