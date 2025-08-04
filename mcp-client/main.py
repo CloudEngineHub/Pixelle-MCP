@@ -56,16 +56,6 @@ async def on_mcp(connection: McpConnection, session: ClientSession) -> None:
     """处理 MCP 连接"""
     await handle_mcp_connect(connection, session, tools_from_chaintlit_to_openai)
     cl.user_session.set("mcp_session", session)
-    
-    # TODO: pixelle-mcp工具使用说明相关代码，暂时注释保留
-    # if connection.name == "pixelle-mcp":
-    #     result_resource = await session.read_resource("usage://tools")
-    #     usage_tools = result_resource.contents[0].text
-    #     if usage_tools:
-    #         cl_messages = cl.chat_context.get()
-    #         if usage_tools not in cl_messages[0].content:
-    #             cl_messages[0].content = f"{system_prompt}\n\n{usage_tools}"
-    #             await cl_messages[0].update()
 
 
 @cl.on_mcp_disconnect

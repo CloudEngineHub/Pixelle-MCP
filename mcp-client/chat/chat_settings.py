@@ -15,10 +15,10 @@ async def setup_chat_settings():
         [
             TextInput(
                 id="system_prompt",
-                label="系统提示词",
+                label="System Prompt",
                 initial=DEFAULT_SYSTEM_PROMPT,
                 multiline=True,
-                placeholder="请输入系统提示词，用于指导AI助手的行为和回复方式。",
+                placeholder="Enter system prompt, which will guide the behavior and response of the AI assistant.",
             ),
         ]
     ).send()

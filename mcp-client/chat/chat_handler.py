@@ -71,7 +71,7 @@ async def execute_tool(tool_name: str, tool_input: Dict[str, Any]) -> str:
     def _format_result_with_duration(content: str) -> str:
         """统一格式化带耗时的结果"""
         duration = time.time() - start_time
-        return f"[耗时{format_duration(duration)}] {content}"
+        return f"[Took {format_duration(duration)}] {content}"
     
     current_step = cl.context.current_step
     current_step.input = tool_input

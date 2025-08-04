@@ -2,15 +2,10 @@
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
 import importlib
-import json
 import os
-import shutil
 from pathlib import Path
 
-from pydantic import Field
 from core import mcp, logger
-from manager.workflow_manager import workflow_manager, CUSTOM_WORKFLOW_DIR
-from utils.file_util import download_files
 
 
 def load_modules(module_name: str):
@@ -35,7 +30,6 @@ def load_modules(module_name: str):
             logger.error(f"Error loading {module_name_with_ext} from {module_name}: {e}")
 
 # 动态加载其他资源
-load_modules("resources")
 load_modules("tools")
 
 if __name__ == "__main__":
