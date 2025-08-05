@@ -154,15 +154,15 @@ After startup, the service addresses are as follows:
 
 * 📋 Copy the exported API workflow file (must be API format), input it on the web page, and let the LLM add this Tool
 
-  ![](docs/ready_to_send.png)
+  ![](docs/ready_to_send_en.png)
 
 * ✨ After sending, the LLM will automatically convert this workflow into an MCP Tool
 
-  ![](docs/added_mcp.png)
+  ![](docs/added_mcp_en.png)
 
 * 🎨 Now, refresh the page and send any image to perform Gaussian blur processing via LLM
 
-  ![](docs/use_mcp_tool.png)
+  ![](docs/use_mcp_tool_en.png)
 
 ### 🔌 2. Add a Complex MCP Tool
 
