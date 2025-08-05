@@ -54,8 +54,8 @@ TYPING_EFFECT_CONFIG = {
         "max_total_duration": 5.0
     },
     "assistant_message": {
-        "delay_per_char": 0.02,
-        "max_total_duration": 20.0
+        "delay_per_char": 0.01,
+        "max_total_duration": 2.0
     }
 }
 
