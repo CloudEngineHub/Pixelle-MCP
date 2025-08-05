@@ -58,42 +58,41 @@ class WorkflowManager:
         return ", ".join(required_params + optional_params)
     
     def _generate_workflow_function(self, title: str, params_str: str) -> tuple[str, str]:
-        """生成工作流执行函数代码
+        """Generate the workflow execution function code
         
         Returns:
-            tuple: (function_code, workflow_path) - 函数代码和工作流路径
+            tuple: (function_code, workflow_path) - Function code and workflow path
         """
         final_workflow_path = os.path.join(CUSTOM_WORKFLOW_DIR, f"{title}.json")
         
-        # 使用更安全的模板，避免所有转义字符问题
-        # 将工作流路径作为变量传入执行环境，而不是字符串格式化
         template = '''async def {title}({params_str}):
     try:
-        # 获取传入的参数（排除特殊参数）
+        # Get the passed parameters (excluding special parameters)
         params = {{k: v for k, v in locals().items() if not k.startswith('_')}}
         
-        # 执行工作流 - workflow_path从外部环境获取
+        # Execute the workflow - workflow_path is retrieved from the external environment
         result = await execute_workflow(WORKFLOW_PATH, params)
         
-        # 转换结果格式为LLM友好的格式
+        # Convert the result to a format friendly to LLM
         if result.status == "completed":
             return result.to_llm_result()
         else:
-            return "工作流执行失败: " + str(result.msg or result.status)
+            return "Workflow execution failed: " + str(result.msg or result.status)
             
     except Exception as e:
-        logger.error("工作流执行失败 {title_safe}: " + str(e), exc_info=True)
-        return "工作流执行异常: " + str(e)
+        logger.error("Workflow execution failed {title_safe}: " + str(e), exc_info=True)
+        return "Workflow execution exception: " + str(e)
 '''
-        
+
         function_code = template.format(
             title=title,
             params_str=params_str,
-            title_safe=repr(title)  # 使用repr确保title在日志中安全显示
+            title_safe=repr(title)
         )
         
         return function_code, final_workflow_path
-    
+
+
     def _register_workflow(self, title: str, workflow_handler, metadata: WorkflowMetadata) -> None:
         """注册并记录工作流"""
         
