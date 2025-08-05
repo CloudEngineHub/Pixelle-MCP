@@ -16,7 +16,8 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-client**: 🌐 MCP client, a web interface built on Chainlit
 - **mcp-server**: 🗄️ MCP server, provides various AIGC tools and services
 
-<img width="1808" height="883" alt=" mcp_structure1" src="docs/%20mcp_structure.png" />
+![](docs/%20mcp_structure.png)
+
 <p align="center">Project Structure</p>
 
 ## 🚀 Features
@@ -244,6 +245,14 @@ You can add a node titled `MCP` in the workflow to provide a tool description:
 4. **📋 Detailed Descriptions**: Provide detailed parameter descriptions for better user experience
 5. **🎯 Export Format**: Must export as API format, do not export as UI format
 
+
+## 💬 Community
+
+Scan the QR codes below to join our communities for latest updates and technical support:
+
+|                      Discord Community                       |                         WeChat Group                         |
+| :----------------------------------------------------------: | :----------------------------------------------------------: |
+| <img src="docs/discord.png" alt="Discord Community" width="250" /> | <img src="docs/wechat.JPG" alt="WeChat Group" width="250" /> |
 
 ## 🤝 How to Contribute
 

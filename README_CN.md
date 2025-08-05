@@ -16,8 +16,7 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - **mcp-client**: 🌐 MCP 客户端，基于 Chainlit 构建的 Web 界面
 - **mcp-server**: 🗄️ MCP 服务端，提供各种 AIGC 工具和服务
 
-<p align="center">项目架构图</p>
-<img width="1808" height="883" alt=" mcp_structure1" src="docs/%20mcp_structure.png" />
+![](docs/%20mcp_structure.png)
 
 
 ## 🚀 功能特性
@@ -248,6 +247,14 @@ $<参数名>.<字段名>[!][:<描述信息>]
 4. **📋 描述详细**：尽量在参数描述中提供详细说明，提升用户体验
 5. **🎯 导出格式**：必须导出为 API 格式，不要导出 UI 格式
 
+
+## 💬 社区交流
+
+扫描下方二维码加入我们的社区，获取最新动态和技术支持：
+
+|                         微信交流群                         |                         Discord 社区                         |
+| :--------------------------------------------------------: | :----------------------------------------------------------: |
+| <img src="docs/wechat.JPG" alt="微信交流群" width="250" /> | <img src="docs/discord.png" alt="Discord 社区" width="250" /> |
 
 ## 🤝 如何参与共建
 
