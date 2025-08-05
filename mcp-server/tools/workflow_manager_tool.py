@@ -4,10 +4,12 @@
 import json
 import keyword
 import re
+import os
 from pydantic import Field
 from core import mcp, logger
-from manager.workflow_manager import workflow_manager
+from manager.workflow_manager import workflow_manager, CUSTOM_WORKFLOW_DIR
 from utils.file_util import download_files
+from utils.file_uploader import upload
 
 
 @mcp.tool(name="save_workflow_tool")
@@ -62,6 +64,59 @@ async def list_workflows_tool():
     workflow_names = list(workflow_manager.loaded_workflows.keys())
     workflow_names.sort()
     return workflow_names
+
+@mcp.tool(name="get_workflow_tool_detail")
+async def get_workflow_tool_detail(
+    workflow_name: str = Field(description="The name of the workflow to get details for"),
+):
+    """
+    Get detailed information about a specific workflow tool, including the workflow file URL.
+    
+    This tool will:
+    - Return the workflow metadata and configuration
+    - Upload the workflow file and return its URL
+    - Provide comprehensive information about the workflow tool
+    """
+    def error(msg: str):
+        return json.dumps({"success": False, "error": msg})
+    
+    try:
+        # Check if workflow exists
+        if workflow_name not in workflow_manager.loaded_workflows:
+            return error(f"Workflow '{workflow_name}' not found or not loaded")
+        
+        # Get workflow info
+        workflow_info = workflow_manager.loaded_workflows[workflow_name]
+        
+        # Get workflow file path
+        workflow_file_path = os.path.join(CUSTOM_WORKFLOW_DIR, f"{workflow_name}.json")
+        
+        # Check if workflow file exists
+        if not os.path.exists(workflow_file_path):
+            return error(f"Workflow file not found: {workflow_file_path}")
+        
+        # Upload workflow file and get URL
+        try:
+            workflow_file_url = upload(workflow_file_path, f"{workflow_name}.json")
+        except Exception as e:
+            logger.error(f"Failed to upload workflow file: {e}")
+            return error(f"Failed to upload workflow file: {str(e)}")
+        
+        # Prepare detailed response
+        result = {
+            "success": True,
+            "workflow_name": workflow_name,
+            "workflow_file_url": workflow_file_url,
+            "metadata": workflow_info["metadata"],
+            "loaded_at": workflow_info["loaded_at"].strftime("%Y-%m-%d %H:%M:%S") if hasattr(workflow_info["loaded_at"], 'strftime') else str(workflow_info["loaded_at"]),
+        }
+        
+        logger.info(f"Successfully retrieved workflow details for: {workflow_name}")
+        return json.dumps(result, ensure_ascii=False, indent=2)
+        
+    except Exception as e:
+        logger.error(f"Failed to get workflow details for {workflow_name}: {e}")
+        return error(f"Failed to get workflow details: {str(e)}")
 
 @mcp.tool(name="remove_workflow_tool")
 async def remove_workflow_tool(
