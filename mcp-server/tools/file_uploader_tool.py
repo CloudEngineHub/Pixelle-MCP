@@ -5,7 +5,6 @@ import aiohttp
 import os
 from pydantic import Field
 from core import mcp, logger
-import json
 
 BASE_URL = os.environ.get("mcp_base_url", "http://localhost:9001")
 
@@ -35,13 +34,14 @@ async def upload_file(
     file_path: str = Field(description="The path to the file to upload.")
 ):
     """
-    Upload File - 上传文件
+    Upload File
     
     Args:
         file_path (str): The path to the file to upload.
         
     Returns:
-        FileInfo: 文件信息
+        url: The URL of the uploaded file.
+        isError: Whether the upload was successful.
     """
     if not os.path.exists(file_path):
         return {"error": "File not found at the specified path."}
