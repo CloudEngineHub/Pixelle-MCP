@@ -23,8 +23,6 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 
 ## 🚀 Features
 
-![](docs/workflow_to_mcp_tool.png)
-
 - ✅ 🔄 **Full-modal Support**: Supports TISV (Text, Image, Sound/Speech, Video) full-modal conversion and generation
 - ✅ 🧩 **ComfyUI Ecosystem**: Server-side is built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI), inheriting all capabilities from the open ComfyUI ecosystem
 - ✅ 🔧 **Zero-code Development**: Defines and implements the Workflow-as-MCP Tool solution, enabling zero-code development and dynamic addition of new MCP Tools
@@ -148,6 +146,8 @@ After startup, the service addresses are as follows:
 ## 🛠️ Add Your Own MCP Tool
 
 ⚡ One workflow = One MCP Tool
+
+![](docs/workflow_to_mcp_tool.png)
 
 ### 🎯 1. Add the Simplest MCP Tool
 
