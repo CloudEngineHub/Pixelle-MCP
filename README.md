@@ -4,7 +4,6 @@
 
 <p align="center">✨ An AIGC solution based on the MCP protocol, seamlessly converting ComfyUI workflows into MCP tools with zero code, empowering LLM and ComfyUI integration.</p>
 
-![](docs/workflow_to_mcp_tool.png)
 
 https://github.com/user-attachments/assets/65422cef-96f9-44fe-a82b-6a124674c417
 
@@ -23,6 +22,8 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 <p align="center">Project Structure</p>
 
 ## 🚀 Features
+
+![](docs/workflow_to_mcp_tool.png)
 
 - ✅ 🔄 **Full-modal Support**: Supports TISV (Text, Image, Sound/Speech, Video) full-modal conversion and generation
 - ✅ 🧩 **ComfyUI Ecosystem**: Server-side is built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI), inheriting all capabilities from the open ComfyUI ecosystem
