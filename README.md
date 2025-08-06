@@ -4,6 +4,8 @@
 
 <p align="center">✨ An AIGC solution based on the MCP protocol, seamlessly converting ComfyUI workflows into MCP tools with zero code, empowering LLM and ComfyUI integration.</p>
 
+![](docs/workflow_to_mcp_tool.png)
+
 https://github.com/user-attachments/assets/65422cef-96f9-44fe-a82b-6a124674c417
 
 https://github.com/user-attachments/assets/75d80326-191a-4133-8b04-d69e91a3c6b3
