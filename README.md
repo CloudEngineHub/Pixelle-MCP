@@ -255,7 +255,7 @@ Scan the QR codes below to join our communities for latest updates and technical
 
 |                      Discord Community                       |                         WeChat Group                         |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| <img src="docs/discord.png" alt="Discord Community" width="250" /> | <img src="docs/wechat.JPG" alt="WeChat Group" width="250" /> |
+| <img src="docs/discord.png" alt="Discord Community" width="250" /> | <img src="docs/wechat.png" alt="WeChat Group" width="250" /> |
 
 ## 🤝 How to Contribute
 

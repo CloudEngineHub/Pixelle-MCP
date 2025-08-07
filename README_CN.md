@@ -256,7 +256,7 @@ $<参数名>.<字段名>[!][:<描述信息>]
 
 |                         微信交流群                         |                         Discord 社区                         |
 | :--------------------------------------------------------: | :----------------------------------------------------------: |
-| <img src="docs/wechat.JPG" alt="微信交流群" width="250" /> | <img src="docs/discord.png" alt="Discord 社区" width="250" /> |
+| <img src="docs/wechat.png" alt="微信交流群" width="250" /> | <img src="docs/discord.png" alt="Discord 社区" width="250" /> |
 
 ## 🤝 如何参与共建
 
