@@ -1,13 +1,4 @@
 {
-  "1": {
-    "inputs": {
-      "ckpt_name": "flux1-dev-fp8.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "Load Checkpoint"
-    }
-  },
   "3": {
     "inputs": {
       "filename_prefix": "ComfyUI",
@@ -36,7 +27,7 @@
   },
   "5": {
     "inputs": {
-      "seed": 290734141799620,
+      "seed": 857483279882614,
       "steps": 8,
       "cfg": 1.5,
       "sampler_name": "euler",
@@ -71,8 +62,8 @@
         0
       ],
       "vae": [
-        "1",
-        2
+        "18",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -104,13 +95,13 @@
         0
       ],
       "clip": [
-        "1",
-        1
+        "17",
+        0
       ]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
+      "title": "CLIP Text Encode"
     }
   },
   "9": {
@@ -118,7 +109,7 @@
       "lora_name": "FLUX.1-Turbo-Alpha.safetensors",
       "strength_model": 1.0000000000000002,
       "model": [
-        "1",
+        "15",
         0
       ]
     },
@@ -147,7 +138,7 @@
   },
   "12": {
     "inputs": {
-      "value": ""
+      "value": "a dog"
     },
     "class_type": "PrimitiveStringMultiline",
     "_meta": {
@@ -173,6 +164,37 @@
     "class_type": "ConditioningZeroOut",
     "_meta": {
       "title": "ConditioningZeroOut"
+    }
+  },
+  "15": {
+    "inputs": {
+      "unet_name": "flux1-dev.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "17": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp16.safetensors",
+      "type": "flux",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "18": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
     }
   }
 }
