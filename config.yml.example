@@ -21,7 +21,7 @@ base:
   server_port: 9001
   # Optional, used to specify public access URL, generally not needed for local services, 
   # configure as LAN IP or domain name when service is not on local machine
-  public_read_url: ""
+  public_read_url: "http://localhost:9001"
 
 
 # MCP Server configuration
@@ -30,7 +30,7 @@ server:
   tz: Asia/Shanghai
   
   # MCP Server configuration
-  mcp_host: localhost
+  mcp_host: 0.0.0.0
   mcp_port: 9002
   
   # Base service configuration, update here accordingly if you changed server_host or server_port in base section, 
