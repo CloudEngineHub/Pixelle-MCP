@@ -4,6 +4,8 @@
 
 <p align="center">✨ 基于 MCP 协议的 AIGC 方案，0代码将 ComfyUI 工作流无缝转化为 MCP Tool，让 LLM 与 ComfyUI 强强联合。</p>
 
+![](docs/readme-1.png)
+
 https://github.com/user-attachments/assets/7f0fc42f-9c44-4ab0-aaa8-1072082964c1
 
 https://github.com/user-attachments/assets/75d80326-191a-4133-8b04-d69e91a3c6b3
