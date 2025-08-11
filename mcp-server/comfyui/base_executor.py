@@ -18,6 +18,7 @@ from utils.file_util import download_files
 from utils.file_uploader import upload
 from comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
 from comfyui.models import ExecuteResult
+from utils.os_util import get_data_path
 
 # 配置变量
 COMFYUI_BASE_URL = os.getenv('COMFYUI_BASE_URL')
@@ -31,6 +32,8 @@ MEDIA_UPLOAD_NODE_TYPES = {
     'VHS_LoadVideo',
 }
 
+TEMP_DIR = get_data_path("temp")
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 class ComfyUIExecutor(ABC):
     """ComfyUI 执行器抽象基类"""
@@ -206,7 +209,7 @@ class ComfyUIExecutor(ABC):
                 
                 # 保存到临时文件
                 suffix = os.path.splitext(filename)[1] or ".jpg"
-                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, dir=TEMP_DIR) as tmp:
                     tmp.write(media_data)
                     temp_path = tmp.name
         
