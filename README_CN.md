@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/7f0fc42f-9c44-4ab0-aaa8-1072082964c1
 
 ## 📋 最近更新
 
-**2025-08-12** - 集成 LiteLLM 框架，新增 Gemini、DeepSeek、Claude、Qwen 等多模型支持
+- ✅ **2025-08-12**：集成 LiteLLM 框架，新增 Gemini、DeepSeek、Claude、Qwen 等多模型支持
 
 
 ## 🚀 功能特性

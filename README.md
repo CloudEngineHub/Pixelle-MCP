@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/65422cef-96f9-44fe-a82b-6a124674c417
 
 ## 📋 Recent Updates
 
-**2025-08-12** – Integrated the LiteLLM framework, adding multi-model support for Gemini, DeepSeek, Claude, Qwen, and more
+- ✅ **2025-08-12**: Integrated the LiteLLM framework, adding multi-model support for Gemini, DeepSeek, Claude, Qwen, and more
 
 
 ## 🚀 Features
