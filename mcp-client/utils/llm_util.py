@@ -146,7 +146,7 @@ def get_ollama_models() -> list[ModelInfo]:
             name=model,
             base_url=OLLAMA_BASE_URL,
             api_key=OLLAMA_API_KEY,
-            provider="ollama",
+            provider="openai",
             model=model
         )
         for model in ollama_models
