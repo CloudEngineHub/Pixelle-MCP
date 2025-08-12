@@ -21,6 +21,11 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 ![](docs/%20mcp_structure.png)
 
 
+## 📋 最近更新
+
+**2025-08-12** - 集成 LiteLLM 框架，新增 Gemini、DeepSeek、Claude、Qwen 等多模型支持
+
+
 ## 🚀 功能特性
 
 - ✅ 🔄 **全模态支持**: 支持TISV（Text、Image、Sound/Speech、Video）全模态的互转和生成
@@ -30,6 +35,7 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - ✅ 🌐 **MCP Client**: Client端基于[Chaintlit](https://github.com/Chainlit/chainlit)框架开发，继承了Chainlit的UI交互控件，支持集成更多的MCP Server
 - ✅ 🔄 **灵活部署**: 支持单独部署Server端仅提供MCP Server，或单独部署Client端仅提供MCP Client，或联合部署
 - ✅ ⚙️ **统一配置**: 采用 YAML 配置方案，一个配置文件管理所有服务
+- ✅ 🤖 **多LLM支持**: 支持多种主流LLM，包括OpenAI、Ollama、Gemini、DeepSeek、Claude、Qwen等
 
 
 ## 🏃‍♂️ 快速开始
@@ -300,10 +306,10 @@ $<参数名>.<字段名>[!][:<描述信息>]
 
 * 🧩 [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
 * 💬 [Chainlit](https://github.com/Chainlit/chainlit)
-
 * 🔌 [MCP](https://modelcontextprotocol.io/introduction)
 * 🎬 [WanVideo](https://github.com/Wan-Video/Wan2.1)
 * ⚡ [Flux](https://github.com/black-forest-labs/flux)
+* 🤖 [LiteLLM](https://github.com/BerriAI/litellm)
 
 ## License
 本项目基于MIT许可证（[LICENSE](LICENSE), SPDX-License-identifier: MIT）发布。

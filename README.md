@@ -22,6 +22,12 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 
 <p align="center">Project Structure</p>
 
+
+## 📋 Recent Updates
+
+**2025-08-12** – Integrated the LiteLLM framework, adding multi-model support for Gemini, DeepSeek, Claude, Qwen, and more
+
+
 ## 🚀 Features
 
 - ✅ 🔄 **Full-modal Support**: Supports TISV (Text, Image, Sound/Speech, Video) full-modal conversion and generation
@@ -31,6 +37,7 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - ✅ 🌐 **MCP Client**: Client is developed based on the [Chainlit](https://github.com/Chainlit/chainlit) framework, inheriting Chainlit's UI controls and supporting integration with more MCP Servers
 - ✅ 🔄 **Flexible Deployment**: Supports standalone deployment of Server-side only as MCP Server, or standalone deployment of Client-side only as MCP Client, or combined deployment
 - ✅ ⚙️ **Unified Configuration**: Uses YAML configuration scheme, one config file manages all services
+- ✅ 🤖 **Multi-LLM Support**: Supports multiple mainstream LLMs, including OpenAI, Ollama, Gemini, DeepSeek, Claude, Qwen, and more
 
 
 ## 🏃‍♂️ Quick Start
@@ -301,6 +308,7 @@ We welcome all forms of contribution! Whether you're a developer, designer, or u
 * 🔌 [MCP](https://modelcontextprotocol.io/introduction)
 * 🎬 [WanVideo](https://github.com/Wan-Video/Wan2.1)
 * ⚡ [Flux](https://github.com/black-forest-labs/flux)
+* 🤖 [LiteLLM](https://github.com/BerriAI/litellm)
 
 ## License
 This project is released under the MIT License ([LICENSE](LICENSE), SPDX-License-identifier: MIT).
