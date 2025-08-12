@@ -8,20 +8,6 @@
 
 https://github.com/user-attachments/assets/65422cef-96f9-44fe-a82b-6a124674c417
 
-https://github.com/user-attachments/assets/75d80326-191a-4133-8b04-d69e91a3c6b3
-
-https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
-
-## 📁 Project Structure
-
-- **mcp-base**: 🔧 Basic service, provides file storage and shared service capabilities
-- **mcp-client**: 🌐 MCP client, a web interface built on Chainlit
-- **mcp-server**: 🗄️ MCP server, provides various AIGC tools and services
-
-![](docs/%20mcp_structure.png)
-
-<p align="center">Project Structure</p>
-
 
 ## 📋 Recent Updates
 
@@ -38,6 +24,15 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - ✅ 🔄 **Flexible Deployment**: Supports standalone deployment of Server-side only as MCP Server, or standalone deployment of Client-side only as MCP Client, or combined deployment
 - ✅ ⚙️ **Unified Configuration**: Uses YAML configuration scheme, one config file manages all services
 - ✅ 🤖 **Multi-LLM Support**: Supports multiple mainstream LLMs, including OpenAI, Ollama, Gemini, DeepSeek, Claude, Qwen, and more
+
+
+## 📁 Project Structure
+
+- **mcp-base**: 🔧 Basic service, provides file storage and shared service capabilities
+- **mcp-client**: 🌐 MCP client, a web interface built on Chainlit
+- **mcp-server**: 🗄️ MCP server, provides various AIGC tools and services
+
+![](docs/%20mcp_structure.png)
 
 
 ## 🏃‍♂️ Quick Start

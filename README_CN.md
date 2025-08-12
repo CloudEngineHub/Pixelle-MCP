@@ -8,18 +8,6 @@
 
 https://github.com/user-attachments/assets/7f0fc42f-9c44-4ab0-aaa8-1072082964c1
 
-https://github.com/user-attachments/assets/75d80326-191a-4133-8b04-d69e91a3c6b3
-
-https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
-
-## 📁 项目结构
-
-- **mcp-base**: 🔧 基础服务，提供文件存储和共用服务能力
-- **mcp-client**: 🌐 MCP 客户端，基于 Chainlit 构建的 Web 界面
-- **mcp-server**: 🗄️ MCP 服务端，提供各种 AIGC 工具和服务
-
-![](docs/%20mcp_structure.png)
-
 
 ## 📋 最近更新
 
@@ -36,6 +24,15 @@ https://github.com/user-attachments/assets/e376dea5-4016-4fec-a017-73bb5ab22485
 - ✅ 🔄 **灵活部署**: 支持单独部署Server端仅提供MCP Server，或单独部署Client端仅提供MCP Client，或联合部署
 - ✅ ⚙️ **统一配置**: 采用 YAML 配置方案，一个配置文件管理所有服务
 - ✅ 🤖 **多LLM支持**: 支持多种主流LLM，包括OpenAI、Ollama、Gemini、DeepSeek、Claude、Qwen等
+
+
+## 📁 项目结构
+
+- **mcp-base**: 🔧 基础服务，提供文件存储和共用服务能力
+- **mcp-client**: 🌐 MCP 客户端，基于 Chainlit 构建的 Web 界面
+- **mcp-server**: 🗄️ MCP 服务端，提供各种 AIGC 工具和服务
+
+![](docs/%20mcp_structure.png)
 
 
 ## 🏃‍♂️ 快速开始
