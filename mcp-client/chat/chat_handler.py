@@ -7,17 +7,36 @@ import os
 import time
 import chainlit as cl
 from typing import Any, Dict, List
-from openai import AsyncOpenAI
 from mcp import ClientSession
 import re
-from httpx import Timeout
-from utils.llm_util import ModelInfo
+from utils.llm_util import ModelInfo, ModelType
+
+from litellm import acompletion
+import litellm
+
 from chat.starters import build_save_action
 from utils.time_util import format_duration
 from core.core import logger
 
-
 save_starter_enabled = os.getenv("CHAINLIT_SAVE_STARTER_ENABLED", "false").lower() == "true"
+
+
+def format_llm_error_message(model_name: str, error_str: str) -> str:
+    """统一的 LLM 错误消息格式化函数"""
+    # 处理常见的错误类型，提供友好的英文错误信息
+    if "RateLimitError" in error_str or "429" in error_str:
+        if "quota" in error_str.lower() or "exceed" in error_str.lower():
+            return f"⚠️ {model_name} API quota exceeded. Please check your plan and billing details."
+        else:
+            return f"⚠️ {model_name} API rate limit hit. Please try again later."
+    elif "401" in error_str or "authentication" in error_str.lower():
+        return f"🔑 {model_name} API key is invalid. Please check your configuration."
+    elif "403" in error_str or "permission" in error_str.lower():
+        return f"🚫 {model_name} API access denied. Please check permissions."
+    elif "timeout" in error_str.lower():
+        return f"⏰ {model_name} API call timed out. Please retry."
+    else:
+        return f"❌ {model_name} model call failed: {error_str}"
 
 
 def get_all_tools() -> List[Dict[str, Any]]:
@@ -143,9 +162,9 @@ def _extract_and_clean_media_markers(text: str) -> tuple[Dict[str, List[str]], s
     """
     # 匹配不同类型的媒体标记
     patterns = {
-        "images": r'\n\s*\[SHOW_IMAGE:([^\]]+)\]',
-        "audios": r'\n\s*\[SHOW_AUDIO:([^\]]+)\]',
-        "videos": r'\n\s*\[SHOW_VIDEO:([^\]]+)\]'
+        "images": r'\[SHOW_IMAGE:([^\]]+)\]',
+        "audios": r'\[SHOW_AUDIO:([^\]]+)\]',
+        "videos": r'\[SHOW_VIDEO:([^\]]+)\]'
     }
     
     media_files = {"images": [], "audios": [], "videos": []}
@@ -331,8 +350,8 @@ async def _handle_stream_chunk(chunk, msg, current_tool_calls, current_args):
     return has_tool_call, choice.finish_reason
 
 
-async def _handle_stream_response(client, api_params, enhanced_messages, messages):
-    """处理单次流式响应"""
+async def _handle_response(model_info, api_params, enhanced_messages, messages):
+    """处理流式响应"""
     # 为这一轮响应创建独立的消息对象
     msg = cl.Message(content="")
     
@@ -341,7 +360,19 @@ async def _handle_stream_response(client, api_params, enhanced_messages, message
     has_tool_call = False
     
     try:
-        response = await client.chat.completions.create(**api_params)
+        # 准备 LiteLLM 参数 - 直接传递所有必要参数
+        litellm_params = {
+            "model": f"{model_info.provider}/{model_info.model}",
+            "stream": True,
+            "num_retries": 0,
+            "timeout": 30,
+            "api_key": model_info.api_key,
+            "base_url": model_info.base_url or None,
+            **api_params,
+        }
+        
+        logger.info(f"Call LLM: {model_info.provider}/{model_info.model}")
+        response = await acompletion(**litellm_params)
         
         try:
             async for chunk in response:
@@ -367,59 +398,63 @@ async def _handle_stream_response(client, api_params, enhanced_messages, message
                         return enhanced_messages, True  # 继续下一轮
                         
                     except Exception as e:
-                        error_message = f"处理工具调用时发生错误: {str(e)}"
+                        error_message = f"Error when processing tool calls: {str(e)}"
                         logger.error(error_message)
                         await msg.stream_token(f"\n{error_message}\n")
                         await msg.send()
                         return messages, False  # 结束处理
                 
-                elif finish_reason:  # 其他完成原因
-                    if not has_tool_call:
-                        # 处理媒体标记并发送消息
-                        await _process_media_markers(msg)
-                        if msg.content and msg.content.strip():
-                            if save_starter_enabled:
-                                # 在AI回复消息上添加保存Action
-                                msg.actions = [
-                                    build_save_action()
-                                ]
-                            await msg.send()
-                        return messages, False  # 结束处理
-                        
-        except GeneratorExit:
-            logger.debug("Stream generator closed gracefully")
+                elif finish_reason:
+                    # 其他完成原因，结束流式处理
+                    break
+            
+            # 处理媒体标记并发送消息
+            if not has_tool_call:
+                await _process_media_markers(msg)
+                if msg.content and msg.content.strip():
+                    if save_starter_enabled:
+                        # 在AI回复消息上添加保存Action
+                        msg.actions = [
+                            build_save_action()
+                        ]
+                    await msg.send()
+                
+                # 添加助手消息到历史记录
+                if msg.content and msg.content.strip():
+                    enhanced_messages.append({
+                        "role": "assistant", 
+                        "content": msg.content
+                    })
+            else:
+                # 如果有工具调用，直接发送消息（工具调用相关的消息已经在别处处理）
+                await msg.send()
+            
+            return enhanced_messages, False  # 结束处理
+            
         except Exception as e:
-            logger.error(f"Stream iteration error: {e}")
-        finally:
-            # 显式关闭响应流以确保资源正确释放
-            if hasattr(response, 'close'):
-                try:
-                    await response.close()
-                except Exception as close_error:
-                    logger.debug(f"Error closing response stream: {close_error}")
-                    
-    except Exception as api_error:
-        logger.error(f"API request error: {api_error}", exc_info=True)
-        
-    
-    # 如果没有工具调用，处理媒体标记并发送消息
-    if not has_tool_call:
+            error_str = str(e)
+            error_message = format_llm_error_message(model_info.name, error_str)
+            logger.error(f"Stream processing error: {error_str}")
+            await msg.stream_token(f"\n{error_message}\n")
+            # 即使出错也要处理媒体标记
+            await _process_media_markers(msg)
+            await msg.send()
+            return messages, False
+            
+    except Exception as e:
+        error_str = str(e)
+        error_message = format_llm_error_message(model_info.name, error_str)
+        logger.error(f"LiteLLM call failed: {error_str}")
+        await msg.stream_token(f"\n{error_message}\n")
+        # 即使出错也要处理媒体标记
         await _process_media_markers(msg)
-        if save_starter_enabled:
-            # 在AI回复消息上添加保存Action
-            msg.actions = [
-                build_save_action()
-            ]
         await msg.send()
         return messages, False
-    
-    return enhanced_messages, True
 
 
 async def process_streaming_response(
     messages: List[Dict[str, Any]], 
     model_info: ModelInfo,
-    **kwargs
 ) -> List[Dict[str, Any]]:
     """
     处理流式响应和工具调用
@@ -427,7 +462,6 @@ async def process_streaming_response(
     Args:
         messages: 消息历史
         model_info: 使用的模型信息
-        **kwargs: 其他 OpenAI API 参数
         
     Returns:
         更新后的消息历史
@@ -459,10 +493,7 @@ async def process_streaming_response(
     while True:  # 循环处理工具调用
         # 准备 API 参数
         api_params = {
-            "model": model_info.name,
             "messages": enhanced_messages,
-            "stream": True,
-            **kwargs
         }
         
         # 如果有工具，添加工具参数
@@ -470,26 +501,24 @@ async def process_streaming_response(
             api_params["tools"] = tools
             api_params["tool_choice"] = "auto"
         
-        client = AsyncOpenAI(
-            timeout=Timeout(None), 
-            api_key=model_info.api_key, 
-            base_url=model_info.base_url,
-        )
         
+        # 所有参数都通过 LiteLLM 函数参数传递，不使用环境变量
         try:
-            enhanced_messages, should_continue = await _handle_stream_response(
-                client, api_params, enhanced_messages, messages
+            enhanced_messages, should_continue = await _handle_response(
+                model_info, api_params, enhanced_messages, messages
             )
             
             if not should_continue:
                 return enhanced_messages
                 
-        finally:
-            # 显式关闭客户端以避免异步上下文冲突
-            try:
-                await client.close()
-            except Exception as client_close_error:
-                logger.debug(f"Error closing OpenAI client: {client_close_error}")
+        except Exception as e:
+            error_str = str(e)
+            error_message = format_llm_error_message(model_info.name, error_str)
+            logger.error(f"LiteLLM main loop error: {error_str}")
+            # 发送错误消息给用户
+            error_msg = cl.Message(content=error_message)
+            await error_msg.send()
+            return enhanced_messages  # 直接返回，不要继续循环
 
 
 # MCP 连接管理的便捷函数
