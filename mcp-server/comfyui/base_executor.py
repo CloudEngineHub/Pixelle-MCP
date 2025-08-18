@@ -143,6 +143,7 @@ class ComfyUIExecutor(ABC):
         node_id = mapping.node_id
         input_field = mapping.input_field
         node_class_type = mapping.node_class_type
+        handler_type = getattr(mapping, 'handler_type', None)  # 获取处理类型（兼容旧版本）
         
         # 检查节点是否存在
         if node_id not in workflow_data:
@@ -155,8 +156,11 @@ class ComfyUIExecutor(ABC):
         if "inputs" not in node_data:
             node_data["inputs"] = {}
         
-        # 检查节点类型是否需要特殊媒体上传处理
-        if node_class_type in MEDIA_UPLOAD_NODE_TYPES:
+        # 优先级1：检查新的DSL handler_type标记
+        if handler_type == "upload_rel":
+            await self._handle_media_upload(node_data, input_field, param_value)
+        # 优先级2：检查节点类型是否需要特殊媒体上传处理（向后兼容）
+        elif node_class_type in MEDIA_UPLOAD_NODE_TYPES:
             await self._handle_media_upload(node_data, input_field, param_value)
         else:
             # 常规参数设置

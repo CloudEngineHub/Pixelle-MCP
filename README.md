@@ -188,11 +188,12 @@ The system supports ComfyUI workflows. Just design your workflow in the canvas a
 In the ComfyUI canvas, double-click the node title to edit, and use the following DSL syntax to define parameters:
 
 ```
-$<param_name>.<field_name>[!][:<description>]
+$<param_name>.[~]<field_name>[!][:<description>]
 ```
 
 #### 🔍 Syntax Explanation:
 - `param_name`: The parameter name for the generated MCP tool function
+- `~`: Optional, indicates URL parameter upload processing, returns relative path
 - `field_name`: The corresponding input field in the node
 - `!`: Indicates this parameter is required
 - `description`: Description of the parameter
@@ -203,6 +204,13 @@ $<param_name>.<field_name>[!][:<description>]
 
 - Set LoadImage node title to: `$image.image!:Input image URL`
 - Meaning: Creates a required parameter named `image`, mapped to the node's `image` field
+
+**URL upload processing example:**
+
+- Set any node title to: `$image.~image!:Input image URL`
+- Meaning: Creates a required parameter named `image`, system will automatically download URL and upload to ComfyUI, returns relative path
+
+> 📝 Note: `LoadImage`, `VHS_LoadAudioUpload`, `VHS_LoadVideo` and other nodes have built-in functionality, no need to add `~` marker
 
 **Optional parameter example:**
 
