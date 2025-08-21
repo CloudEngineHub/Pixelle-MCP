@@ -110,11 +110,11 @@
   "10": {
     "inputs": {
       "width": [
-        "25",
+        "27",
         0
       ],
       "height": [
-        "26",
+        "28",
         0
       ],
       "batch_size": 1
@@ -187,20 +187,20 @@
       "title": "MCP"
     }
   },
-  "25": {
+  "27": {
     "inputs": {
       "value": 1024
     },
-    "class_type": "Int-🔬",
+    "class_type": "easy int",
     "_meta": {
       "title": "$width.value!:image width"
     }
   },
-  "26": {
+  "28": {
     "inputs": {
       "value": 1024
     },
-    "class_type": "Int-🔬",
+    "class_type": "easy int",
     "_meta": {
       "title": "$height.value!:image height"
     }
