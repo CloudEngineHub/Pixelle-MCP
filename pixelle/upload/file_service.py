@@ -11,15 +11,16 @@ from pathlib import Path
 from typing import Optional, List
 from fastapi import HTTPException, UploadFile
 
-from storage import storage, FileInfo
-from config.settings import settings
+from pixelle.upload.base import FileInfo
+from pixelle.settings import settings
+from pixelle.upload.local_storage import LocalStorage
 
 
 class FileService:
     """文件服务类"""
     
     def __init__(self):
-        self.storage = storage
+        self.storage = LocalStorage()
     
     def _validate_file(self, file: UploadFile) -> None:
         """验证上传的文件"""
@@ -34,16 +35,7 @@ class FileService:
                     status_code=413,
                     detail=f"File too large. Maximum size: {settings.max_file_size} bytes"
                 )
-        
-        # 检查文件扩展名
-        if file.filename:
-            file_ext = Path(file.filename).suffix.lower()
-            if file_ext and file_ext not in settings.allowed_extensions:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"File type not allowed. Allowed extensions: {settings.allowed_extensions}"
-                )
-    
+
     def _get_content_type(self, filename: str) -> str:
         """获取文件的MIME类型"""
         content_type, _ = mimetypes.guess_type(filename)

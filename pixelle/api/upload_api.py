@@ -1,71 +1,12 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-"""
-Pixelle Base Service
-基于FastAPI的基础服务，提供文件存储和共用服务能力
-"""
+from fastapi import HTTPException, UploadFile, File
+from fastapi.responses import Response
 
-import uvicorn
-import logging
-from pathlib import Path
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.responses import Response, StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-
-from config.settings import settings
-from services.file_service import file_service
-from storage import FileInfo
-
-
-# 配置日志 - 过滤健康检查的访问日志
-class HealthCheckFilter(logging.Filter):
-    """过滤健康检查的访问日志"""
-    def filter(self, record):
-        if hasattr(record, 'getMessage'):
-            message = record.getMessage()
-            # 过滤掉健康检查的访问日志
-            if 'GET /health HTTP/1.1' in message:
-                return False
-        return True
-
-# 应用过滤器到访问日志记录器
-access_logger = logging.getLogger("uvicorn.access")
-access_logger.addFilter(HealthCheckFilter())
-
-# 创建FastAPI应用
-app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
-    description="基础服务，提供文件存储和共用服务能力"
-)
-
-# 配置CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/")
-async def root():
-    """根路径"""
-    return {
-        "service": settings.app_name,
-        "version": settings.app_version,
-        "storage_type": settings.storage_type,
-        "status": "running"
-    }
-
-
-@app.get("/health")
-async def health_check():
-    """健康检查"""
-    return {"status": "healthy", "storage_type": settings.storage_type}
+from pixelle.core import app
+from pixelle.upload.file_service import file_service
+from pixelle.upload.base import FileInfo
 
 
 @app.post(f"/upload", response_model=FileInfo)
@@ -161,12 +102,3 @@ async def check_file_exists(file_id: str):
     """
     exists = await file_service.file_exists(file_id)
     return {"exists": exists}
-
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host=settings.server_host,
-        port=settings.server_port,
-        reload=settings.debug
-    ) 

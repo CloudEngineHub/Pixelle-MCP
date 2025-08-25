@@ -19,14 +19,14 @@ services:
 
   # Pixelle MCP Server
   mcp-server:
-    build: ./mcp-server
+    build: pixelle
     depends_on:
       mcp-base:
         condition: service_healthy
     ports:
       - "9002:9002"
     volumes:
-      - ./mcp-server/data:/app/data
+      - ./pixelle/data:/app/data
       - ./config.yml:/app/config.yml:ro
     environment:
       - MCP_BASE_URL=http://mcp-base:9001

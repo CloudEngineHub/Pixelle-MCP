@@ -6,10 +6,11 @@ import keyword
 import re
 import os
 from pydantic import Field
-from core import mcp, logger
-from manager.workflow_manager import workflow_manager, CUSTOM_WORKFLOW_DIR
-from utils.file_util import download_files
-from utils.file_uploader import upload
+
+from pixelle.core import mcp, logger
+from pixelle.manager.workflow_manager import workflow_manager, CUSTOM_WORKFLOW_DIR
+from pixelle.utils.file_util import download_files
+from pixelle.utils.file_uploader import upload
 
 
 @mcp.tool(name="save_workflow_tool")

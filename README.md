@@ -75,7 +75,7 @@ The `mcp-server/workflows` directory contains a set of popular workflows by defa
 **Note: It is strongly recommended to test the workflow in your ComfyUI canvas before copying, to ensure smooth execution later.**
 
 ```shell
-cp -r mcp-server/workflows/* mcp-server/data/custom_workflows/
+cp -r pixelle/workflows/* pixelle/data/custom_workflows/
 ```
 
 ### 🚀 3. Start the Services
@@ -116,16 +116,16 @@ cd mcp-base
 # Install dependencies (only needed on first run or after updates)
 uv sync
 # Start service
-uv run main.py
+uv run upload_api.py
 ```
 
 **Start Server (mcp-server):**
 ```shell
-cd mcp-server
+cd pixelle
 # Install dependencies (only needed on first run or after updates)
 uv sync
 # Start service
-uv run main.py
+uv run upload_api.py
 ```
 
 **Start Client (mcp-client):**
@@ -133,8 +133,8 @@ uv run main.py
 cd mcp-client
 # Install dependencies (only needed on first run or after updates)
 uv sync
-# Start service (for hot-reload in dev mode: uv run chainlit run main.py -w --port 9003)
-uv run main.py
+# Start service (for hot-reload in dev mode: uv run chainlit run upload_api.py -w --port 9003)
+uv run upload_api.py
 ```
 
 

@@ -78,7 +78,7 @@ cp config.yml.example config.yml
 **注：这里强烈建议在拷贝之前，先将工作流拖进你的ComfyUI画布试运行，以确保后续调用过程中能够顺利执行。**
 
 ```shell
-cp -r mcp-server/workflows/* mcp-server/data/custom_workflows/
+cp -r pixelle/workflows/* pixelle/data/custom_workflows/
 ```
 
 ### 🚀 3. 启动服务（任选其一）
@@ -119,16 +119,16 @@ cd mcp-base
 # 安装依赖（仅首次或更新时需要）
 uv sync
 # 启动服务
-uv run main.py
+uv run upload_api.py
 ```
 
 **启动服务端（mcp-server）**：
 ```shell
-cd mcp-server
+cd pixelle
 # 安装依赖（仅首次或更新时需要）
 uv sync
 # 启动服务
-uv run main.py
+uv run upload_api.py
 ```
 
 **启动客户端（mcp-client）**：
@@ -136,8 +136,8 @@ uv run main.py
 cd mcp-client
 # 安装依赖（仅首次或更新时需要）
 uv sync
-# 启动服务（开发模式需要热更新时，运行：uv run chainlit run main.py -w --port 9003）
-uv run main.py
+# 启动服务（开发模式需要热更新时，运行：uv run chainlit run upload_api.py -w --port 9003）
+uv run upload_api.py
 ```
 
 

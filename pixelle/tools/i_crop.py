@@ -1,12 +1,12 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-import json
 from pydantic import Field
-from core import mcp, logger
 from PIL import Image
-from utils.file_uploader import upload
-from utils.file_util import download_files, create_temp_file
+
+from pixelle.core import mcp, logger
+from pixelle.utils.file_uploader import upload
+from pixelle.utils.file_util import download_files, create_temp_file
 
 @mcp.tool
 async def i_crop(

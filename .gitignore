@@ -21,3 +21,5 @@ redeploy.sh
 logs/
 config*.yml
 */config*.yml
+
+data/
