@@ -145,7 +145,7 @@ uv run upload_api.py
 
 启动完成后，各服务地址如下：
 
-- **客户端**: 🌐 http://localhost:9003 (Chainlit Web UI，默认用户名密码均为`dev`，可以在 [`auth.py`](mcp-client/auth/auth.py) 中更改)
+- **客户端**: 🌐 http://localhost:9003 (Chainlit Web UI，默认用户名密码均为`dev`，可以在 [`auth.py`](pixelle/web/auth/auth.py) 中更改)
 - **服务端**: 🗄️ http://localhost:9002/sse (MCP Server)
 - **基础服务**: 🔧 http://localhost:9001/docs (文件存储和基础API)
 

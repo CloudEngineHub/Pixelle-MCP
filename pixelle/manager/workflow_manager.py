@@ -8,10 +8,11 @@ import re
 from pathlib import Path
 from typing import Dict, Any, Optional
 from pydantic import Field
-from core import mcp, logger
-from utils.os_util import get_data_path
-from comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
-from comfyui.facade import execute_workflow
+from pixelle.logger import logger
+from pixelle.core import mcp
+from pixelle.utils.os_util import get_data_path
+from pixelle.comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
+from pixelle.comfyui.facade import execute_workflow
 
 CUSTOM_WORKFLOW_DIR = get_data_path("custom_workflows")
 os.makedirs(CUSTOM_WORKFLOW_DIR, exist_ok=True)
@@ -117,7 +118,7 @@ class WorkflowManager:
 
             # 如果源文件和目标文件是同一个文件，直接跳过
             if os.path.abspath(str(workflow_path)) == os.path.abspath(str(target_workflow_path)):
-                logger.info(f"工作流文件已存在且路径相同，无需复制: {target_workflow_path}")
+                logger.debug(f"工作流文件已存在且路径相同，无需复制: {target_workflow_path}")
                 return
 
             # 复制工作流文件到工作流目录
@@ -195,7 +196,7 @@ class WorkflowManager:
             # 保存工作流文件到工作流目录
             self._save_workflow_if_needed(workflow_path, title)
             
-            logger.info(f"工作流 '{title}' 已成功加载为MCP工具")
+            logger.debug(f"工作流 '{title}' 已成功加载为MCP工具")
             return {
                 "success": True,
                 "workflow": title,

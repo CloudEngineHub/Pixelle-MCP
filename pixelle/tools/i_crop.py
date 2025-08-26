@@ -4,7 +4,8 @@
 from pydantic import Field
 from PIL import Image
 
-from pixelle.core import mcp, logger
+from pixelle.logger import logger
+from pixelle.core import mcp
 from pixelle.utils.file_uploader import upload
 from pixelle.utils.file_util import download_files, create_temp_file
 

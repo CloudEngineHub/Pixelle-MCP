@@ -4,9 +4,9 @@
 import os
 from typing import Dict, Any
 
-from comfyui.models import ExecuteResult
-from comfyui.websocket_executor import WebSocketExecutor
-from comfyui.http_executor import HttpExecutor
+from pixelle.comfyui.models import ExecuteResult
+from pixelle.comfyui.websocket_executor import WebSocketExecutor
+from pixelle.comfyui.http_executor import HttpExecutor
 
 # 配置变量
 COMFYUI_EXECUTOR_TYPE = os.getenv('COMFYUI_EXECUTOR_TYPE', 'http')

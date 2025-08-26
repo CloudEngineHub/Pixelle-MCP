@@ -4,7 +4,8 @@
 import aiohttp
 import os
 from pydantic import Field
-from pixelle.core import mcp, logger
+from pixelle.logger import logger
+from pixelle.core import mcp
 
 BASE_URL = os.environ.get("mcp_base_url", "http://localhost:9001")
 

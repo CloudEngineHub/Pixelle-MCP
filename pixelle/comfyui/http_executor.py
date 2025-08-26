@@ -6,10 +6,10 @@ import json
 import time
 import uuid
 import asyncio
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 
-from comfyui.base_executor import ComfyUIExecutor, COMFYUI_API_KEY, logger
-from comfyui.models import ExecuteResult
+from pixelle.comfyui.base_executor import ComfyUIExecutor, COMFYUI_API_KEY, logger
+from pixelle.comfyui.models import ExecuteResult
 
 
 class HttpExecutor(ComfyUIExecutor):

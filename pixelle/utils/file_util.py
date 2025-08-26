@@ -7,8 +7,8 @@ import os
 import mimetypes
 from contextlib import contextmanager
 from typing import Generator, List, Union, overload
-from core import logger
-from utils.os_util import get_data_path
+from pixelle.logger import logger
+from pixelle.utils.os_util import get_data_path
 
 
 TEMP_DIR = get_data_path("temp")

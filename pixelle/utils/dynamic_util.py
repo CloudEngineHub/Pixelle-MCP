@@ -2,7 +2,7 @@
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 import importlib
 from pathlib import Path
-from pixelle.core import logger
+from pixelle.logger import logger
 import pixelle
 
 def load_modules(module_name: str, src_dir:str="pixelle"):
@@ -24,3 +24,4 @@ def load_modules(module_name: str, src_dir:str="pixelle"):
             logger.info(f"Loaded module from {module_name_with_ext}.")
         except Exception as e:
             logger.error(f"Error loading {module_name_with_ext} from {module_name}: {e}")
+            raise  e

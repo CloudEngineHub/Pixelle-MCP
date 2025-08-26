@@ -13,12 +13,12 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 import aiohttp
 
-from core import logger
-from utils.file_util import download_files
-from utils.file_uploader import upload
-from comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
-from comfyui.models import ExecuteResult
-from utils.os_util import get_data_path
+from pixelle.logger import logger
+from pixelle.utils.file_util import download_files
+from pixelle.utils.file_uploader import upload
+from pixelle.comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
+from pixelle.comfyui.models import ExecuteResult
+from pixelle.utils.os_util import get_data_path
 
 # 配置变量
 COMFYUI_BASE_URL = os.getenv('COMFYUI_BASE_URL')

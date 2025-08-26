@@ -2,31 +2,33 @@
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
 """
-MCP Base 文件上传器
-调用 mcp-base 的 API 进行文件上传
+本地文件上传器
+直接复制文件到本地存储，避免HTTP调用的超时问题
 """
 
 import os
+import shutil
 import requests
 from pathlib import Path
 from typing import Union, Optional, Tuple
 from urllib.parse import urlparse
 import uuid
 
-from core import logger
+from pixelle.logger import logger
+from pixelle.settings import settings
+from pixelle.utils import os_util
 
-MCP_BASE_URL = os.getenv("MCP_BASE_URL", "http://localhost:9001")
-
-class McpBaseUploader:
-    """MCP Base 文件上传器"""
+class LocalFileUploader:
+    """本地文件上传器"""
     
-    def __init__(self, mcp_base_url: str):
-        self.mcp_base_url = mcp_base_url
-        self.upload_endpoint = f"{self.mcp_base_url.rstrip('/')}/upload"
+    def __init__(self):
+        # 本地存储路径，与LocalStorage保持一致
+        self.storage_path = Path(os_util.get_data_path(settings.local_storage_path))
+        self.storage_path.mkdir(parents=True, exist_ok=True)
     
     def upload(self, data: Union[bytes, str, Path], filename: Optional[str] = None) -> str:
         """
-        上传文件到 mcp-base
+        本地文件上传（复制到存储目录）
         
         Args:
             data: 文件数据，可以是 bytes、文件路径或 URL
@@ -39,28 +41,32 @@ class McpBaseUploader:
             # 处理不同类型的输入
             file_content, file_name = self._process_input(data, filename)
             
-            # 准备上传数据
-            files = {
-                'file': (file_name, file_content, self._get_content_type(file_name))
-            }
+            # 生成文件ID，与LocalStorage逻辑保持一致
+            file_id = self._generate_file_id(file_name)
+            file_path = self.storage_path / file_id
             
-            # 发送上传请求
-            response = requests.post(self.upload_endpoint, files=files, timeout=60)
-            response.raise_for_status()
+            # 写入文件
+            with open(file_path, 'wb') as f:
+                f.write(file_content)
             
-            # 解析响应
-            result = response.json()
-            file_url = result.get('url')
+            # 生成文件URL
+            file_url = self._get_file_url(file_id)
             
-            if not file_url:
-                raise Exception("上传响应中未找到文件URL")
-            
-            logger.info(f"文件上传成功: {file_url}")
+            logger.info(f"文件保存成功: {file_url}")
             return file_url
             
         except Exception as e:
-            logger.error(f"文件上传失败: {e}")
+            logger.error(f"文件保存失败: {e}")
             raise Exception(f"文件上传失败: {str(e)}")
+    
+    def _generate_file_id(self, filename: str) -> str:
+        """生成文件ID，与LocalStorage保持一致"""
+        ext = Path(filename).suffix
+        return f"{uuid.uuid4().hex}{ext}"
+    
+    def _get_file_url(self, file_id: str) -> str:
+        """生成文件访问URL"""
+        return f"{settings.get_read_url()}/api/files/{file_id}"
     
     def _process_input(self, data: Union[bytes, str, Path], filename: Optional[str] = None) -> Tuple[bytes, str]:
         """处理不同类型的输入数据"""
@@ -145,7 +151,7 @@ class McpBaseUploader:
 
 
 # 创建默认上传器实例
-default_uploader = McpBaseUploader(MCP_BASE_URL)
+default_uploader = LocalFileUploader()
 
 
 def upload(data: Union[bytes, str, Path], filename: Optional[str] = None) -> str:

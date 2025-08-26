@@ -4,7 +4,7 @@
 import json
 import re
 from pathlib import Path
-from core import logger
+from pixelle.logger import logger
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 

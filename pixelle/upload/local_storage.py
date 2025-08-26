@@ -13,9 +13,9 @@ from pixelle.utils import os_util
 
 class LocalStorage(StorageBackend):
 
-    def __init__(self, base_url: Optional[str] = None):
+    def __init__(self, read_url: Optional[str] = None):
         self.storage_path = Path(os_util.get_data_path(settings.local_storage_path))
-        self.base_url = base_url or settings.get_base_url()
+        self.read_url = read_url or settings.get_read_url()
         
         self.storage_path.mkdir(parents=True, exist_ok=True)
     
@@ -27,7 +27,7 @@ class LocalStorage(StorageBackend):
         return self.storage_path / file_id
     
     def _get_file_url(self, file_id: str) -> str:
-        return f"{self.base_url}/files/{file_id}"
+        return f"{self.read_url}/files/{file_id}"
     
     async def upload(
         self, 

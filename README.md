@@ -142,7 +142,7 @@ uv run upload_api.py
 
 After startup, the service addresses are as follows:
 
-- **Client**: 🌐 http://localhost:9003 (Chainlit Web UI, default username and password are both `dev`, can be changed in [`auth.py`](mcp-client/auth/auth.py))
+- **Client**: 🌐 http://localhost:9003 (Chainlit Web UI, default username and password are both `dev`, can be changed in [`auth.py`](pixelle/web/auth/auth.py))
 - **Server**: 🗄️ http://localhost:9002/sse (MCP Server)
 - **Base Service**: 🔧 http://localhost:9001/docs (File storage and basic API)
 
