@@ -193,6 +193,12 @@ async def _process_media_markers(msg: cl.Message):
     # Extract media markers and clean text
     media_files, cleaned_content = _extract_and_clean_media_markers(msg.content)
     
+    # If content becomes empty after removing media markers but we have media files,
+    # set a default message to ensure the message with media elements is displayed
+    has_media = any(media_files.values())
+    if not cleaned_content.strip() and has_media:
+        cleaned_content = "📎"  # Simple media indicator
+    
     # Update message content (remove markers)
     msg.content = cleaned_content
     
