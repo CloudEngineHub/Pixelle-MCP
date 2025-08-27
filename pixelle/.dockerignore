@@ -26,42 +26,42 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# 虚拟环境
+# Virtual environment
 .venv/
 venv/
 ENV/
 env/
 
-# IDE相关
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# 系统文件
+# System files
 .DS_Store
 Thumbs.db
 
-# 日志文件
+# Log files
 *.log
 server.log
 
-# 临时文件
+# Temporary files
 temp/
 tmp/
 *.tmp
 
-# 部署脚本
+# Deployment scripts
 redeploy.sh
 
-# 缓存
+# Cache
 .cache/
 .pytest_cache/
 
-# 持久化数据目录
+# Persistent data directory
 data/
 
-# 其他
+# Others
 .cursorrules
 ../.python-version

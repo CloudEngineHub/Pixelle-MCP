@@ -13,24 +13,24 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    # 基础服务配置
+    # Base service configuration
     host: str = "localhost"
     port: int = 9004
     public_read_url: Optional[str] = None
     local_storage_path: str = "files"
     
-    # ComfyUI 集成配置
+    # ComfyUI integration configuration
     comfyui_base_url: str = "http://localhost:8188"
     comfyui_api_key: str = ""
     comfyui_cookies: str = ""
     comfyui_executor_type: str = "http"
     
-    # Chainlit 配置
+    # Chainlit configuration
     chainlit_auth_secret: str = "changeme-generate-a-secure-secret-key"
     chainlit_auth_enabled: bool = True
     chainlit_save_starter_enabled: bool = False
     
-    # LLM 模型配置
+    # LLM model configuration
     # OpenAI
     openai_base_url: str = "https://api.openai.com/v1"
     openai_api_key: str = ""
@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     qwen_api_key: str = ""
     qwen_models: str = ""
     
-    # 默认模型
+    # Default model
     chainlit_chat_default_model: str = "gpt-4o-mini"
 
     def get_read_url(self) -> str:

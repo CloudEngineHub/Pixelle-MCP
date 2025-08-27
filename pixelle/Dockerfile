@@ -1,33 +1,33 @@
-# 使用Python 3.11作为基础镜像
+# Use Python 3.11 as the base image
 FROM python:3.11-slim
 
-# 设置环境变量
+# Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# 安装系统依赖
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装uv包管理器
+# Install uv package manager
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# 设置工作目录
+# Set working directory
 WORKDIR /app
 
-# 复制所有文件
+# Copy all files
 COPY . .
 
-# 使用uv安装依赖
+# Use uv to install dependencies
 RUN uv sync --frozen --no-cache
 
-# 确保使用虚拟环境中的Python
+# Ensure using Python in virtual environment
 ENV PATH="/app/.venv/bin:$PATH"
 
-# 暴露端口
+# Expose port
 EXPOSE 9002
 
-# 启动命令
+# Start command
 CMD ["python", "main.py"] 

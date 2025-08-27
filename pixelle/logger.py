@@ -1,13 +1,25 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-from pixelle.filter import HealthCheckFilter
 import logging
 
-# 应用过滤器到访问日志记录器
+
+class HealthCheckFilter(logging.Filter):
+    """Filter health check access logs"""
+
+    def filter(self, record):
+        if hasattr(record, 'getMessage'):
+            message = record.getMessage()
+            # filter health check access logs
+            if 'GET /health HTTP/1.1' in message:
+                return False
+        return True
+
+
+# apply filter to access logger
 logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 
-# 设置引擎io和socketio的日志级别
+# set engineio and socketio log level
 logging.getLogger("socketio").setLevel(logging.WARNING)
 logging.getLogger("engineio").setLevel(logging.WARNING)
 logging.getLogger("numexpr").setLevel(logging.WARNING)
