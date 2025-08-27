@@ -1,11 +1,6 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-"""
-文件服务
-提供文件上传、下载、管理等功能
-"""
-
 import mimetypes
 from pathlib import Path
 from typing import Optional, List
@@ -17,49 +12,32 @@ from pixelle.upload.local_storage import LocalStorage
 
 
 class FileService:
-    """文件服务类"""
     
     def __init__(self):
         self.storage = LocalStorage()
     
-    def _validate_file(self, file: UploadFile) -> None:
-        """验证上传的文件"""
-        # 检查文件大小
-        if hasattr(file.file, 'seek') and hasattr(file.file, 'tell'):
-            file.file.seek(0, 2)  # 移动到文件末尾
-            file_size = file.file.tell()
-            file.file.seek(0)  # 重置到文件开头
-            
-            if file_size > settings.max_file_size:
-                raise HTTPException(
-                    status_code=413,
-                    detail=f"File too large. Maximum size: {settings.max_file_size} bytes"
-                )
-
     def _get_content_type(self, filename: str) -> str:
-        """获取文件的MIME类型"""
+        """Actual file MIME type"""
         content_type, _ = mimetypes.guess_type(filename)
         return content_type or "application/octet-stream"
     
     async def upload_file(self, file: UploadFile) -> FileInfo:
         """
-        上传文件
+        Upload file
         
         Args:
-            file: 上传的文件
+            file: uploaded file
             
         Returns:
-            FileInfo: 文件信息
+            FileInfo: file info
         """
-        # 验证文件
-        self._validate_file(file)
         
-        # 获取文件信息
+        # get file info
         filename = file.filename or "unknown"
         content_type = file.content_type or self._get_content_type(filename)
         
         try:
-            # 上传到存储后端
+            # upload to storage backend
             file_info = await self.storage.upload(
                 file_data=file.file,
                 filename=filename,
@@ -75,13 +53,13 @@ class FileService:
     
     async def get_file(self, file_id: str) -> Optional[bytes]:
         """
-        获取文件内容
+        Get file content
         
         Args:
-            file_id: 文件ID
+            file_id: file ID
             
         Returns:
-            bytes: 文件内容，如果文件不存在返回None
+            bytes: file content, return None if file not exists
         """
         try:
             return await self.storage.download(file_id)
@@ -91,13 +69,13 @@ class FileService:
     
     async def get_file_info(self, file_id: str) -> Optional[FileInfo]:
         """
-        获取文件信息
+        Get file info
         
         Args:
-            file_id: 文件ID
+            file_id: file ID
             
         Returns:
-            FileInfo: 文件信息，如果文件不存在返回None
+            FileInfo: file info, return None if file not exists
         """
         try:
             return await self.storage.get_file_info(file_id)
@@ -107,13 +85,13 @@ class FileService:
     
     async def delete_file(self, file_id: str) -> bool:
         """
-        删除文件
+        Delete file
         
         Args:
-            file_id: 文件ID
+            file_id: file ID
             
         Returns:
-            bool: 是否删除成功
+            bool: whether delete successfully
         """
         try:
             return await self.storage.delete(file_id)
@@ -123,13 +101,13 @@ class FileService:
     
     async def file_exists(self, file_id: str) -> bool:
         """
-        检查文件是否存在
+        Check if file exists
         
         Args:
-            file_id: 文件ID
+            file_id: file ID
             
         Returns:
-            bool: 文件是否存在
+            bool: whether file exists
         """
         try:
             return await self.storage.exists(file_id)
@@ -138,5 +116,5 @@ class FileService:
             return False
 
 
-# 全局文件服务实例
+# global file service instance
 file_service = FileService() 

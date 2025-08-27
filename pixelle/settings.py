@@ -7,7 +7,6 @@ import os
 from pixelle.utils.os_util import get_root_path
 from pixelle.yml_env_loader import load_yml_and_set_env
 
-os.environ["CHAINLIT_APP_ROOT"] = get_root_path()
 
 # Load config.yml and inject env vars
 load_yml_and_set_env("base")
@@ -16,17 +15,15 @@ load_yml_and_set_env("client")
 
 
 class Settings(BaseSettings):
-    server_host: str = "localhost"
-    server_port: int = 9004
+    host: str = "localhost"
+    port: int = 9004
     public_read_url: Optional[str] = None
     local_storage_path: str = "files"
-    # 100MB
-    max_file_size: int = 100 * 1024 * 1024
 
     def get_read_url(self) -> str:
         if self.public_read_url:
             return self.public_read_url
-        return f"http://{self.server_host}:{self.server_port}"
+        return f"http://{self.host}:{self.server_port}"
 
     class ConfigDict:
         env_file = ".env"
@@ -34,5 +31,10 @@ class Settings(BaseSettings):
         extra = "ignore"
 
 
-# 全局配置实例
+# Global settings instance
 settings = Settings()
+
+# Extra env vars
+os.environ["CHAINLIT_APP_ROOT"] = get_root_path()
+os.environ["CHAINLIT_HOST"] = str(settings.host)
+os.environ["CHAINLIT_PORT"] = str(settings.port)

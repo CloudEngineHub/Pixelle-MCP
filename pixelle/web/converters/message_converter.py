@@ -10,10 +10,10 @@ def messages_from_chaintlit_to_openai(cl_messages: list[cl.Message]) -> list[dic
         content = cl_message.content
         elements = cl_message.elements
         if elements:
-            ext_info = f"\n\n本消息附件:"
+            ext_info = f"\n\nAttachments of current message:"
             for i, element in enumerate(elements):
                 url = element.url or upload(element.path)
-                ext_info += f"\n{i+1}. 类型: {element.mime}, 名称: {element.name}, URL: {url}"
+                ext_info += f"\n{i+1}. Type: {element.mime}, Name: {element.name}, URL: {url}"
             content += ext_info
         
         if cl_message.type == "assistant_message":

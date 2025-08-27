@@ -1,12 +1,13 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
+
 # !!! Don't modify the import order, `settings` module must be imported before other modules !!!
 from pixelle.settings import settings
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
-from chainlit.config import load_module
+from chainlit.config import load_module, config as chainlit_config
 from chainlit.server import lifespan as chainlit_lifespan
 from chainlit.server import app as chainlit_app
 
@@ -14,6 +15,11 @@ from pixelle.utils.dynamic_util import load_modules
 from pixelle.utils.os_util import get_src_path
 from pixelle.mcp_core import mcp
 from pixelle.api.files_api import router as files_router
+
+
+# Modify chainlit config
+chainlit_config.run.host = settings.host
+chainlit_config.run.port = settings.port
 
 # Access chainlit entry file path
 chainlit_entry_file = get_src_path("web/app.py")
@@ -73,8 +79,8 @@ def main():
     print("🚀 Start server...")
     uvicorn.run(
         app,
-        host=settings.server_host,
-        port=settings.server_port,
+        host=settings.host,
+        port=settings.port,
         reload=False,
     )
 
