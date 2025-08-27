@@ -1,10 +1,10 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-import os
 import chainlit as cl
+from pixelle.settings import settings
 
-chainlit_auth_enabled = os.getenv("CHAINLIT_AUTH_ENABLED", "false").lower() == "true"
+chainlit_auth_enabled = settings.chainlit_auth_enabled
 
 if chainlit_auth_enabled:
     @cl.password_auth_callback

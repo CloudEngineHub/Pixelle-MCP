@@ -2198,7 +2198,7 @@ dependencies = [
     { name = "fastmcp" },
     { name = "litellm" },
     { name = "pillow" },
-    { name = "pyyaml" },
+    { name = "python-dotenv" },
     { name = "requests" },
     { name = "websockets" },
 ]
@@ -2213,7 +2213,7 @@ requires-dist = [
     { name = "fastmcp", specifier = ">=2.7.1" },
     { name = "litellm", specifier = ">=1.76.0" },
     { name = "pillow", specifier = ">=11.2.1" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "websockets", specifier = ">=12.0" },
 ]

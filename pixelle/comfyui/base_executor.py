@@ -19,11 +19,12 @@ from pixelle.utils.file_uploader import upload
 from pixelle.comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
 from pixelle.comfyui.models import ExecuteResult
 from pixelle.utils.os_util import get_data_path
+from pixelle.settings import settings
 
 # 配置变量
-COMFYUI_BASE_URL = os.getenv('COMFYUI_BASE_URL')
-COMFYUI_API_KEY = os.getenv('COMFYUI_API_KEY')
-COMFYUI_COOKIES = os.getenv('COMFYUI_COOKIES')
+COMFYUI_BASE_URL = settings.comfyui_base_url
+COMFYUI_API_KEY = settings.comfyui_api_key
+COMFYUI_COOKIES = settings.comfyui_cookies
 
 # 需要特殊媒体上传处理的节点类型
 MEDIA_UPLOAD_NODE_TYPES = {

@@ -1,15 +1,15 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-import os
 from typing import Dict, Any
 
 from pixelle.comfyui.models import ExecuteResult
 from pixelle.comfyui.websocket_executor import WebSocketExecutor
 from pixelle.comfyui.http_executor import HttpExecutor
+from pixelle.settings import settings
 
 # 配置变量
-COMFYUI_EXECUTOR_TYPE = os.getenv('COMFYUI_EXECUTOR_TYPE', 'http')
+COMFYUI_EXECUTOR_TYPE = settings.comfyui_executor_type
 
 
 class ComfyUIClient:

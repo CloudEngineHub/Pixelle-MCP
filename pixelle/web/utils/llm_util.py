@@ -3,89 +3,89 @@
 
 from enum import Enum
 from typing import Union, Optional
-import os
 
 from pydantic import BaseModel, Field
 
 from pixelle.logger import logger
+from pixelle.settings import settings
 
 # default model
-CHAINLIT_CHAT_DEFAULT_MODEL = os.getenv("CHAINLIT_CHAT_DEFAULT_MODEL")
+CHAINLIT_CHAT_DEFAULT_MODEL = settings.chainlit_chat_default_model
 logger.info(f"Default chat model: {CHAINLIT_CHAT_DEFAULT_MODEL}")
 
 
 # OpenAI config
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-CHAINLIT_CHAT_OPENAI_MODELS = os.getenv("CHAINLIT_CHAT_OPENAI_MODELS", "")
+OPENAI_BASE_URL = settings.openai_base_url
+OPENAI_API_KEY = settings.openai_api_key
+CHAINLIT_CHAT_OPENAI_MODELS = settings.chainlit_chat_openai_models
 openai_models = [model.strip() for model in CHAINLIT_CHAT_OPENAI_MODELS.split(",") if model.strip()]
 if openai_models and not OPENAI_API_KEY:
     openai_models.clear()
-    logger.warning("No OpenAI API key found, ignore OpenAI models, you can set `openai_api_key` in `config.yml` to enable OpenAI models")
+    logger.warning("No OpenAI API key found, ignore OpenAI models, you can set `OPENAI_API_KEY` in `.env` to enable OpenAI models")
 logger.info(f"OPENAI_BASE_URL: {OPENAI_BASE_URL}")
 logger.info(f"OPENAI_API_KEY: {OPENAI_API_KEY}")
 logger.info(f"Found {len(openai_models)} OpenAI models: {openai_models}")
 
 
 # Ollama config
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-OLLAMA_MODELS = os.getenv("OLLAMA_MODELS")
+OLLAMA_BASE_URL = settings.ollama_base_url
+OLLAMA_MODELS = settings.ollama_models
 OLLAMA_API_KEY = "ollama"
 ollama_models = [model.strip() for model in OLLAMA_MODELS.split(",") if model.strip()]
 if ollama_models and not OLLAMA_BASE_URL:
     ollama_models.clear()
-    logger.warning("No Ollama base URL found, ignore Ollama models, you can set `ollama_base_url` in `config.yml` to enable Ollama models")
+    logger.warning("No Ollama base URL found, ignore Ollama models, you can set `OLLAMA_BASE_URL` in `.env` to enable Ollama models")
 logger.info(f"OLLAMA_BASE_URL: {OLLAMA_BASE_URL}")
 logger.info(f"Found {len(ollama_models)} Ollama models: {ollama_models}")
 
 
 # Gemini config
-GEMINI_BASE_URL = os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODELS = os.getenv("GEMINI_MODELS", "")
+GEMINI_BASE_URL = settings.gemini_base_url
+GEMINI_API_KEY = settings.gemini_api_key
+GEMINI_MODELS = settings.gemini_models
 gemini_models = [model.strip() for model in GEMINI_MODELS.split(",") if model.strip()]
 if gemini_models and not GEMINI_API_KEY:
     gemini_models.clear()
-    logger.warning("No Gemini API key found, ignore Gemini models, you can set `gemini_api_key` in `config.yml` to enable Gemini models")
+    logger.warning("No Gemini API key found, ignore Gemini models, you can set `GEMINI_API_KEY` in `.env` to enable Gemini models")
 logger.info(f"GEMINI_BASE_URL: {GEMINI_BASE_URL}")
 logger.info(f"GEMINI_API_KEY: {GEMINI_API_KEY}")
 logger.info(f"Found {len(gemini_models)} Gemini models: {gemini_models}")
 
 
 # DeepSeek config
-DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_MODELS = os.getenv("DEEPSEEK_MODELS", "")
+DEEPSEEK_BASE_URL = settings.deepseek_base_url
+DEEPSEEK_API_KEY = settings.deepseek_api_key
+DEEPSEEK_MODELS = settings.deepseek_models
 deepseek_models = [model.strip() for model in DEEPSEEK_MODELS.split(",") if model.strip()]
 if deepseek_models and not DEEPSEEK_API_KEY:
     deepseek_models.clear()
-    logger.warning("No DeepSeek API key found, ignore DeepSeek models, you can set `deepseek_api_key` in `config.yml` to enable DeepSeek models")
+    logger.warning("No DeepSeek API key found, ignore DeepSeek models, you can set `DEEPSEEK_API_KEY` in `.env` to enable DeepSeek models")
 logger.info(f"DEEPSEEK_BASE_URL: {DEEPSEEK_BASE_URL}")
 logger.info(f"DEEPSEEK_API_KEY: {DEEPSEEK_API_KEY}")
 logger.info(f"Found {len(deepseek_models)} DeepSeek models: {deepseek_models}")
 
 
 # Claude config
-CLAUDE_BASE_URL = os.getenv("CLAUDE_BASE_URL", "https://api.anthropic.com")
-CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
-CLAUDE_MODELS = os.getenv("CLAUDE_MODELS", "")
+CLAUDE_BASE_URL = settings.claude_base_url
+CLAUDE_API_KEY = settings.claude_api_key
+CLAUDE_MODELS = settings.claude_models
 claude_models = [model.strip() for model in CLAUDE_MODELS.split(",") if model.strip()]
 if claude_models and not CLAUDE_API_KEY:
     claude_models.clear()
-    logger.warning("No Claude API key found, ignore Claude models, you can set `claude_api_key` in `config.yml` to enable Claude models")
+    logger.warning("No Claude API key found, ignore Claude models, you can set `CLAUDE_API_KEY` in `.env` to enable Claude models")
 logger.info(f"CLAUDE_BASE_URL: {CLAUDE_BASE_URL}")
 logger.info(f"CLAUDE_API_KEY: {CLAUDE_API_KEY}")
 logger.info(f"Found {len(claude_models)} Claude models: {claude_models}")
 
 
 # Qwen config
-QWEN_BASE_URL = os.getenv("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-QWEN_API_KEY = os.getenv("QWEN_API_KEY")
-QWEN_MODELS = os.getenv("QWEN_MODELS", "")
+QWEN_BASE_URL = settings.qwen_base_url
+QWEN_API_KEY = settings.qwen_api_key
+QWEN_MODELS = settings.qwen_models
 qwen_models = [model.strip() for model in QWEN_MODELS.split(",") if model.strip()]
 if qwen_models and not QWEN_API_KEY:
     qwen_models.clear()
-    logger.warning("No Qwen API key found, ignore Qwen models, you can set `qwen_api_key` in `config.yml` to enable Qwen models")
+    logger.warning("No Qwen API key found, ignore Qwen models, you can set `QWEN_API_KEY` in `.env` to enable Qwen models")
 logger.info(f"QWEN_BASE_URL: {QWEN_BASE_URL}")
 logger.info(f"QWEN_API_KEY: {QWEN_API_KEY}")
 logger.info(f"Found {len(qwen_models)} Qwen models: {qwen_models}")

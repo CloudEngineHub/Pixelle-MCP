@@ -16,8 +16,9 @@ from litellm import acompletion
 from pixelle.web.chat.starters import build_save_action
 from pixelle.web.utils.time_util import format_duration
 from pixelle.logger import logger
+from pixelle.settings import settings
 
-save_starter_enabled = os.getenv("CHAINLIT_SAVE_STARTER_ENABLED", "false").lower() == "true"
+save_starter_enabled = settings.chainlit_save_starter_enabled
 
 
 def format_llm_error_message(model_name: str, error_str: str) -> str:
