@@ -14,6 +14,7 @@ from pixelle.web.converters.tool_converter import tools_from_chaintlit_to_openai
 from pixelle.web.chat.chat_handler import handle_mcp_connect, handle_mcp_disconnect
 from pixelle.web.chat.chat_settings import setup_chat_settings, setup_settings_update
 from pixelle.web.chat import chat_handler as tool_handler
+from pixelle.web import auth
 from pixelle.utils.file_uploader import upload
 
 
