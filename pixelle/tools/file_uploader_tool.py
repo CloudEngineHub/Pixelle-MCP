@@ -6,12 +6,12 @@ import os
 from pydantic import Field
 from pixelle.logger import logger
 from pixelle.mcp_core import mcp
+from pixelle.settings import settings
 
-BASE_URL = os.environ.get("mcp_base_url", "http://localhost:9001")
 
 async def _file_request(method, path, **kwargs):
     async with aiohttp.ClientSession() as session:
-        url = f"{BASE_URL}{path}"
+        url = f"http://localhost:{settings.server_port}{path}"
         try:
             async with session.request(method, url, **kwargs) as response:
                 if response.status == 200:
@@ -52,4 +52,4 @@ async def upload_file(
                    open(file_path, 'rb'),
                    filename=os.path.basename(file_path))
 
-    return await _file_request("post", "/upload", data=data)
+    return await _file_request("post", "/files/upload", data=data)

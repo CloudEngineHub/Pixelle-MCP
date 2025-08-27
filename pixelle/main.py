@@ -15,7 +15,7 @@ from chainlit.server import app as chainlit_app
 from pixelle.settings import settings
 from pixelle.utils.dynamic_util import load_modules
 from pixelle.mcp_core import mcp
-from pixelle.api.upload_api import router as upload_router
+from pixelle.api.files_api import router as files_router
 
 # 加载Chainlit应用和配置
 chainlit_entry_file = get_src_path("web/app.py")
@@ -59,7 +59,7 @@ app.add_middleware(
 load_modules("tools")
 
 # 注册API路由
-app.include_router(upload_router, prefix="/api")
+app.include_router(files_router, prefix="/files")
 
 # 挂载MCP服务到/pixelle路径
 app.mount("/pixelle", mcp_asgi_app)

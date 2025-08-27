@@ -9,7 +9,6 @@ from pixelle.upload.base import FileInfo
 
 # 创建路由器
 router = APIRouter(
-    prefix="/files",
     tags=["files"],
     responses={404: {"description": "Not found"}},
 )
@@ -44,12 +43,12 @@ async def get_file(file_id: str):
     file_info = await file_service.get_file_info(file_id)
     if not file_info:
         raise HTTPException(status_code=404, detail="File not found")
-    
+
     # 获取文件内容
     file_content = await file_service.get_file(file_id)
     if not file_content:
         raise HTTPException(status_code=404, detail="File content not found")
-    
+
     # 返回文件流
     return Response(
         content=file_content,

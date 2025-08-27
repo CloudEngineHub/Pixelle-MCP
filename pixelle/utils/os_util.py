@@ -6,16 +6,17 @@ import pixelle
 import base64
 import os
 
+SRC_PATH = Path(pixelle.__file__).parent
+ROOT_PATH = SRC_PATH.parent
+
 def get_root_path(*paths: str) -> str:
-    root_dir = str(Path(__file__).parent.parent.parent)
-    return os.path.join(root_dir, *paths)
+    return os.path.join(ROOT_PATH, *paths)
 
 def get_data_path(*paths: str) -> str:
     return get_root_path("data", *paths)
 
 def get_src_path(*paths: str) -> str:
-    src_dir_name = Path(pixelle.__file__).parent.name
-    return get_root_path(src_dir_name, *paths)
+    return os.path.join(SRC_PATH, *paths)
 
 def get_temp_path(*paths: str) -> str:
     temp_path = get_root_path("temp")
