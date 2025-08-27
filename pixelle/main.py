@@ -1,9 +1,7 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
-import os
-from pixelle.utils.os_util import get_src_path, get_root_path
-
-os.environ["CHAINLIT_APP_ROOT"] = get_root_path()
+# !!! Don't modify the import order, `settings` module must be imported before other modules !!!
+from pixelle.settings import settings
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -12,41 +10,38 @@ from chainlit.config import load_module
 from chainlit.server import lifespan as chainlit_lifespan
 from chainlit.server import app as chainlit_app
 
-from pixelle.settings import settings
 from pixelle.utils.dynamic_util import load_modules
+from pixelle.utils.os_util import get_src_path
 from pixelle.mcp_core import mcp
 from pixelle.api.files_api import router as files_router
 
-# 加载Chainlit应用和配置
+# Access chainlit entry file path
 chainlit_entry_file = get_src_path("web/app.py")
-
-# 导入chainlit配置和模块加载
+# Load chainlit module
 load_module(chainlit_entry_file)
 
-# 创建MCP的ASGI应用，根据官方文档示例
-mcp_asgi_app = mcp.http_app(path='/mcp')
+# Create ASGI app of MCP
+mcp_app = mcp.http_app(path='/mcp')
 
 
-# 组合lifespan
+# combine multi lifespans
 @asynccontextmanager
 async def combined_lifespan(app: FastAPI):
-    """组合Chainlit和MCP的lifespan"""
-    # 启动MCP lifespan
-    async with mcp_asgi_app.lifespan(app):
-        # 启动Chainlit lifespan  
+    # start MCP lifespan
+    async with mcp_app.lifespan(app):
+        # start chainlit lifespan
         async with chainlit_lifespan(app):
             yield
 
 
-# 重新创建FastAPI应用，使用组合的lifespan
+# Create a fastapi application
 app = FastAPI(
-    title=chainlit_app.title,
-    description=chainlit_app.description,
-    version=chainlit_app.version,
+    title="Pixelle-MCP",
+    description="A fastapi app that contains mcp server and mcp client.",
     lifespan=combined_lifespan,
 )
 
-# 配置CORS中间件
+# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -55,20 +50,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 动态加载工具模块
+# Load tools module dynamically
 load_modules("tools")
 
-# 注册API路由
+# Register files router
 app.include_router(files_router, prefix="/files")
 
-# 挂载MCP服务到/pixelle路径
-app.mount("/pixelle", mcp_asgi_app)
+# Mount MCP server to `/pixelle` path
+app.mount("/pixelle", mcp_app)
 
-# 复制Chainlit的所有中间件
+# Transfer all middleware into our app
 for middleware in chainlit_app.user_middleware:
     app.add_middleware(middleware.cls, **middleware.kwargs)
 
-# 最后复制Chainlit的所有路由（这样不会覆盖我们的挂载）
+# Copy all routes that are in Chainlit's app into our app
 for route in chainlit_app.routes:
     app.router.routes.append(route)
 
