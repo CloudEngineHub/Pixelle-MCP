@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from pydantic import Field
 from pixelle.logger import logger
-from pixelle.core import mcp
+from pixelle.mcp_core import mcp
 from pixelle.utils.os_util import get_data_path
 from pixelle.comfyui.workflow_parser import WorkflowParser, WorkflowMetadata
 from pixelle.comfyui.facade import execute_workflow

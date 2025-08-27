@@ -1,15 +1,21 @@
 # Copyright (C) 2025 AIDC-AI
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
-from fastapi import HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import Response
 
-from pixelle.core import app
 from pixelle.upload.file_service import file_service
 from pixelle.upload.base import FileInfo
 
+# 创建路由器
+router = APIRouter(
+    prefix="/files",
+    tags=["files"],
+    responses={404: {"description": "Not found"}},
+)
 
-@app.post(f"/upload", response_model=FileInfo)
+
+@router.post("/upload", response_model=FileInfo)
 async def upload_file(file: UploadFile = File(...)):
     """
     上传文件
@@ -23,7 +29,7 @@ async def upload_file(file: UploadFile = File(...)):
     return await file_service.upload_file(file)
 
 
-@app.get(f"/files/{{file_id}}")
+@router.get("/{file_id}")
 async def get_file(file_id: str):
     """
     获取文件
@@ -54,7 +60,7 @@ async def get_file(file_id: str):
     )
 
 
-@app.get(f"/files/{{file_id}}/info", response_model=FileInfo)
+@router.get("/{file_id}/info", response_model=FileInfo)
 async def get_file_info(file_id: str):
     """
     获取文件信息
@@ -72,7 +78,7 @@ async def get_file_info(file_id: str):
 
 
 # 暂不开放, 防止数据丢失
-# @app.delete(f"/files/{{file_id}}")
+# @router.delete("/{file_id}")
 async def delete_file(file_id: str):
     """
     删除文件
@@ -89,7 +95,7 @@ async def delete_file(file_id: str):
     return {"message": "File deleted successfully"}
 
 
-@app.get(f"/files/{{file_id}}/exists")
+@router.get("/{file_id}/exists")
 async def check_file_exists(file_id: str):
     """
     检查文件是否存在

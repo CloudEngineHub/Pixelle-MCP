@@ -8,7 +8,7 @@ import os
 from pydantic import Field
 
 from pixelle.logger import logger
-from pixelle.core import mcp
+from pixelle.mcp_core import mcp
 from pixelle.manager.workflow_manager import workflow_manager, CUSTOM_WORKFLOW_DIR
 from pixelle.utils.file_util import download_files
 from pixelle.utils.file_uploader import upload
