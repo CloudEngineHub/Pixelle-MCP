@@ -7,14 +7,27 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from pathlib import Path
-import socket
 from typing import Dict, List, Optional
-import requests
-from urllib.parse import urljoin
-
-import psutil
 
 from pixelle.settings import settings
+from pixelle.utils.network_util import (
+    test_comfyui_connection,
+    test_ollama_connection,
+    get_openai_models,
+    get_ollama_models,
+    check_url_status,
+)
+from pixelle.utils.process_util import (
+    check_port_in_use,
+    get_process_using_port,
+    kill_process_on_port,
+)
+from pixelle.utils.config_util import (
+    parse_env_file,
+    detect_config_status_from_env,
+    build_env_lines,
+)
+
 
 app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - 将ComfyUI工作流转换为MCP工具")
 console = Console()
@@ -123,16 +136,20 @@ def run_full_setup_wizard():
             console.print("❌ 至少需要配置一个LLM提供商")
             return
         
-        # Step 3: 服务配置
+        # Step 3: 选择默认模型（基于已选择的提供商与模型）
+        all_models = collect_all_selected_models(llm_configs)
+        selected_default_model = select_default_model_interactively(all_models)
+
+        # Step 4: 服务配置
         service_config = setup_service_config()
         if not service_config:
             console.print("⚠️  服务配置跳过，将使用默认配置继续")
             service_config = {"port": "9004", "enable_web": True}  # 使用默认值
         
-        # Step 4: 保存配置
-        save_unified_config(comfyui_config, llm_configs, service_config)
+        # Step 5: 保存配置
+        save_unified_config(comfyui_config, llm_configs, service_config, selected_default_model)
         
-        # Step 5: 询问立即启动
+        # Step 6: 询问立即启动
         console.print("\n✅ [bold green]配置完成！[/bold green]")
         if questionary.confirm("立即启动 Pixelle MCP？", default=True, instruction="(Y/n)").ask():
             start_pixelle_server()
@@ -205,16 +222,6 @@ def setup_comfyui(default_url: str = None):
         else:
             # 重新测试，但保持用户填写的地址
             return setup_comfyui(url)
-
-
-
-def test_comfyui_connection(url: str) -> bool:
-    """测试ComfyUI连接"""
-    try:
-        response = requests.get(urljoin(url, "/system_stats"), timeout=3)
-        return response.status_code == 200
-    except:
-        return False
 
 
 def setup_multiple_llm_providers():
@@ -580,46 +587,6 @@ def configure_qwen() -> Optional[Dict]:
     }
 
 
-def test_ollama_connection(base_url: str) -> bool:
-    """测试Ollama连接"""
-    try:
-        # 移除/v1后缀来测试基础连接
-        test_url = base_url.replace("/v1", "")
-        response = requests.get(f"{test_url}/api/tags", timeout=5)
-        return response.status_code == 200
-    except:
-        return False
-
-
-def get_openai_models(api_key: str, base_url: str) -> List[str]:
-    """获取OpenAI可用模型"""
-    try:
-        headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(f"{base_url}/models", headers=headers, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            models = [model["id"] for model in data.get("data", [])]
-            # 过滤出GPT模型，排除embeddings等其他类型
-            gpt_models = [m for m in models if any(keyword in m.lower() for keyword in ["gpt", "chat", "davinci", "text"])]
-            return sorted(gpt_models)
-    except Exception as e:
-        console.print(f"⚠️  获取模型列表失败: {e}")
-    return []
-
-
-def get_ollama_models(base_url: str) -> List[str]:
-    """获取Ollama可用模型"""
-    try:
-        test_url = base_url.replace("/v1", "")
-        response = requests.get(f"{test_url}/api/tags", timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            return [model["name"] for model in data.get("models", [])]
-    except:
-        pass
-    return []
-
-
 def setup_service_config():
     """配置服务选项 - 第三步"""
     console.print(Panel(
@@ -673,7 +640,7 @@ def setup_service_config():
     }
 
 
-def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_config: Dict):
+def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_config: Dict, default_model: Optional[str] = None):
     """保存统一配置到.env文件"""
     console.print(Panel(
         "💾 [bold]保存配置[/bold]\n\n"
@@ -682,114 +649,7 @@ def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_c
         border_style="magenta"
     ))
     
-    env_lines = [
-        "# Pixelle MCP Project Environment Variables Configuration",
-        "# 此文件由 Pixelle MCP CLI 自动生成，您可以手动编辑来修改配置",
-        "# Copy this file to .env and modify the configuration values according to your actual situation",
-        "",
-        "# ======== Basic Service Configuration ========",
-        "# Service configuration",
-        f"HOST={service_config['host']}",
-        f"PORT={service_config['port']}",
-        "# Optional, used to specify public access URL, generally not needed for local services,",
-        "# configure when service is not on local machine",
-        "PUBLIC_READ_URL=\"\"",
-        "",
-        "# ======== ComfyUI Integration Configuration ========",
-        "# ComfyUI service address",
-        f"COMFYUI_BASE_URL={comfyui_config['url']}",
-        "# ComfyUI API Key (required if API Nodes are used in workflows,",
-        "# get it from: https://platform.comfy.org/profile/api-keys)",
-        "COMFYUI_API_KEY=\"\"",
-        "# Cookies used when calling ComfyUI interface, configure if ComfyUI service requires authentication",
-        "COMFYUI_COOKIES=\"\"",
-        "# Executor type for calling ComfyUI interface, supports websocket and http (both are generally supported)",
-        "COMFYUI_EXECUTOR_TYPE=http",
-        "",
-        "# ======== Chainlit Framework Configuration ========",
-        "# Chainlit auth secret (used for chainlit auth, can be reused or randomly generated)",
-        "CHAINLIT_AUTH_SECRET=\"changeme-generate-a-secure-secret-key\"",
-        f"CHAINLIT_AUTH_ENABLED=true",
-        "CHAINLIT_SAVE_STARTER_ENABLED=false",
-        ""
-    ]
-    
-    # 添加LLM配置
-    env_lines.append("# ======== LLM Model Configuration ========")
-    
-    for llm_config in llm_configs:
-        provider = llm_config["provider"].upper()
-        
-        if provider == "OPENAI":
-            env_lines.extend([
-                "# OpenAI configuration",
-                f"OPENAI_BASE_URL=\"{llm_config.get('base_url', 'https://api.openai.com/v1')}\"",
-                "# Get your API key at: https://platform.openai.com/api-keys",
-                f"OPENAI_API_KEY=\"{llm_config['api_key']}\"",
-                "# List OpenAI models to be used, if multiple, separate with English commas",
-                f"CHAINLIT_CHAT_OPENAI_MODELS=\"{llm_config.get('models', 'gpt-4o-mini')}\"",
-            ])
-        elif provider == "OLLAMA":
-            env_lines.extend([
-                "# Ollama configuration (local models)",
-                f"OLLAMA_BASE_URL=\"{llm_config.get('base_url', 'http://localhost:11434/v1')}\"",
-                "# List Ollama models to be used, if multiple, separate with English commas",
-                f"OLLAMA_MODELS=\"{llm_config.get('models', '')}\"",
-            ])
-        elif provider == "GEMINI":
-            env_lines.extend([
-                "# Gemini configuration",
-                f"GEMINI_BASE_URL=\"https://generativelanguage.googleapis.com/v1beta\"",
-                "# Get your API key at: https://aistudio.google.com/app/apikey",
-                f"GEMINI_API_KEY=\"{llm_config['api_key']}\"",
-                "# List Gemini models to be used, if multiple, separate with English commas",
-                f"GEMINI_MODELS=\"{llm_config.get('models', '')}\"",
-            ])
-        elif provider == "DEEPSEEK":
-            env_lines.extend([
-                "# DeepSeek configuration",
-                f"DEEPSEEK_BASE_URL=\"https://api.deepseek.com\"",
-                "# Get your API key at: https://platform.deepseek.com/api_keys",
-                f"DEEPSEEK_API_KEY=\"{llm_config['api_key']}\"",
-                "# List DeepSeek models to be used, if multiple, separate with English commas",
-                f"DEEPSEEK_MODELS=\"{llm_config.get('models', '')}\"",
-            ])
-        elif provider == "CLAUDE":
-            env_lines.extend([
-                "# Claude (Anthropic) configuration",
-                f"CLAUDE_BASE_URL=\"https://api.anthropic.com\"",
-                "# Get your API key at: https://console.anthropic.com/settings/keys",
-                f"CLAUDE_API_KEY=\"{llm_config['api_key']}\"",
-                "# List Claude models to be used, if multiple, separate with English commas",
-                f"CLAUDE_MODELS=\"{llm_config.get('models', '')}\"",
-            ])
-        elif provider == "QWEN":
-            env_lines.extend([
-                "# Qwen (Alibaba Cloud) configuration",
-                f"QWEN_BASE_URL=\"https://dashscope.aliyuncs.com/compatible-mode/v1\"",
-                "# Get your API key at: https://bailian.console.aliyun.com/?tab=model#/api-key",
-                f"QWEN_API_KEY=\"{llm_config['api_key']}\"",
-                "# List Qwen models to be used, if multiple, separate with English commas",
-                f"QWEN_MODELS=\"{llm_config.get('models', '')}\"",
-            ])
-        
-        env_lines.append("")
-    
-    # 设置默认模型（使用第一个配置的LLM的第一个模型）
-    if llm_configs:
-        first_llm = llm_configs[0]
-        models = first_llm.get('models', '')
-        if models:
-            default_model = models.split(',')[0].strip()
-            env_lines.extend([
-                "# Optional, default model for conversations (can be from any provider above)",
-                f"CHAINLIT_CHAT_DEFAULT_MODEL=\"{default_model}\"",
-                ""
-            ])
-    
-
-    
-    # 写入.env文件
+    env_lines = build_env_lines(comfyui_config, llm_configs, service_config, default_model)
     with open('.env', 'w', encoding='utf-8') as f:
         f.write('\n'.join(env_lines))
     
@@ -823,6 +683,49 @@ def reload_config():
         setattr(settings_module.settings, field_name, getattr(new_settings, field_name))
     
     console.print("🔄 [bold blue]配置已重新加载[/bold blue]")
+
+
+def collect_all_selected_models(llm_configs: List[Dict]) -> List[str]:
+    """从已配置的各提供商配置中收集所有模型，去重并保持顺序。"""
+    seen = set()
+    ordered_models: List[str] = []
+    for conf in llm_configs or []:
+        models_str = (conf.get("models") or "").strip()
+        if not models_str:
+            continue
+        for m in models_str.split(","):
+            model = m.strip()
+            if model and model not in seen:
+                seen.add(model)
+                ordered_models.append(model)
+    return ordered_models
+
+
+def select_default_model_interactively(all_models: List[str]) -> Optional[str]:
+    """提供方向键选择默认模型的交互；若无模型或用户取消则返回 None。"""
+    if not all_models:
+        return None
+
+    # 默认值：第一项，但允许用户更改
+    default_choice_value = all_models[0]
+    choices = [
+        questionary.Choice(
+            title=(m if m != default_choice_value else f"{m} (默认)"),
+            value=m,
+            shortcut_key=None,
+        )
+        for m in all_models
+    ]
+
+    console.print("\n⭐ 请选择会话默认模型（可随时在 .env 中修改）")
+    selected = questionary.select(
+        "默认模型:",
+        choices=choices,
+        default=default_choice_value,
+        instruction="使用方向键选择，回车确认",
+    ).ask()
+
+    return selected or default_choice_value
 
 
 def show_main_menu():
@@ -918,16 +821,20 @@ def run_fresh_setup_wizard():
             console.print("❌ 至少需要配置一个LLM提供商")
             return
         
-        # Step 3: 服务配置
+        # Step 3: 选择默认模型（基于已选择的提供商与模型）
+        all_models = collect_all_selected_models(llm_configs)
+        selected_default_model = select_default_model_interactively(all_models)
+
+        # Step 4: 服务配置
         service_config = setup_service_config()
         if not service_config:
             console.print("⚠️  服务配置跳过，将使用默认配置继续")
             service_config = {"port": "9004", "host": "localhost"}  # 使用默认值
         
-        # Step 4: 保存配置
-        save_unified_config(comfyui_config, llm_configs, service_config)
+        # Step 5: 保存配置
+        save_unified_config(comfyui_config, llm_configs, service_config, selected_default_model)
         
-        # Step 5: 询问立即启动
+        # Step 6: 询问立即启动
         console.print("\n✅ [bold green]重新配置完成！[/bold green]")
         if questionary.confirm("立即启动 Pixelle MCP？", default=True, instruction="(Y/n)").ask():
             start_pixelle_server()
@@ -995,122 +902,6 @@ def guide_manual_edit():
     
     console.print("\n📋 配置完成后，重新运行 [bold]pixelle[/bold] 来应用配置")
     console.print("🗑️  如需完全重新配置，删除 .env 文件后重新运行 [bold]pixelle[/bold]")
-
-
-def check_port_in_use(port: int) -> bool:
-    """检查端口是否被占用"""
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(1)
-            result = sock.connect_ex(('localhost', port))
-            return result == 0
-    except:
-        return False
-
-
-def get_process_using_port(port: int) -> Optional[str]:
-    """获取占用端口的进程信息"""
-    try:
-        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-            try:
-                # 使用kind参数只获取TCP连接，提高效率
-                for conn in proc.net_connections(kind='tcp'):
-                    if conn.laddr.port == port and conn.status in [psutil.CONN_LISTEN, psutil.CONN_ESTABLISHED]:
-                        status_desc = "监听中" if conn.status == psutil.CONN_LISTEN else "已建立连接"
-                        return f"{proc.info['name']} (PID: {proc.info['pid']}) - {status_desc}"
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                continue
-    except Exception as e:
-        console.print(f"⚠️  获取进程信息失败: {e}")
-    return None
-
-
-def kill_process_on_port(port: int) -> bool:
-    """终止占用端口的进程"""
-    try:
-        target_proc = None
-        target_pid = None
-        
-        # 首先找到占用端口的进程
-        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-            try:
-                for conn in proc.net_connections(kind='tcp'):
-                    if conn.laddr.port == port and conn.status in [psutil.CONN_LISTEN, psutil.CONN_ESTABLISHED]:
-                        target_proc = proc
-                        target_pid = proc.pid
-                        status_desc = "监听中" if conn.status == psutil.CONN_LISTEN else "已建立连接"
-                        console.print(f"🎯 找到目标进程: {proc.info['name']} (PID: {target_pid}) - {status_desc}")
-                        break
-                if target_proc:
-                    break
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                continue
-        
-        if not target_proc:
-            console.print("❌ 未找到占用端口的进程")
-            return False
-        
-        # 尝试终止进程
-        try:
-            console.print(f"🔄 正在终止进程 {target_pid}...")
-            target_proc.terminate()
-            
-            # 等待进程终止
-            try:
-                target_proc.wait(timeout=3)
-                console.print(f"✅ 进程 {target_pid} 已正常终止")
-                return True
-            except psutil.TimeoutExpired:
-                # 如果温和终止失败，尝试强制杀死
-                console.print(f"⚠️  进程 {target_pid} 未响应terminate，尝试强制终止...")
-                target_proc.kill()
-                try:
-                    target_proc.wait(timeout=2)
-                    console.print(f"✅ 进程 {target_pid} 已强制终止")
-                    return True
-                except psutil.TimeoutExpired:
-                    console.print(f"❌ 无法终止进程 {target_pid}")
-                    return False
-                    
-        except psutil.NoSuchProcess:
-            console.print(f"✅ 进程 {target_pid} 已不存在")
-            return True
-        except psutil.AccessDenied:
-            console.print(f"❌ 权限不足，无法终止进程 {target_pid}")
-            # 尝试使用系统命令作为备用方案
-            try:
-                console.print("🔄 尝试使用系统命令终止进程...")
-                import os
-                os.system(f"kill -TERM {target_pid}")
-                import time
-                time.sleep(2)
-                
-                # 检查进程是否还存在
-                if not psutil.pid_exists(target_pid):
-                    console.print(f"✅ 进程 {target_pid} 已通过系统命令终止")
-                    return True
-                else:
-                    # 尝试强制终止
-                    os.system(f"kill -KILL {target_pid}")
-                    time.sleep(1)
-                    if not psutil.pid_exists(target_pid):
-                        console.print(f"✅ 进程 {target_pid} 已强制终止")
-                        return True
-                    else:
-                        console.print(f"❌ 系统命令也无法终止进程 {target_pid}")
-                        console.print("💡 请手动终止该进程或使用 sudo 运行")
-                        return False
-            except Exception as e:
-                console.print(f"❌ 系统命令终止失败: {e}")
-                console.print("💡 请手动终止该进程或使用 sudo 运行")
-                return False
-        except Exception as e:
-            console.print(f"❌ 终止进程时发生错误: {e}")
-            return False
-            
-    except Exception as e:
-        console.print(f"❌ 终止进程操作失败: {e}")
-        return False
 
 
 def start_pixelle_server():
@@ -1260,13 +1051,7 @@ def check_service_status():
         console.print("💡 如有服务未运行，请检查配置或重启服务")
 
 
-def check_url_status(url: str, timeout: int = 5) -> bool:
-    """检查URL是否可访问"""
-    try:
-        response = requests.get(url, timeout=timeout)
-        return response.status_code == 200
-    except:
-        return False
+    
 
 
 def show_help():
