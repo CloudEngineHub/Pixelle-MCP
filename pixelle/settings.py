@@ -62,6 +62,47 @@ class Settings(BaseSettings):
     
     # Default model
     chainlit_chat_default_model: str = "gpt-4o-mini"
+    
+    def get_configured_llm_providers(self) -> list[str]:
+        """获取已配置的LLM提供商列表"""
+        providers = []
+        if self.openai_api_key:
+            providers.append("openai")
+        if self.ollama_models:
+            providers.append("ollama") 
+        if self.gemini_api_key:
+            providers.append("gemini")
+        if self.deepseek_api_key:
+            providers.append("deepseek")
+        if self.claude_api_key:
+            providers.append("claude")
+        if self.qwen_api_key:
+            providers.append("qwen")
+        return providers
+    
+    def get_all_available_models(self) -> list[str]:
+        """获取所有可用模型列表"""
+        models = []
+        
+        if self.openai_api_key and self.chainlit_chat_openai_models:
+            models.extend([m.strip() for m in self.chainlit_chat_openai_models.split(",") if m.strip()])
+        
+        if self.ollama_models:
+            models.extend([m.strip() for m in self.ollama_models.split(",") if m.strip()])
+            
+        if self.gemini_api_key and self.gemini_models:
+            models.extend([m.strip() for m in self.gemini_models.split(",") if m.strip()])
+            
+        if self.deepseek_api_key and self.deepseek_models:
+            models.extend([m.strip() for m in self.deepseek_models.split(",") if m.strip()])
+            
+        if self.claude_api_key and self.claude_models:
+            models.extend([m.strip() for m in self.claude_models.split(",") if m.strip()])
+            
+        if self.qwen_api_key and self.qwen_models:
+            models.extend([m.strip() for m in self.qwen_models.split(",") if m.strip()])
+        
+        return models
 
     def get_read_url(self) -> str:
         if self.public_read_url:
