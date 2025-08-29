@@ -15,6 +15,29 @@ def check_url_status(url: str, timeout: int = 5) -> bool:
         return False
 
 
+def check_mcp_streamable(url: str, timeout: int = 5) -> bool:
+    init_payload = {
+        "jsonrpc": "2.0",
+        "method": "initialize",
+        "id": 1,
+        "params": {}
+    }
+    headers = {
+        "Accept": "application/json, text/event-stream",
+        "Content-Type": "application/json"
+    }
+    try:
+        resp = requests.post(url, json=init_payload, headers=headers, timeout=timeout, stream=True)
+        # 看 HTTP 状态和内容类型
+        ok = resp.status_code == 200 or resp.status_code == 202
+        ctype = resp.headers.get("Content-Type", "")
+        if ok and ("application/json" in ctype or "text/event-stream" in ctype):
+            return True
+    except Exception:
+        return False
+    return False
+
+
 def test_comfyui_connection(url: str) -> bool:
     """Test ComfyUI connectivity using /system_stats endpoint."""
     try:

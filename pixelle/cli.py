@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 
 from pixelle.settings import settings
 from pixelle.utils.network_util import (
+    check_mcp_streamable,
     test_comfyui_connection,
     test_ollama_connection,
     get_openai_models,
@@ -23,57 +24,55 @@ from pixelle.utils.process_util import (
     kill_process_on_port,
 )
 from pixelle.utils.config_util import (
-    parse_env_file,
-    detect_config_status_from_env,
     build_env_lines,
 )
 
 
-app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - 将ComfyUI工作流转换为MCP工具")
+app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - A simple solution to convert ComfyUI workflow to MCP tool")
 console = Console()
 
 
 def main():
-    """🎨 Pixelle MCP 统一入口点 - 智能判断用户意图"""
+    """🎨 Pixelle MCP - A simple tool to convert ComfyUI workflow to MCP tool"""
     
-    # 显示欢迎界面
+    # Show welcome message
     show_welcome()
     
-    # 检测配置状态
+    # Detect config status
     config_status = detect_config_status()
     
     if config_status == "first_time":
-        # 首次使用：完整配置向导 + 启动
-        console.print("\n🎯 [bold blue]检测到这是您首次使用 Pixelle MCP！[/bold blue]")
-        console.print("我们将引导您完成简单的配置过程...\n")
+        # First time use: full setup wizard + start
+        console.print("\n🎯 [bold blue]Detect this is your first time using Pixelle MCP![/bold blue]")
+        console.print("We will guide you through a simple configuration process...\n")
         
-        if questionary.confirm("开始配置向导？", default=True, instruction="(Y/n)").ask():
+        if questionary.confirm("Start configuration wizard?", default=True, instruction="(Y/n)").ask():
             run_full_setup_wizard()
         else:
-            console.print("❌ 配置已取消。您可以随时再次运行 [bold]pixelle[/bold] 来配置。")
+            console.print("❌ Configuration cancelled. You can always run [bold]pixelle[/bold] to configure.")
             return
             
     elif config_status == "incomplete":
-        # 配置不完整：引导用户处理
-        console.print("\n⚠️  [bold yellow]检测到配置文件存在但不完整[/bold yellow]")
-        console.print("💡 建议重新引导配置或手动编辑配置文件")
+        # Config is incomplete: guide user to handle
+        console.print("\n⚠️  [bold yellow]Detect config file exists but is incomplete[/bold yellow]")
+        console.print("💡 Suggest to re-run configuration or manually edit config file")
         show_main_menu()
         
     else:
-        # 已完整配置：显示主菜单
+        # Config is complete: show main menu
         show_main_menu()
 
 
 def show_welcome():
-    """显示欢迎界面"""
+    """Show welcome message"""
     welcome_text = """
 🎨 [bold blue]Pixelle MCP 2.0[/bold blue]
-将ComfyUI工作流转换为MCP工具的极简解决方案
+A simple solution to convert ComfyUI workflow to MCP tool
 
-✨ 30秒从零到AI助手
-🔧 零代码将工作流转为MCP工具  
-🌐 支持Cursor、Claude Desktop等MCP客户端
-🤖 支持多种主流LLM（OpenAI、Ollama、Gemini等）
+✨ 30 seconds from zero to AI assistant
+🔧 Zero code to convert workflow to MCP tool  
+🌐 Support Cursor, Claude Desktop, etc. MCP clients
+🤖 Support multiple mainstream LLMs (OpenAI, Ollama, Gemini, etc.)
 """
     
     console.print(Panel(
@@ -85,16 +84,16 @@ def show_welcome():
 
 
 def detect_config_status() -> str:
-    """检测当前配置状态"""
+    """Detect current config status"""
     env_file = Path(".env")
     
     if not env_file.exists():
         return "first_time"
     
-    # 检查必要的配置项
+    # Check required configs
     required_configs = [
         "COMFYUI_BASE_URL",
-        # 至少要有一个LLM配置
+        # At least one LLM config is required
         ("OPENAI_API_KEY", "OLLAMA_BASE_URL", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "CLAUDE_API_KEY", "QWEN_API_KEY")
     ]
     
@@ -106,11 +105,11 @@ def detect_config_status() -> str:
                 key, value = line.split('=', 1)
                 env_vars[key.strip()] = value.strip().strip('"\'')
     
-    # 检查ComfyUI配置
+    # Check ComfyUI config
     if "COMFYUI_BASE_URL" not in env_vars or not env_vars["COMFYUI_BASE_URL"]:
         return "incomplete"
     
-    # 检查是否至少有一个LLM配置
+    # Check if at least one LLM config is present
     llm_configs = required_configs[1]
     has_llm = any(key in env_vars and env_vars[key] for key in llm_configs)
     if not has_llm:
@@ -120,205 +119,205 @@ def detect_config_status() -> str:
 
 
 def run_full_setup_wizard():
-    """运行完整的配置向导"""
-    console.print("\n🚀 [bold]开始 Pixelle MCP 配置向导[/bold]\n")
+    """Run full setup wizard"""
+    console.print("\n🚀 [bold]Start Pixelle MCP configuration wizard[/bold]\n")
     
     try:
-        # Step 1: ComfyUI配置
+        # Step 1: ComfyUI config
         comfyui_config = setup_comfyui()
         if not comfyui_config:
-            console.print("⚠️  ComfyUI配置跳过，将使用默认配置继续")
-            comfyui_config = {"url": "http://localhost:8188"}  # 使用默认值
+            console.print("⚠️  ComfyUI config skipped, using default config")
+            comfyui_config = {"url": "http://localhost:8188"}  # Use default value
         
-        # Step 2: LLM配置（可配置多个）
+        # Step 2: LLM config (can be configured multiple)
         llm_configs = setup_multiple_llm_providers()
         if not llm_configs:
-            console.print("❌ 至少需要配置一个LLM提供商")
+            console.print("❌ At least one LLM provider is required")
             return
         
-        # Step 3: 选择默认模型（基于已选择的提供商与模型）
+        # Step 3: Select default model (based on selected providers and models)
         all_models = collect_all_selected_models(llm_configs)
         selected_default_model = select_default_model_interactively(all_models)
 
-        # Step 4: 服务配置
+        # Step 4: Service config
         service_config = setup_service_config()
         if not service_config:
-            console.print("⚠️  服务配置跳过，将使用默认配置继续")
-            service_config = {"port": "9004", "enable_web": True}  # 使用默认值
+            console.print("⚠️  Service config skipped, using default config")
+            service_config = {"port": "9004", "enable_web": True}  # Use default value
         
-        # Step 5: 保存配置
+        # Step 5: Save config
         save_unified_config(comfyui_config, llm_configs, service_config, selected_default_model)
         
-        # Step 6: 询问立即启动
-        console.print("\n✅ [bold green]配置完成！[/bold green]")
-        if questionary.confirm("立即启动 Pixelle MCP？", default=True, instruction="(Y/n)").ask():
+        # Step 6: Ask to start immediately
+        console.print("\n✅ [bold green]Configuration completed![/bold green]")
+        if questionary.confirm("Start Pixelle MCP immediately?", default=True, instruction="(Y/n)").ask():
             start_pixelle_server()
             
     except KeyboardInterrupt:
-        console.print("\n\n❌ 配置已取消（按下了 Ctrl+C）")
-        console.print("💡 您可以随时重新运行 [bold]pixelle[/bold] 来配置")
+        console.print("\n\n❌ Configuration cancelled (Ctrl+C pressed)")
+        console.print("💡 You can always run [bold]pixelle[/bold] to configure")
     except Exception as e:
-        console.print(f"\n❌ 配置过程中发生错误: {e}")
-        console.print("💡 您可以重新运行 [bold]pixelle[/bold] 来重试")
+        console.print(f"\n❌ Error during configuration: {e}")
+        console.print("💡 You can always run [bold]pixelle[/bold] to try again")
 
 
 def setup_comfyui(default_url: str = None):
-    """配置ComfyUI - 第一步"""
+    """Setup ComfyUI - Step 1"""
     console.print(Panel(
-        "🧩 [bold]ComfyUI 配置[/bold]\n\n"
-        "Pixelle MCP 需要连接到您的 ComfyUI 服务来执行工作流。\n"
-        "ComfyUI 是一个强大的AI工作流编辑器，如果您还没有安装，\n"
-        "请访问：https://github.com/comfyanonymous/ComfyUI",
-        title="Step 1/4: ComfyUI 配置",
+        "🧩 [bold]ComfyUI configuration[/bold]\n\n"
+        "Pixelle MCP needs to connect to your ComfyUI service to execute workflows.\n"
+        "ComfyUI is a powerful AI workflow editor, if you haven't installed it yet,\n"
+        "please visit: https://github.com/comfyanonymous/ComfyUI",
+        title="Step 1/4: ComfyUI configuration",
         border_style="blue"
     ))
     
-    # 手动配置
-    console.print("\n📝 请配置 ComfyUI 服务地址")
-    console.print("💡 如果选择'n'，将允许您输入自定义地址")
+    # Manual config
+    console.print("\n📝 Please configure ComfyUI service address")
+    console.print("💡 If you choose 'n', you can input custom address")
     
-    # 使用传入的默认值或代码默认值
+    # Use default value or code default value
     final_default_url = default_url or "http://localhost:8188"
     use_default = questionary.confirm(
-        f"使用默认地址 {final_default_url}？",
+        f"Use default address {final_default_url}?",
         default=True,
         instruction="(Y/n)"
     ).ask()
     
     if use_default:
         url = final_default_url
-        console.print(f"✅ 使用默认地址: {url}")
+        console.print(f"✅ Using default address: {url}")
     else:
         url = questionary.text(
-            "请输入自定义 ComfyUI 地址:",
-            instruction="(例如: http://192.168.1.100:8188)"
+            "Please input custom ComfyUI address:",
+            instruction="(e.g. http://192.168.1.100:8188)"
         ).ask()
     
     if not url:
         return None
     
-    # 测试连接
-    console.print(f"🔌 正在测试连接 {url}...")
+    # Test connection
+    console.print(f"🔌 Testing connection to {url}...")
     if test_comfyui_connection(url):
-        console.print("✅ [bold green]ComfyUI 连接成功！[/bold green]")
+        console.print("✅ [bold green]ComfyUI connection successful![/bold green]")
         return {"url": url}
     else:
-        console.print("❌ [bold red]无法连接到 ComfyUI[/bold red]")
-        console.print("请检查：")
-        console.print("1. ComfyUI 是否正在运行")
-        console.print("2. 地址是否正确")
-        console.print("3. 网络是否畅通")
+        console.print("❌ [bold red]Cannot connect to ComfyUI[/bold red]")
+        console.print("Please check:")
+        console.print("1. Whether ComfyUI is running")
+        console.print("2. Whether the address is correct")
+        console.print("3. Whether the network is available")
         
-        # 询问是否跳过测试
+        # Ask if skip test
         skip_test = questionary.confirm(
-            "是否跳过连接测试？",
+            "Skip connection test?",
             default=True,
-            instruction="(Y/n，跳过将直接使用您填写的地址)"
+            instruction="(Y/n, skip will directly use the address you entered)"
         ).ask()
         
         if skip_test:
-            console.print(f"⏭️  已跳过连接测试，将使用地址: {url}")
+            console.print(f"⏭️  Skipped connection test, using address: {url}")
             return {"url": url}
         else:
-            # 重新测试，但保持用户填写的地址
+            # Re-test, but keep the user's input address
             return setup_comfyui(url)
 
 
 def setup_multiple_llm_providers():
-    """配置多个LLM提供商 - 第二步"""
+    """Setup multiple LLM providers - Step 2"""
     console.print(Panel(
-        "🤖 [bold]LLM 提供商配置[/bold]\n\n"
-        "Pixelle MCP 支持多种LLM提供商，您可以配置一个或多个。\n"
-        "配置多个提供商的好处：\n"
-        "• 可以在不同场景下使用不同模型\n"
-        "• 提供备选方案，提高服务可用性\n"
-        "• 某些模型在特定任务上表现更好",
-        title="Step 2/4: LLM 提供商配置",
+        "🤖 [bold]LLM provider configuration[/bold]\n\n"
+        "Pixelle MCP supports multiple LLM providers, you can configure one or more.\n"
+        "The benefits of configuring multiple providers:\n"
+        "• Can use different models in different scenarios\n"
+        "• Provide backup solutions, improve service availability\n"
+        "• Some models perform better on specific tasks",
+        title="Step 2/4: LLM provider configuration",
         border_style="green"
     ))
     
     configured_providers = []
     
     while True:
-        # 显示可选的提供商
+        # Show available providers
         available_providers = [
-            questionary.Choice("🔥 OpenAI (推荐) - GPT-4、GPT-3.5等", "openai"),
-            questionary.Choice("🏠 Ollama (本地) - 免费本地模型", "ollama"),
-            questionary.Choice("💎 Google Gemini - Google最新模型", "gemini"),
-            questionary.Choice("🚀 DeepSeek - 性价比极高的代码模型", "deepseek"),
-            questionary.Choice("🤖 Claude - Anthropic的强大模型", "claude"),
-            questionary.Choice("🌟 Qwen - 阿里巴巴通义千问", "qwen"),
+            questionary.Choice("🔥 OpenAI (recommended) - GPT-4, GPT-3.5, etc.", "openai"),
+            questionary.Choice("🏠 Ollama (local) - Free local model", "ollama"),
+            questionary.Choice("💎 Google Gemini - Google latest model", "gemini"),
+            questionary.Choice("🚀 DeepSeek - High-performance code model", "deepseek"),
+            questionary.Choice("🤖 Claude - Anthropic's powerful model", "claude"),
+            questionary.Choice("🌟 Qwen - Alibaba Tongyi Qwen", "qwen"),
         ]
         
-        # 过滤已配置的提供商
+        # Filter configured providers
         remaining_providers = [p for p in available_providers 
                              if p.value not in [cp["provider"] for cp in configured_providers]]
         
         if not remaining_providers:
-            console.print("✅ 已配置所有可用的LLM提供商，自动进入下一步")
+            console.print("✅ All available LLM providers are configured, automatically enter next step")
             break
         
-        # 显示当前已配置的提供商
+        # Show currently configured providers
         if configured_providers:
-            console.print("\n📋 [bold]已配置的提供商：[/bold]")
+            console.print("\n📋 [bold]Configured providers:[/bold]")
             for provider in configured_providers:
                 console.print(f"  ✅ {provider['provider'].title()}")
         
-        # 选择要配置的提供商
+        # Select provider to configure
         if configured_providers:
-            remaining_providers.append(questionary.Choice("🏁 完成配置", "done"))
+            remaining_providers.append(questionary.Choice("🏁 Complete configuration", "done"))
         
-        # 总是添加退出选项
-        remaining_providers.append(questionary.Choice("❌ 取消配置", "cancel"))
+        # Always add exit option
+        remaining_providers.append(questionary.Choice("❌ Cancel configuration", "cancel"))
         
         provider = questionary.select(
-            "选择要配置的LLM提供商：" if not configured_providers else "选择要继续配置的LLM提供商：",
+            "Select LLM provider to configure:" if not configured_providers else "Select LLM provider to continue configuration:",
             choices=remaining_providers
         ).ask()
         
         if provider == "cancel":
-            if questionary.confirm("确定要取消配置吗？", default=False, instruction="(y/N)").ask():
-                console.print("❌ 配置已取消")
+            if questionary.confirm("Are you sure you want to cancel configuration?", default=False, instruction="(y/N)").ask():
+                console.print("❌ Configuration cancelled")
                 return None
             else:
-                continue  # 继续配置循环
+                continue  # Continue configuration loop
         
         if provider == "done":
             break
         
-        # 配置具体的提供商
+        # Configure specific provider
         provider_config = configure_specific_llm(provider)
         if provider_config:
             configured_providers.append(provider_config)
             
-            # 显示选择的模型
+            # Show selected models
             models = provider_config.get('models', '')
             if models:
                 model_list = [m.strip() for m in models.split(',')]
                 model_display = '、'.join(model_list)
-                console.print(f"✅ [bold green]{provider.title()} 配置成功！[/bold green]")
-                console.print(f"📋 您选择了 {model_display} 模型\n")
+                console.print(f"✅ [bold green]{provider.title()} configuration successful![/bold green]")
+                console.print(f"📋 You selected {model_display} model\n")
             else:
-                console.print(f"✅ [bold green]{provider.title()} 配置成功！[/bold green]\n")
+                console.print(f"✅ [bold green]{provider.title()} configuration successful![/bold green]\n")
         
         if not configured_providers:
-            console.print("⚠️  至少需要配置一个LLM提供商才能继续")
+            console.print("⚠️  At least one LLM provider is required to continue")
         else:
-            # 检查是否还有未配置的提供商
-            # remaining_providers已经过滤掉已配置的，且会添加"完成配置"和"取消配置"选项
+            # Check if there are any remaining providers to configure
+            # remaining_providers has already filtered out configured providers, and will add "done" and "cancel" options
             actual_remaining = len([p for p in remaining_providers if p.value not in ["done", "cancel"]])
             if actual_remaining > 0:
-                if not questionary.confirm("是否继续配置其他LLM提供商？", default=False, instruction="(y/N)").ask():
+                if not questionary.confirm("Continue configuring other LLM providers?", default=False, instruction="(y/N)").ask():
                     break
             else:
-                # 所有提供商都已配置完毕，自动进入下一步
+                # All providers are configured, automatically enter next step
                 break
     
     return configured_providers
 
 
 def configure_specific_llm(provider: str) -> Optional[Dict]:
-    """配置具体的LLM提供商"""
+    """Configure specific LLM provider"""
     
     if provider == "openai":
         return configure_openai()
@@ -337,89 +336,89 @@ def configure_specific_llm(provider: str) -> Optional[Dict]:
 
 
 def configure_openai() -> Optional[Dict]:
-    """配置OpenAI"""
-    console.print("\n🔥 [bold]配置 OpenAI 兼容接口[/bold]")
-    console.print("支持 OpenAI 官方以及所有兼容 OpenAI SDK 协议的提供商")
-    console.print("包括但不限于：OpenAI、Azure OpenAI、各种第三方代理服务等")
-    console.print("获取 OpenAI 官方 API Key: https://platform.openai.com/api-keys\n")
+    """Configure OpenAI"""
+    console.print("\n🔥 [bold]Configure OpenAI compatible interface[/bold]")
+    console.print("Support OpenAI official and all compatible OpenAI SDK providers")
+    console.print("Including but not limited to: OpenAI, Azure OpenAI, various third-party proxy services, etc.")
+    console.print("Get OpenAI official API Key: https://platform.openai.com/api-keys\n")
     
-    api_key = questionary.password("请输入您的 OpenAI API Key:").ask()
+    api_key = questionary.password("Please input your OpenAI API Key:").ask()
     if not api_key:
         return None
     
-    console.print("💡 如果使用代理或第三方服务，选择'n'输入自定义地址")
+    console.print("💡 If you use proxy or third-party service, select 'n' to input custom address")
     default_base_url = "https://api.openai.com/v1"
     use_default_url = questionary.confirm(
-        f"使用默认 API 地址 {default_base_url}？",
+        f"Use default API address {default_base_url}?",
         default=True,
         instruction="(Y/n)"
     ).ask()
     
     if use_default_url:
         base_url = default_base_url
-        console.print(f"✅ 使用默认地址: {base_url}")
+        console.print(f"✅ Using default address: {base_url}")
     else:
         base_url = questionary.text(
-            "请输入自定义 API 地址:",
-            instruction="(例如: https://your-proxy.com/v1)"
+            "Please input custom API address:",
+            instruction="(e.g. https://your-proxy.com/v1)"
         ).ask()
     
-    # 尝试获取模型列表
-    console.print("🔍 正在获取可用模型列表...")
+    # Try to get model list
+    console.print("🔍 Getting available model list...")
     available_models = get_openai_models(api_key, base_url)
     
     if available_models:
-        console.print(f"📋 发现 {len(available_models)} 个可用模型")
+        console.print(f"📋 Found {len(available_models)} available models")
         
-        # 预选推荐模型
+        # Pre-select recommended models
         recommended_models = []
         for model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo"]:
             if model in available_models:
                 recommended_models.append(model)
         
         if recommended_models:
-            console.print(f"💡 已为您预选推荐模型: {', '.join(recommended_models)}")
+            console.print(f"💡 Pre-selected recommended models: {', '.join(recommended_models)}")
         
-        # 直接提供多选界面
-        # 创建choices列表，并标记推荐模型为默认选中
+        # Directly provide multi-select interface
+        # Create choices list, and mark recommended models as default selected
         choices = []
         for model in available_models:
             if model in recommended_models:
-                choices.append(questionary.Choice(f"{model} (推荐)", model, checked=True))
+                choices.append(questionary.Choice(f"{model} (recommended)", model, checked=True))
             else:
                 choices.append(questionary.Choice(model, model, checked=False))
         
         selected_models = questionary.checkbox(
-            "请选择要使用的模型（空格选择/取消，回车确认）:",
+            "Please select the model to use (space to select/cancel, enter to confirm):",
             choices=choices,
-            instruction="使用方向键导航，空格键选择/取消选择，回车键确认"
+            instruction="Use arrow keys to navigate, space to select/cancel, enter to confirm"
         ).ask()
         
         if selected_models:
             models = ",".join(selected_models)
-            console.print(f"✅ 已选择模型: {models}")
+            console.print(f"✅ Selected models: {models}")
         else:
-            console.print("⚠️  未选择任何模型，将使用手动输入")
+            console.print("⚠️  No models selected, using manual input")
             models = questionary.text(
-                "请输入自定义模型:",
-                instruction="(多个模型用英文逗号分隔)"
+                "Please input custom models:",
+                instruction="(Separate multiple models with commas)"
             ).ask()
     else:
-        console.print("⚠️  无法获取模型列表，使用默认配置")
+        console.print("⚠️  Cannot get model list, using default config")
         default_models = "gpt-4o-mini,gpt-4o"
         use_default_models = questionary.confirm(
-            f"使用默认推荐模型 {default_models}？",
+            f"Use default recommended models {default_models}?",
             default=True,
             instruction="(Y/n)"
         ).ask()
         
         if use_default_models:
             models = default_models
-            console.print(f"✅ 使用默认模型: {models}")
+            console.print(f"✅ Using default models: {models}")
         else:
             models = questionary.text(
-                "请输入自定义模型:",
-                instruction="(多个模型用英文逗号分隔，例如: gpt-4,gpt-3.5-turbo)"
+                "Please input custom models:",
+                instruction="(multiple models separated by commas, e.g. gpt-4,gpt-3.5-turbo)"
             ).ask()
     
     return {
@@ -431,39 +430,39 @@ def configure_openai() -> Optional[Dict]:
 
 
 def configure_ollama() -> Optional[Dict]:
-    """配置Ollama"""
-    console.print("\n🏠 [bold]配置 Ollama (本地模型)[/bold]")
-    console.print("Ollama 可以在本地运行开源模型，完全免费且数据不出本机")
-    console.print("安装 Ollama: https://ollama.ai\n")
+    """Configure Ollama"""
+    console.print("\n🏠 [bold]Configure Ollama (local model)[/bold]")
+    console.print("Ollama can run open-source models locally, completely free and data does not leave the machine")
+    console.print("Install Ollama: https://ollama.ai\n")
     
-    console.print("💡 如果Ollama运行在其他地址，选择'n'输入自定义地址")
+    console.print("💡 If Ollama is running on other address, select 'n' to input custom address")
     default_base_url = "http://localhost:11434/v1"
     use_default_url = questionary.confirm(
-        f"使用默认 Ollama 地址 {default_base_url}？",
+        f"Use default Ollama address {default_base_url}?",
         default=True,
         instruction="(Y/n)"
     ).ask()
     
     if use_default_url:
         base_url = default_base_url
-        console.print(f"✅ 使用默认地址: {base_url}")
+        console.print(f"✅ Using default address: {base_url}")
     else:
         base_url = questionary.text(
-            "请输入自定义 Ollama 地址:",
-            instruction="(例如: http://192.168.1.100:11434/v1)"
+            "Please input custom Ollama address:",
+            instruction="(e.g. http://192.168.1.100:11434/v1)"
         ).ask()
     
-    # 测试连接
-    console.print("🔌 正在测试 Ollama 连接...")
+    # Test connection
+    console.print("🔌 Testing Ollama connection...")
     if test_ollama_connection(base_url):
-        console.print("✅ Ollama 连接成功")
+        console.print("✅ Ollama connection successful")
         
-        # 获取可用模型
+        # Get available models
         models = get_ollama_models(base_url)
         if models:
-            console.print(f"📋 发现 {len(models)} 个可用模型")
+            console.print(f"📋 Found {len(models)} available models")
             selected_models = questionary.checkbox(
-                "选择要使用的模型:",
+                "Please select the model to use:",
                 choices=[questionary.Choice(model, model) for model in models]
             ).ask()
             
@@ -474,12 +473,12 @@ def configure_ollama() -> Optional[Dict]:
                     "models": ",".join(selected_models)
                 }
         else:
-            console.print("⚠️  未发现可用模型，您可能需要先下载模型")
-            console.print("例如：ollama pull llama2")
+            console.print("⚠️  No available models found, you may need to download models first")
+            console.print("e.g. ollama pull llama2")
             
             models = questionary.text(
-                "手动指定模型:",
-                instruction="(多个模型用英文逗号分隔)"
+                "Please manually specify models:",
+                instruction="(multiple models separated by commas)"
             ).ask()
             
             if models:
@@ -489,26 +488,26 @@ def configure_ollama() -> Optional[Dict]:
                     "models": models
                 }
     else:
-        console.print("❌ 无法连接到 Ollama")
-        console.print("请确保 Ollama 正在运行")
+        console.print("❌ Cannot connect to Ollama")
+        console.print("Please ensure Ollama is running")
         
     return None
 
 
 def configure_gemini() -> Optional[Dict]:
-    """配置Gemini"""
-    console.print("\n💎 [bold]配置 Google Gemini[/bold]")
-    console.print("Google Gemini 是Google最新的大语言模型")
-    console.print("获取API Key: https://makersuite.google.com/app/apikey\n")
+    """Configure Gemini"""
+    console.print("\n💎 [bold]Configure Google Gemini[/bold]")
+    console.print("Google Gemini is the latest large language model from Google")
+    console.print("Get API Key: https://makersuite.google.com/app/apikey\n")
     
-    api_key = questionary.password("请输入您的 Gemini API Key:").ask()
+    api_key = questionary.password("Please input your Gemini API Key:").ask()
     if not api_key:
         return None
     
     models = questionary.text(
-        "可用模型 (可选):",
+        "Available models (optional):",
         default="gemini-pro,gemini-pro-vision",
-        instruction="(多个模型用英文逗号分隔)"
+        instruction="(multiple models separated by commas)"
     ).ask()
     
     return {
@@ -519,19 +518,19 @@ def configure_gemini() -> Optional[Dict]:
 
 
 def configure_deepseek() -> Optional[Dict]:
-    """配置DeepSeek"""
-    console.print("\n🚀 [bold]配置 DeepSeek[/bold]")
-    console.print("DeepSeek 是性价比极高的代码专用模型")
-    console.print("获取API Key: https://platform.deepseek.com/api_keys\n")
+    """Configure DeepSeek"""
+    console.print("\n🚀 [bold]Configure DeepSeek[/bold]")
+    console.print("DeepSeek is a highly cost-effective code-specific model")
+    console.print("Get API Key: https://platform.deepseek.com/api_keys\n")
     
-    api_key = questionary.password("请输入您的 DeepSeek API Key:").ask()
+    api_key = questionary.password("Please input your DeepSeek API Key:").ask()
     if not api_key:
         return None
     
     models = questionary.text(
-        "可用模型 (可选):",
+        "Available models (optional):",
         default="deepseek-chat,deepseek-coder",
-        instruction="(多个模型用英文逗号分隔)"
+        instruction="(multiple models separated by commas)"
     ).ask()
     
     return {
@@ -542,19 +541,19 @@ def configure_deepseek() -> Optional[Dict]:
 
 
 def configure_claude() -> Optional[Dict]:
-    """配置Claude"""
-    console.print("\n🤖 [bold]配置 Claude[/bold]")
-    console.print("Claude 是 Anthropic 开发的强大AI助手")
-    console.print("获取API Key: https://console.anthropic.com/\n")
+    """Configure Claude"""
+    console.print("\n🤖 [bold]Configure Claude[/bold]")
+    console.print("Claude is a powerful AI assistant developed by Anthropic")
+    console.print("Get API Key: https://console.anthropic.com/\n")
     
-    api_key = questionary.password("请输入您的 Claude API Key:").ask()
+    api_key = questionary.password("Please input your Claude API Key:").ask()
     if not api_key:
         return None
     
     models = questionary.text(
-        "可用模型 (可选):",
+        "Available models (optional):",
         default="claude-3-sonnet-20240229,claude-3-haiku-20240307",
-        instruction="(多个模型用英文逗号分隔)"
+        instruction="(multiple models separated by commas)"
     ).ask()
     
     return {
@@ -565,19 +564,19 @@ def configure_claude() -> Optional[Dict]:
 
 
 def configure_qwen() -> Optional[Dict]:
-    """配置Qwen"""
-    console.print("\n🌟 [bold]配置 阿里巴巴通义千问[/bold]")
-    console.print("通义千问是阿里巴巴开发的大语言模型")
-    console.print("获取API Key: https://dashscope.console.aliyun.com/\n")
+    """Configure Qwen"""
+    console.print("\n🌟 [bold]Configure Alibaba Tongyi Qwen[/bold]")
+    console.print("Tongyi Qwen is a large language model developed by Alibaba")
+    console.print("Get API Key: https://dashscope.console.aliyun.com/\n")
     
-    api_key = questionary.password("请输入您的 Qwen API Key:").ask()
+    api_key = questionary.password("Please input your Qwen API Key:").ask()
     if not api_key:
         return None
     
     models = questionary.text(
-        "可用模型 (可选):",
+        "Available models (optional):",
         default="qwen-plus,qwen-turbo",
-        instruction="(多个模型用英文逗号分隔)"
+        instruction="(multiple models separated by commas)"
     ).ask()
     
     return {
@@ -588,51 +587,50 @@ def configure_qwen() -> Optional[Dict]:
 
 
 def setup_service_config():
-    """配置服务选项 - 第三步"""
+    """Configure service options - Step 3"""
     console.print(Panel(
-        "⚙️ [bold]服务配置[/bold]\n\n"
-        "配置 Pixelle MCP 的服务选项，包括端口、主机地址等。",
-        title="Step 3/4: 服务配置",
+        "⚙️ [bold]Service configuration[/bold]\n\n"
+        "Configure Pixelle MCP service options, including port, host address, etc.",
+        title="Step 3/4: Service configuration",
         border_style="yellow"
     ))
     
     default_port = "9004"
     port = questionary.text(
-        "服务端口:",
+        "Service port:",
         default=default_port,
-        instruction="(直接回车使用默认端口9004，或输入其他端口号)"
+        instruction="(press Enter to use default port 9004, or input other port)"
     ).ask()
     
     if not port:
         port = default_port
     
-    console.print(f"✅ 服务将在端口 {port} 启动")
+    console.print(f"✅ Service will start on port {port}")
     
-    # 配置主机地址
-    console.print("\n📡 [bold yellow]主机地址配置[/bold yellow]")
-    console.print("🔍 [dim]主机地址决定了服务监听的网络接口：[/dim]")
-    console.print("   • [green]localhost[/green] - 仅本机访问（推荐用于本地开发）")
-    console.print("   • [yellow]0.0.0.0[/yellow] - 允许外部访问（用于服务器部署或局域网共享）")
-    console.print("\n⚠️  [bold red]安全提示：[/bold red]")
-    console.print("   选择 0.0.0.0 时，请确保：")
-    console.print("   1. 已配置防火墙规则")
-    console.print("   2. 已设置强密码认证")
-    console.print("   3. 在可信网络环境中运行")
+    # Configure host address
+    console.print("\n📡 [bold yellow]Host address configuration[/bold yellow]")
+    console.print("🔍 [dim]Host address determines the network interface the service listens on:[/dim]")
+    console.print("   • [green]localhost[/green] - Only accessible from this machine (recommended for local development)")
+    console.print("   • [yellow]0.0.0.0[/yellow] - Allows external access (used for server deployment or LAN sharing)")
+    console.print("\n⚠️  [bold red]Security tips:[/bold red]")
+    console.print("   When using 0.0.0.0, please ensure:")
+    console.print("   1. Firewall rules are configured")
+    console.print("   2. Running in a trusted network environment")
     
     default_host = "localhost"
     host = questionary.text(
-        "主机地址:",
+        "Host address:",
         default=default_host,
-        instruction="(localhost=本机访问, 0.0.0.0=允许外部访问)"
+        instruction="(localhost=only accessible from this machine, 0.0.0.0=allows external access)"
     ).ask()
     
     if not host:
         host = default_host
     
     if host == "0.0.0.0":
-        console.print("⚠️  [bold yellow]已设置为允许外部访问，请确保网络安全！[/bold yellow]")
+        console.print("⚠️  [bold yellow]External access is enabled, please ensure network security![/bold yellow]")
     else:
-        console.print(f"✅ 服务将在 {host} 上监听")
+        console.print(f"✅ Service will listen on {host}")
     
     return {
         "port": port,
@@ -641,11 +639,11 @@ def setup_service_config():
 
 
 def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_config: Dict, default_model: Optional[str] = None):
-    """保存统一配置到.env文件"""
+    """Save unified configuration to .env file"""
     console.print(Panel(
-        "💾 [bold]保存配置[/bold]\n\n"
-        "正在将配置保存到 .env 文件...",
-        title="Step 4/4: 保存配置",
+        "💾 [bold]Save configuration[/bold]\n\n"
+        "Saving configuration to .env file...",
+        title="Step 4/4: Save configuration",
         border_style="magenta"
     ))
     
@@ -653,40 +651,40 @@ def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_c
     with open('.env', 'w', encoding='utf-8') as f:
         f.write('\n'.join(env_lines))
     
-    console.print("✅ [bold green]配置已保存到 .env 文件[/bold green]")
+    console.print("✅ [bold green]Configuration saved to .env file[/bold green]")
     
-    # 🔥 关键修复：立即重新加载环境变量和settings
+    # Reload config immediately
     reload_config()
 
 
 def reload_config():
-    """重新加载环境变量和settings配置"""
+    """Reload environment variables and settings configuration"""
     import os
     from dotenv import load_dotenv
     
-    # 强制重新加载.env文件
+    # Force reload .env file
     load_dotenv(override=True)
     
-    # 重新设置Chainlit环境变量
+    # Set Chainlit environment variables
     from pixelle.utils.os_util import get_root_path
     os.environ["CHAINLIT_APP_ROOT"] = get_root_path()
     
-    # 更新全局settings实例的值
+    # Update global settings instance values
     from pixelle import settings as settings_module
     
-    # 创建新的Settings实例来获取最新配置
+    # Create new Settings instance to get latest configuration
     from pixelle.settings import Settings
     new_settings = Settings()
     
-    # 更新全局settings对象的属性
+    # Update global settings object attributes
     for field_name in new_settings.model_fields:
         setattr(settings_module.settings, field_name, getattr(new_settings, field_name))
     
-    console.print("🔄 [bold blue]配置已重新加载[/bold blue]")
+    console.print("🔄 [bold blue]Configuration reloaded[/bold blue]")
 
 
 def collect_all_selected_models(llm_configs: List[Dict]) -> List[str]:
-    """从已配置的各提供商配置中收集所有模型，去重并保持顺序。"""
+    """Collect all models from all configured providers, remove duplicates and maintain order."""
     seen = set()
     ordered_models: List[str] = []
     for conf in llm_configs or []:
@@ -702,46 +700,46 @@ def collect_all_selected_models(llm_configs: List[Dict]) -> List[str]:
 
 
 def select_default_model_interactively(all_models: List[str]) -> Optional[str]:
-    """提供方向键选择默认模型的交互；若无模型或用户取消则返回 None。"""
+    """Provide interactive selection of default model using arrow keys; return None if no models or user cancels."""
     if not all_models:
         return None
 
-    # 默认值：第一项，但允许用户更改
+    # Default value: first item, but allow user to change
     default_choice_value = all_models[0]
     choices = [
         questionary.Choice(
-            title=(m if m != default_choice_value else f"{m} (默认)"),
+            title=(m if m != default_choice_value else f"{m} (default)"),
             value=m,
             shortcut_key=None,
         )
         for m in all_models
     ]
 
-    console.print("\n⭐ 请选择会话默认模型（可随时在 .env 中修改）")
+    console.print("\n⭐ Please select the default model for the session (can be modified in .env)")
     selected = questionary.select(
-        "默认模型:",
+        "Default model:",
         choices=choices,
         default=default_choice_value,
-        instruction="使用方向键选择，回车确认",
+        instruction="Use arrow keys to navigate, press Enter to confirm",
     ).ask()
 
     return selected or default_choice_value
 
 
 def show_main_menu():
-    """显示主菜单"""
-    console.print("\n📋 [bold]当前配置状态[/bold]")
+    """Show main menu"""
+    console.print("\n📋 [bold]Current configuration status[/bold]")
     show_current_config()
     
     action = questionary.select(
-        "请选择要执行的操作:",
+        "Please select the action to perform:",
         choices=[
-            questionary.Choice("🚀 启动 Pixelle MCP", "start"),
-            questionary.Choice("🔄 重新引导配置", "reconfig"),
-            questionary.Choice("✏️ 手动编辑配置", "manual"),
-            questionary.Choice("📋 查看状态", "status"),
-            questionary.Choice("❓ 帮助", "help"),
-            questionary.Choice("❌ 退出", "exit")
+            questionary.Choice("🚀 Start Pixelle MCP", "start"),
+            questionary.Choice("🔄 Reconfigure Pixelle MCP", "reconfig"),
+            questionary.Choice("📝 Manual edit configuration", "manual"),
+            questionary.Choice("📋 Check status", "status"),
+            questionary.Choice("❓ Help", "help"),
+            questionary.Choice("❌ Exit", "exit")
         ]
     ).ask()
     
@@ -756,134 +754,134 @@ def show_main_menu():
     elif action == "help":
         show_help()
     elif action == "exit":
-        console.print("👋 再见！")
+        console.print("👋 Goodbye!")
     else:
-        console.print(f"功能 {action} 正在开发中...")
+        console.print(f"Feature {action} is under development...")
 
 
 def show_current_config():
-    """显示当前配置"""
+    """Show current configuration"""
     from pixelle.settings import settings
     
-    # 创建配置表格
-    table = Table(title="当前配置", show_header=True, header_style="bold magenta")
-    table.add_column("配置项", style="cyan", width=20)
-    table.add_column("当前值", style="green")
+    # Create configuration table
+    table = Table(title="Current configuration", show_header=True, header_style="bold magenta")
+    table.add_column("Configuration item", style="cyan", width=20)
+    table.add_column("Current value", style="green")
     
-    # 服务配置
-    table.add_row("服务地址", f"http://{settings.host}:{settings.port}")
-    table.add_row("ComfyUI地址", settings.comfyui_base_url)
+    # Service configuration
+    table.add_row("Service address", f"http://{settings.host}:{settings.port}")
+    table.add_row("ComfyUI address", settings.comfyui_base_url)
     
-    # LLM配置
+    # LLM configuration
     providers = settings.get_configured_llm_providers()
     if providers:
-        table.add_row("LLM提供商", ", ".join(providers))
+        table.add_row("LLM providers", ", ".join(providers))
         models = settings.get_all_available_models()
         if models:
-            table.add_row("可用模型", f"{len(models)} 个模型")
-            table.add_row("默认模型", settings.chainlit_chat_default_model)
+            table.add_row("Available models", f"{len(models)} models")
+            table.add_row("Default model", settings.chainlit_chat_default_model)
     else:
-        table.add_row("LLM提供商", "[red]未配置[/red]")
+        table.add_row("LLM providers", "[red]Not configured[/red]")
     
-    # Web界面
-    web_status = "启用" if settings.chainlit_auth_enabled else "禁用"
-    table.add_row("Web界面", web_status)
+    # Web interface
+    web_status = "Enabled" if settings.chainlit_auth_enabled else "Disabled"
+    table.add_row("Web interface", web_status)
     
     console.print(table)
 
 
 def run_fresh_setup_wizard():
-    """重新引导配置（与首次配置完全相同的流程）"""
+    """Reconfigure Pixelle MCP (same process as initial setup)"""
     console.print(Panel(
-        "🔄 [bold]重新引导配置 Pixelle MCP[/bold]\n\n"
-        "将从头开始进行完整配置，这与首次配置是完全相同的流程。\n"
-        "现有配置将被全新配置替换。",
-        title="重新引导配置",
+        "🔄 [bold]Reconfigure Pixelle MCP[/bold]\n\n"
+        "This will start a fresh configuration process, which is the same as the initial setup.\n"
+        "Existing configuration will be replaced.",
+        title="Reconfigure Pixelle MCP",
         border_style="yellow"
     ))
     
-    if not questionary.confirm("确定要重新进行完整配置吗？", default=True, instruction="(Y/n)").ask():
-        console.print("❌ 重新配置已取消")
+    if not questionary.confirm("Are you sure you want to reconfigure Pixelle MCP?", default=True, instruction="(Y/n)").ask():
+        console.print("❌ Reconfigure cancelled")
         return
     
-    console.print("\n🚀 [bold]开始重新配置向导[/bold]\n")
+    console.print("\n🚀 [bold]Start reconfiguration wizard[/bold]\n")
     
     try:
-        # Step 1: ComfyUI配置
+        # Step 1: ComfyUI configuration
         comfyui_config = setup_comfyui()
         if not comfyui_config:
-            console.print("⚠️  ComfyUI配置跳过，将使用默认配置继续")
-            comfyui_config = {"url": "http://localhost:8188"}  # 使用默认值
+            console.print("⚠️  ComfyUI configuration skipped, using default configuration")
+            comfyui_config = {"url": "http://localhost:8188"}  # Use default value
         
-        # Step 2: LLM配置（可配置多个）
+        # Step 2: LLM configuration (multiple providers can be configured)
         llm_configs = setup_multiple_llm_providers()
         if not llm_configs:
-            console.print("❌ 至少需要配置一个LLM提供商")
+            console.print("❌ At least one LLM provider is required")
             return
         
-        # Step 3: 选择默认模型（基于已选择的提供商与模型）
+        # Step 3: Select default model (based on selected providers and models)
         all_models = collect_all_selected_models(llm_configs)
         selected_default_model = select_default_model_interactively(all_models)
 
-        # Step 4: 服务配置
+        # Step 4: Service configuration
         service_config = setup_service_config()
         if not service_config:
-            console.print("⚠️  服务配置跳过，将使用默认配置继续")
-            service_config = {"port": "9004", "host": "localhost"}  # 使用默认值
+            console.print("⚠️  Service configuration skipped, using default configuration")
+            service_config = {"port": "9004", "host": "localhost"}  # Use default value
         
-        # Step 5: 保存配置
+        # Step 5: Save configuration
         save_unified_config(comfyui_config, llm_configs, service_config, selected_default_model)
         
-        # Step 6: 询问立即启动
-        console.print("\n✅ [bold green]重新配置完成！[/bold green]")
-        if questionary.confirm("立即启动 Pixelle MCP？", default=True, instruction="(Y/n)").ask():
+        # Step 6: Ask if immediately start
+        console.print("\n✅ [bold green]Reconfiguration completed![/bold green]")
+        if questionary.confirm("Start Pixelle MCP immediately?", default=True, instruction="(Y/n)").ask():
             start_pixelle_server()
             
     except KeyboardInterrupt:
-        console.print("\n\n❌ 重新配置已取消（按下了 Ctrl+C）")
-        console.print("💡 您可以随时重新运行 [bold]pixelle[/bold] 来配置")
+        console.print("\n\n❌ Reconfiguration cancelled (Ctrl+C pressed)")
+        console.print("💡 You can always rerun [bold]pixelle[/bold] to configure")
     except Exception as e:
-        console.print(f"\n❌ 配置过程中发生错误: {e}")
-        console.print("💡 您可以重新运行 [bold]pixelle[/bold] 来重试")
+        console.print(f"\n❌ Error occurred during configuration: {e}")
+        console.print("💡 You can rerun [bold]pixelle[/bold] to try again")
 
 
 def guide_manual_edit():
-    """引导用户手动编辑配置"""
+    """Guide user to manually edit configuration"""
     console.print(Panel(
-        "✏️ [bold]手动编辑配置[/bold]\n\n"
-        "配置文件包含详细的注释说明，您可以直接编辑来自定义配置。\n"
-        "配置文件位置：.env\n\n"
-        "💡 如需完全重新配置，删除 .env 文件后重新运行 'pixelle'\n"
-        "💡 编辑完成后，重新运行 'pixelle' 来应用配置",
-        title="手动配置指南",
+        "✏️ [bold]Manual edit configuration[/bold]\n\n"
+        "Configuration file contains detailed comments, you can directly edit to customize the configuration.\n"
+        "Configuration file location: .env\n\n"
+        "💡 If you need to completely reconfigure, delete the .env file and rerun 'pixelle'\n"
+        "💡 After editing, rerun 'pixelle' to apply the configuration",
+        title="Manual configuration guide",
         border_style="green"
     ))
     
-    # 显示当前配置文件路径
+    # Show current configuration file path
     env_path = Path(".env").absolute()
-    console.print(f"📁 配置文件路径: {env_path}")
+    console.print(f"📁 Configuration file path: {env_path}")
     
     if not env_path.exists():
-        console.print("\n⚠️  配置文件不存在！")
-        console.print("💡 请先运行交互引导: 选择菜单中的 '🔄 重新引导配置'")
-        console.print("💡 或者退出并重新运行 [bold]pixelle[/bold] 进行首次配置")
+        console.print("\n⚠️  Configuration file does not exist!")
+        console.print("💡 Please run the interactive guide first: select '🔄 Reconfigure Pixelle MCP' from the menu")
+        console.print("💡 Or exit and rerun [bold]pixelle[/bold] for initial configuration")
         return
     
-    # 提供一些常用编辑器的建议
-    console.print("\n💡 推荐编辑器:")
+    # Provide some common editors suggestions
+    console.print("\n💡 Recommended editors:")
     console.print("• VS Code: code .env")
     console.print("• Nano: nano .env") 
     console.print("• Vim: vim .env")
-    console.print("• 或任何文本编辑器")
+    console.print("• Or any text editor")
     
-    console.print("\n📝 常见配置修改:")
-    console.print("• 更换端口: 修改 PORT=9004")
-    console.print("• 添加新LLM: 配置对应的 API_KEY")
-    console.print("• 禁用LLM: 删除或清空对应的 API_KEY")
-    console.print("• 更换ComfyUI: 修改 COMFYUI_BASE_URL")
+    console.print("\n📝 Common configuration modifications:")
+    console.print("• Change port: modify PORT=9004")
+    console.print("• Add new LLM: configure the corresponding API_KEY")
+    console.print("• Disable LLM: delete or clear the corresponding API_KEY")
+    console.print("• Change ComfyUI: modify COMFYUI_BASE_URL")
     
-    # 询问是否要打开文件
-    if questionary.confirm("是否要在默认编辑器中打开配置文件？", default=True, instruction="(Y/n)").ask():
+    # Ask if open file
+    if questionary.confirm("Open configuration file in default editor?", default=True, instruction="(Y/n)").ask():
         try:
             import subprocess
             import platform
@@ -895,187 +893,179 @@ def guide_manual_edit():
             else:  # Linux
                 subprocess.run(["xdg-open", str(env_path)])
                 
-            console.print("✅ 已在默认编辑器中打开配置文件")
+            console.print("✅ Configuration file opened in default editor")
         except Exception as e:
-            console.print(f"❌ 无法自动打开: {e}")
-            console.print("💡 请手动编辑文件")
+            console.print(f"❌ Cannot open automatically: {e}")
+            console.print("💡 Please manually edit the file")
     
-    console.print("\n📋 配置完成后，重新运行 [bold]pixelle[/bold] 来应用配置")
-    console.print("🗑️  如需完全重新配置，删除 .env 文件后重新运行 [bold]pixelle[/bold]")
+    console.print("\n📋 After configuration, rerun [bold]pixelle[/bold] to apply the configuration")
+    console.print("🗑️  If you need to completely reconfigure, delete the .env file and rerun [bold]pixelle[/bold]")
 
 
 def start_pixelle_server():
-    """启动Pixelle服务器"""
-    console.print("\n🚀 [bold]正在启动 Pixelle MCP...[/bold]")
+    """Start Pixelle server"""
+    console.print("\n🚀 [bold]Starting Pixelle MCP...[/bold]")
     
     try:
-        # 重新加载环境变量
+        # Reload environment variables
         from dotenv import load_dotenv
         load_dotenv(override=True)
         
         port = int(settings.port)
         
-        # 检查端口是否被占用
+        # Check if port is in use
         if check_port_in_use(port):
             process_info = get_process_using_port(port)
             if process_info:
-                console.print(f"⚠️  [bold yellow]检测到端口 {port} 已被占用[/bold yellow]")
-                console.print(f"占用进程: {process_info}")
+                console.print(f"⚠️  [bold yellow]Port {port} is in use[/bold yellow]")
+                console.print(f"Occupied process: {process_info}")
                 
                 kill_service = questionary.confirm(
-                    "是否终止现有服务并重新启动？",
+                    "Terminate existing service and restart?",
                     default=True,
                     instruction="(Y/n)"
                 ).ask()
                 
                 if kill_service:
-                    console.print("🔄 正在终止现有服务...")
+                    console.print("🔄 Terminating existing service...")
                     if kill_process_on_port(port):
-                        console.print("✅ 现有服务已终止")
+                        console.print("✅ Existing service terminated")
                         import time
-                        time.sleep(1)  # 等待端口释放
+                        time.sleep(1)  # Wait for port to be released
                     else:
-                        console.print("❌ 无法终止现有服务，启动可能失败")
+                        console.print("❌ Cannot terminate existing service, launch may fail")
                         proceed = questionary.confirm(
-                            "是否仍要尝试启动？",
+                            "Still try to launch?",
                             default=False,
                             instruction="(y/N)"
                         ).ask()
                         if not proceed:
-                            console.print("❌ 启动已取消")
+                            console.print("❌ Launch cancelled")
                             return
                 else:
-                    console.print("❌ 启动已取消")
+                    console.print("❌ Launch cancelled")
                     return
             else:
-                console.print(f"⚠️  [bold yellow]端口 {port} 被占用，但无法确定占用进程[/bold yellow]")
-                console.print("启动可能失败，建议更换端口或手动处理")
+                console.print(f"⚠️  [bold yellow]Port {port} is in use, but cannot determine the occupied process[/bold yellow]")
+                console.print("Launch may fail, suggest changing port or manually handle")
         
-        # 启动服务
+        # Start service
         console.print(Panel(
-            f"🌐 Web 界面: http://localhost:{settings.port}/\n"
-            f"🔌 MCP 端点: http://localhost:{settings.port}/mcp\n"
-            f"📁 已加载工作流目录: data/custom_workflows/",
-            title="🎉 Pixelle MCP 正在运行！",
+            f"🌐 Web interface: http://localhost:{settings.port}/\n"
+            f"🔌 MCP endpoint: http://localhost:{settings.port}/mcp\n"
+            f"📁 Loaded workflow directory: data/custom_workflows/",
+            title="🎉 Pixelle MCP is running!",
             border_style="green"
         ))
         
-        console.print("\n按 [bold]Ctrl+C[/bold] 停止服务\n")
+        console.print("\nPress [bold]Ctrl+C[/bold] to stop service\n")
         
-        # 导入并启动main
+        # Import and start main
         from pixelle.main import main as start_main
         start_main()
         
     except KeyboardInterrupt:
-        console.print("\n👋 Pixelle MCP 已停止")
+        console.print("\n👋 Pixelle MCP stopped")
     except Exception as e:
-        console.print(f"❌ 启动失败: {e}")
+        console.print(f"❌ Launch failed: {e}")
 
 
 def check_service_status():
-    """检查服务状态"""
+    """Check service status"""
     console.print(Panel(
-        "📋 [bold]检查服务状态[/bold]\n\n"
-        "正在检查各项服务的运行状态...",
-        title="服务状态检查",
+        "📋 [bold]Check service status[/bold]\n\n"
+        "Checking the status of all services...",
+        title="Service status check",
         border_style="cyan"
     ))
     
     from pixelle.settings import settings
     import requests
     
-    # 创建状态表格
-    status_table = Table(title="服务状态", show_header=True, header_style="bold cyan")
-    status_table.add_column("服务", style="cyan", width=20)
-    status_table.add_column("地址", style="yellow", width=30)
-    status_table.add_column("状态", width=15)
-    status_table.add_column("说明", style="white")
+    # Create status table
+    status_table = Table(title="Service status", show_header=True, header_style="bold cyan")
+    status_table.add_column("Service", style="cyan", width=20)
+    status_table.add_column("Address", style="yellow", width=40)
+    status_table.add_column("Status", width=15)
+    status_table.add_column("Description", style="white")
     
-    # 检查MCP端点
+    # Check MCP endpoint
     pixelle_url = f"http://{settings.host}:{settings.port}"
-    mcp_status = check_url_status(f"{pixelle_url}/mcp")
+    pixelle_mcp_server_url = f"{pixelle_url}/pixelle/mcp"
+    mcp_status = check_mcp_streamable(pixelle_mcp_server_url)
     status_table.add_row(
-        "MCP 端点",
-        f"{pixelle_url}/mcp",
-        "🟢 可用" if mcp_status else "🔴 不可用",
-        "MCP协议端点" if mcp_status else "请先启动服务"
+        "MCP endpoint",
+        pixelle_mcp_server_url,
+        "🟢 Available" if mcp_status else "🔴 Unavailable",
+        "MCP protocol endpoint" if mcp_status else "Please start the service first"
     )
     
-    # 检查Web界面
+    # Check Web interface
     if settings.chainlit_auth_enabled:
         web_status = check_url_status(pixelle_url)
         status_table.add_row(
-            "Web 界面",
+            "Web interface",
             pixelle_url,
-            "🟢 可用" if web_status else "🔴 不可用",
-            "聊天界面" if web_status else "请先启动服务"
+            "🟢 Available" if web_status else "🔴 Unavailable",
+            "Chat interface" if web_status else "Please start the service first"
         )
     else:
-        web_status = True  # 如果禁用，算作正常状态
+        web_status = True  # If disabled, consider it as normal status
         status_table.add_row(
-            "Web 界面",
-            "已禁用",
-            "⚪ 禁用",
-            "已在配置中禁用"
+            "Web interface",
+            "Disabled",
+            "⚪ Disabled",
+            "Disabled in configuration"
         )
     
-    # 检查ComfyUI
+    # Check ComfyUI
     comfyui_status = test_comfyui_connection(settings.comfyui_base_url)
     status_table.add_row(
         "ComfyUI",
         settings.comfyui_base_url,
-        "🟢 连接正常" if comfyui_status else "🔴 连接失败",
-        "工作流执行引擎" if comfyui_status else "请检查ComfyUI是否运行"
+        "🟢 Connected" if comfyui_status else "🔴 Connection failed",
+        "Workflow execution engine" if comfyui_status else "Please check if ComfyUI is running"
     )
     
     console.print(status_table)
     
-    # 显示LLM配置状态
+    # Show LLM configuration status
     providers = settings.get_configured_llm_providers()
     if providers:
-        console.print(f"\n🤖 [bold]LLM 提供商：[/bold] {', '.join(providers)} ({len(providers)} 个)")
+        console.print(f"\n🤖 [bold]LLM providers:[/bold] {', '.join(providers)} ({len(providers)} providers)")
         models = settings.get_all_available_models()
-        console.print(f"📋 [bold]可用模型：[/bold] {len(models)} 个")
-        console.print(f"⭐ [bold]默认模型：[/bold] {settings.chainlit_chat_default_model}")
+        console.print(f"📋 [bold]Available models:[/bold] {len(models)} models")
+        console.print(f"⭐ [bold]Default model:[/bold] {settings.chainlit_chat_default_model}")
     else:
-        console.print("\n⚠️  [bold yellow]警告：[/bold yellow] 未配置任何LLM提供商")
+        console.print("\n⚠️  [bold yellow]Warning:[/bold yellow] No LLM providers configured")
     
-    # 总结
+    # Summary
     total_services = 3  # MCP, Web, ComfyUI
     running_services = sum([mcp_status, web_status, comfyui_status])
     
     if running_services == total_services:
-        console.print("\n✅ [bold green]所有服务运行正常！[/bold green]")
+        console.print("\n✅ [bold green]All services are running normally![/bold green]")
     else:
-        console.print(f"\n⚠️  [bold yellow]{running_services}/{total_services} 服务正常运行[/bold yellow]")
-        console.print("💡 如有服务未运行，请检查配置或重启服务")
+        console.print(f"\n⚠️  [bold yellow]{running_services}/{total_services} services are running normally[/bold yellow]")
+        console.print("💡 If any service is not running, please check the configuration or restart the service")
 
 
     
 
 
 def show_help():
-    """显示帮助信息"""
+    """Show help information"""
     console.print(Panel(
-        "❓ [bold]获取帮助[/bold]\n\n"
-        "正在打开 Pixelle MCP GitHub 主页...",
-        title="帮助",
+        "❓ [bold]Get help[/bold]\n\n"
+        "Opening Pixelle MCP GitHub page...",
+        title="Help",
         border_style="blue"
     ))
     
-    import webbrowser
-    github_url = "https://github.com/AIDC-AI/Pixelle-MCP"
-    
-    try:
-        webbrowser.open(github_url)
-        console.print(f"🌐 已在浏览器中打开: {github_url}")
-    except Exception as e:
-        console.print(f"❌ 无法自动打开浏览器: {e}")
-        console.print(f"📋 请手动访问: {github_url}")
-    
-    console.print("\n📚 其他帮助资源:")
-    console.print("• 🐛 问题反馈: https://github.com/AIDC-AI/Pixelle-MCP/issues")
-    console.print("• 💬 社区讨论: https://github.com/AIDC-AI/Pixelle-MCP#-community")
+    console.print("• 📚 Documentation: https://github.com/AIDC-AI/Pixelle-MCP")
+    console.print("• 🐛 Issue feedback: https://github.com/AIDC-AI/Pixelle-MCP/issues")
+    console.print("• 💬 Community discussion: https://github.com/AIDC-AI/Pixelle-MCP#-community")
+    console.print("• 📦 Installation guide: https://github.com/AIDC-AI/Pixelle-MCP/blob/main/INSTALL.md")
 
 
 if __name__ == "__main__":
