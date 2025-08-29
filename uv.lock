@@ -2186,7 +2186,7 @@ wheels = [
 ]
 
 [[package]]
-name = "pixelle-mcp-server"
+name = "pixelle-mcp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

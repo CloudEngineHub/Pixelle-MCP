@@ -26,14 +26,30 @@ from pixelle.utils.process_util import (
 from pixelle.utils.config_util import (
     build_env_lines,
 )
+from pixelle.utils.os_util import set_root_path
 
 
 app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - A simple solution to convert ComfyUI workflow to MCP tool")
 console = Console()
 
 
-def main():
+def main(
+    root_path: Optional[str] = typer.Option(
+        None, 
+        "--root-path", 
+        help="Root path for Pixelle MCP (default: ~/.pixelle)"
+    )
+):
     """🎨 Pixelle MCP - A simple tool to convert ComfyUI workflow to MCP tool"""
+    
+    # Set root path if provided
+    if root_path and isinstance(root_path, str):
+        set_root_path(root_path)
+    
+    # Always show current root path for debugging
+    from pixelle.utils.os_util import get_pixelle_root_path
+    current_root_path = get_pixelle_root_path()
+    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
     
     # Show welcome message
     show_welcome()
@@ -85,7 +101,9 @@ A simple solution to convert ComfyUI workflow to MCP tool
 
 def detect_config_status() -> str:
     """Detect current config status"""
-    env_file = Path(".env")
+    from pixelle.utils.os_util import get_pixelle_root_path
+    pixelle_root = get_pixelle_root_path()
+    env_file = Path(pixelle_root) / ".env"
     
     if not env_file.exists():
         return "first_time"
@@ -648,7 +666,13 @@ def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_c
     ))
     
     env_lines = build_env_lines(comfyui_config, llm_configs, service_config, default_model)
-    with open('.env', 'w', encoding='utf-8') as f:
+    
+    # Save to root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    pixelle_root = get_pixelle_root_path()
+    env_path = Path(pixelle_root) / '.env'
+    
+    with open(env_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(env_lines))
     
     console.print("✅ [bold green]Configuration saved to .env file[/bold green]")
@@ -662,12 +686,17 @@ def reload_config():
     import os
     from dotenv import load_dotenv
     
-    # Force reload .env file
-    load_dotenv(override=True)
+    # Force reload .env file from root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    pixelle_root = get_pixelle_root_path()
+    env_path = Path(pixelle_root) / ".env"
+    if env_path.exists():
+        load_dotenv(env_path, override=True)
     
     # Set Chainlit environment variables
-    from pixelle.utils.os_util import get_root_path
-    os.environ["CHAINLIT_APP_ROOT"] = get_root_path()
+    from pixelle.utils.os_util import get_src_path
+    import os
+    os.environ["CHAINLIT_APP_ROOT"] = get_src_path()
     
     # Update global settings instance values
     from pixelle import settings as settings_module
@@ -858,8 +887,10 @@ def guide_manual_edit():
     ))
     
     # Show current configuration file path
-    env_path = Path(".env").absolute()
-    console.print(f"📁 Configuration file path: {env_path}")
+    from pixelle.utils.os_util import get_pixelle_root_path
+    pixelle_root = get_pixelle_root_path()
+    env_path = Path(pixelle_root) / ".env"
+    console.print(f"📁 Configuration file path: {env_path.absolute()}")
     
     if not env_path.exists():
         console.print("\n⚠️  Configuration file does not exist!")
@@ -952,7 +983,7 @@ def start_pixelle_server():
         # Start service
         console.print(Panel(
             f"🌐 Web interface: http://localhost:{settings.port}/\n"
-            f"🔌 MCP endpoint: http://localhost:{settings.port}/mcp\n"
+            f"🔌 MCP endpoint: http://localhost:{settings.port}/pixelle/mcp\n"
             f"📁 Loaded workflow directory: data/custom_workflows/",
             title="🎉 Pixelle MCP is running!",
             border_style="green"

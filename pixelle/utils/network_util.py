@@ -28,7 +28,7 @@ def check_mcp_streamable(url: str, timeout: int = 5) -> bool:
     }
     try:
         resp = requests.post(url, json=init_payload, headers=headers, timeout=timeout, stream=True)
-        # 看 HTTP 状态和内容类型
+        # Check HTTP status and content type
         ok = resp.status_code == 200 or resp.status_code == 202
         ctype = resp.headers.get("Content-Type", "")
         if ok and ("application/json" in ctype or "text/event-stream" in ctype):

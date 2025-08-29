@@ -4,12 +4,20 @@ from typing import Optional
 from pydantic_settings import BaseSettings
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-from pixelle.utils.os_util import get_root_path
+from pixelle.utils.os_util import get_pixelle_root_path, get_root_path, get_src_path
 
 
-# Load .env file
-load_dotenv()
+# Load .env file from root path
+def load_env_from_root_path():
+    """Load .env from Pixelle root path"""
+    root_path = get_pixelle_root_path()
+    env_path = Path(root_path) / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+
+load_env_from_root_path()
 
 
 class Settings(BaseSettings):
@@ -117,6 +125,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Extra env vars for Chainlit
-os.environ["CHAINLIT_APP_ROOT"] = get_root_path()
+# Set CHAINLIT_APP_ROOT to package source directory (where .chainlit/ is packaged)
+os.environ["CHAINLIT_APP_ROOT"] = get_src_path()
 os.environ["CHAINLIT_HOST"] = str(settings.host)
 os.environ["CHAINLIT_PORT"] = str(settings.port)
