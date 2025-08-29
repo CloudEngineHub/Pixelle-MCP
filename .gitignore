@@ -27,3 +27,4 @@ data/
 
 !.env.example
 .env*
+dist/
