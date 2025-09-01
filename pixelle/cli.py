@@ -192,53 +192,20 @@ def setup_comfyui(default_url: str = None):
     
     # Manual config
     console.print("\n📝 Please configure ComfyUI service address")
-    console.print("💡 If you choose 'n', you can input custom address")
     
-    # Use default value or code default value
+    # Direct text input with default value
     final_default_url = default_url or "http://localhost:8188"
-    use_default = questionary.confirm(
-        f"Use default address {final_default_url}?",
-        default=True,
-        instruction="(Y/n)"
+    url = questionary.text(
+        "ComfyUI address:",
+        default=final_default_url,
+        instruction="(press Enter to use default, or input custom address)"
     ).ask()
-    
-    if use_default:
-        url = final_default_url
-        console.print(f"✅ Using default address: {url}")
-    else:
-        url = questionary.text(
-            "Please input custom ComfyUI address:",
-            instruction="(e.g. http://192.168.1.100:8188)"
-        ).ask()
     
     if not url:
         return None
     
-    # Test connection
-    console.print(f"🔌 Testing connection to {url}...")
-    if test_comfyui_connection(url):
-        console.print("✅ [bold green]ComfyUI connection successful![/bold green]")
-        return {"url": url}
-    else:
-        console.print("❌ [bold red]Cannot connect to ComfyUI[/bold red]")
-        console.print("Please check:")
-        console.print("1. Whether ComfyUI is running")
-        console.print("2. Whether the address is correct")
-        console.print("3. Whether the network is available")
-        
-        # Ask if skip test
-        skip_test = questionary.confirm(
-            "Skip connection test?",
-            default=True,
-            instruction="(Y/n, skip will directly use the address you entered)"
-        ).ask()
-        
-        if skip_test:
-            console.print(f"⏭️  Skipped connection test, using address: {url}")
-            return {"url": url}
-        else:
-            # Re-test, but keep the user's input address
-            return setup_comfyui(url)
+    console.print(f"✅ ComfyUI address set to: {url}")
+    return {"url": url}
 
 
 def setup_multiple_llm_providers():
@@ -364,22 +331,12 @@ def configure_openai() -> Optional[Dict]:
     if not api_key:
         return None
     
-    console.print("💡 If you use proxy or third-party service, select 'n' to input custom address")
     default_base_url = "https://api.openai.com/v1"
-    use_default_url = questionary.confirm(
-        f"Use default API address {default_base_url}?",
-        default=True,
-        instruction="(Y/n)"
+    base_url = questionary.text(
+        "API address:",
+        default=default_base_url,
+        instruction="(press Enter to use default, or input custom address)"
     ).ask()
-    
-    if use_default_url:
-        base_url = default_base_url
-        console.print(f"✅ Using default address: {base_url}")
-    else:
-        base_url = questionary.text(
-            "Please input custom API address:",
-            instruction="(e.g. https://your-proxy.com/v1)"
-        ).ask()
     
     # Try to get model list
     console.print("🔍 Getting available model list...")
@@ -388,23 +345,10 @@ def configure_openai() -> Optional[Dict]:
     if available_models:
         console.print(f"📋 Found {len(available_models)} available models")
         
-        # Pre-select recommended models
-        recommended_models = []
-        for model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo"]:
-            if model in available_models:
-                recommended_models.append(model)
-        
-        if recommended_models:
-            console.print(f"💡 Pre-selected recommended models: {', '.join(recommended_models)}")
-        
-        # Directly provide multi-select interface
-        # Create choices list, and mark recommended models as default selected
+        # Create choices list with all available models
         choices = []
         for model in available_models:
-            if model in recommended_models:
-                choices.append(questionary.Choice(f"{model} (recommended)", model, checked=True))
-            else:
-                choices.append(questionary.Choice(model, model, checked=False))
+            choices.append(questionary.Choice(model, model, checked=False))
         
         selected_models = questionary.checkbox(
             "Please select the model to use (space to select/cancel, enter to confirm):",
@@ -422,22 +366,11 @@ def configure_openai() -> Optional[Dict]:
                 instruction="(Separate multiple models with commas)"
             ).ask()
     else:
-        console.print("⚠️  Cannot get model list, using default config")
-        default_models = "gpt-4o-mini,gpt-4o"
-        use_default_models = questionary.confirm(
-            f"Use default recommended models {default_models}?",
-            default=True,
-            instruction="(Y/n)"
+        console.print("⚠️  Cannot get model list, please input models manually")
+        models = questionary.text(
+            "Please input models:",
+            instruction="(multiple models separated by commas, e.g. gpt-4,gpt-3.5-turbo)"
         ).ask()
-        
-        if use_default_models:
-            models = default_models
-            console.print(f"✅ Using default models: {models}")
-        else:
-            models = questionary.text(
-                "Please input custom models:",
-                instruction="(multiple models separated by commas, e.g. gpt-4,gpt-3.5-turbo)"
-            ).ask()
     
     return {
         "provider": "openai",
@@ -453,22 +386,12 @@ def configure_ollama() -> Optional[Dict]:
     console.print("Ollama can run open-source models locally, completely free and data does not leave the machine")
     console.print("Install Ollama: https://ollama.ai\n")
     
-    console.print("💡 If Ollama is running on other address, select 'n' to input custom address")
     default_base_url = "http://localhost:11434/v1"
-    use_default_url = questionary.confirm(
-        f"Use default Ollama address {default_base_url}?",
-        default=True,
-        instruction="(Y/n)"
+    base_url = questionary.text(
+        "Ollama address:",
+        default=default_base_url,
+        instruction="(press Enter to use default, or input custom address)"
     ).ask()
-    
-    if use_default_url:
-        base_url = default_base_url
-        console.print(f"✅ Using default address: {base_url}")
-    else:
-        base_url = questionary.text(
-            "Please input custom Ollama address:",
-            instruction="(e.g. http://192.168.1.100:11434/v1)"
-        ).ask()
     
     # Test connection
     console.print("🔌 Testing Ollama connection...")
@@ -638,8 +561,7 @@ def setup_service_config():
     default_host = "localhost"
     host = questionary.text(
         "Host address:",
-        default=default_host,
-        instruction="(localhost=only accessible from this machine, 0.0.0.0=allows external access)"
+        default=default_host
     ).ask()
     
     if not host:
@@ -668,8 +590,8 @@ def save_unified_config(comfyui_config: Dict, llm_configs: List[Dict], service_c
     env_lines = build_env_lines(comfyui_config, llm_configs, service_config, default_model)
     
     # Save to root path
-    from pixelle.utils.os_util import get_pixelle_root_path
-    pixelle_root = get_pixelle_root_path()
+    from pixelle.utils.os_util import ensure_pixelle_root_path
+    pixelle_root = ensure_pixelle_root_path()
     env_path = Path(pixelle_root) / '.env'
     
     with open(env_path, 'w', encoding='utf-8') as f:
