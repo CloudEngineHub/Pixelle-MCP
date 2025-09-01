@@ -50,7 +50,7 @@ async def save_workflow_tool(
                 f"The uploaded filename cannot be a Python keyword: '{uploaded_filename}'."
             )
 
-        with download_files(workflow_url) as temp_workflow_path:
+        async with download_files(workflow_url) as temp_workflow_path:
             return workflow_manager.load_workflow(temp_workflow_path, tool_name=uploaded_filename)
             
     except Exception as e:

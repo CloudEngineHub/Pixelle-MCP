@@ -59,7 +59,7 @@ class AspectRatio(Enum):
         return width, height
 
 
-def detect_image_aspect_ratio_enum(image_url: str) -> AspectRatio:
+async def detect_image_aspect_ratio_enum(image_url: str) -> AspectRatio:
     """
     从图片URL检测图片的宽高比
     
@@ -70,7 +70,7 @@ def detect_image_aspect_ratio_enum(image_url: str) -> AspectRatio:
         AspectRatio: 宽高比枚举
     """
     try:
-        with download_files(image_url) as temp_file_path:
+        async with download_files(image_url) as temp_file_path:
             with Image.open(temp_file_path) as img:
                 width, height = img.size
                 
@@ -100,7 +100,7 @@ def detect_image_aspect_ratio_enum(image_url: str) -> AspectRatio:
         return AspectRatio.SQUARE
 
 
-def detect_image_aspect_ratio(image_url: str) -> str:
+async def detect_image_aspect_ratio(image_url: str) -> str:
     """
     从图片URL检测图片的宽高比（向后兼容函数）
     
@@ -110,5 +110,5 @@ def detect_image_aspect_ratio(image_url: str) -> str:
     Returns:
         str: 宽高比字符串，如 "1:1", "16:9", "9:16", "4:3", "3:4"
     """
-    aspect_ratio_enum = detect_image_aspect_ratio_enum(image_url)
+    aspect_ratio_enum = await detect_image_aspect_ratio_enum(image_url)
     return aspect_ratio_enum.value 

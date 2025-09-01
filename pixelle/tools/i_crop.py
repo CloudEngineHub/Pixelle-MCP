@@ -15,7 +15,7 @@ async def i_crop(
 ):
     """Crop the image to the center of the original."""
     # Download the image using a context manager
-    with download_files(image_url, '.jpg') as temp_image_path:
+    async with download_files(image_url, '.jpg') as temp_image_path:
         # Open the image and process it
         with Image.open(temp_image_path) as img:
             # Get original image dimensions

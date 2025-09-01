@@ -5,8 +5,11 @@ import requests
 import tempfile
 import os
 import mimetypes
-from contextlib import contextmanager
-from typing import Generator, List, Union, overload
+import aiohttp
+import asyncio
+from contextlib import contextmanager, asynccontextmanager
+from typing import Generator, List, Union, overload, AsyncGenerator
+from urllib.parse import urlparse
 from pixelle.logger import logger
 from pixelle.utils.os_util import get_data_path
 
@@ -16,31 +19,31 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 
 @overload
-def download_files(file_urls: str, suffix: str = None, auto_cleanup: bool = True, cookies: dict = None) -> Generator[str, None, None]:
+async def download_files(file_urls: str, suffix: str = None, auto_cleanup: bool = True, cookies: dict = None) -> AsyncGenerator[str, None]:
     ...
 
 
 @overload
-def download_files(file_urls: List[str], suffix: str = None, auto_cleanup: bool = True, cookies: dict = None) -> Generator[List[str], None, None]:
+async def download_files(file_urls: List[str], suffix: str = None, auto_cleanup: bool = True, cookies: dict = None) -> AsyncGenerator[List[str], None]:
     ...
 
 
-@contextmanager
-def download_files(file_urls: Union[str, List[str]], suffix: str = None, auto_cleanup: bool = True, cookies: dict = None) -> Generator[Union[str, List[str]], None, None]:
+@asynccontextmanager
+async def download_files(file_urls: Union[str, List[str]], suffix: str = None, auto_cleanup: bool = True, cookies: dict = None) -> AsyncGenerator[Union[str, List[str]], None]:
     """
-    从 URL 下载文件到临时文件的上下文管理器
+    Download files from URLs to temporary files.
     
     Args:
-        file_urls: 单个 URL 字符串或 URL 列表
-        suffix: 临时文件后缀名，如果不指定则尝试从 URL 推断
-        auto_cleanup: 是否自动清理临时文件，默认为 True
+        file_urls: Single URL string or URL list
+        suffix: Temporary file suffix, if not specified, try to infer from URL
+        auto_cleanup: Whether to automatically clean up temporary files, default is True
         cookies: 请求时使用的 cookies，默认为 None
         
     Yields:
-        str: 如果输入是 str，返回临时文件路径
-        List[str]: 如果输入是 List[str]，返回临时文件路径列表
+        str: If input is str, return temporary file path
+        List[str]: If input is List[str], return temporary file path list
         
-    自动清理所有临时文件
+    Automatically clean up all temporary files
     """
     is_single_url = isinstance(file_urls, str)
     url_list = [file_urls] if is_single_url else file_urls
@@ -48,45 +51,51 @@ def download_files(file_urls: Union[str, List[str]], suffix: str = None, auto_cl
     temp_file_paths = []
     try:
         for url in url_list:
-            # 从 URL 下载文件
-            logger.info(f"正在从 URL 下载文件: {url}")
-            response = requests.get(url, timeout=30, cookies=cookies)
-            response.raise_for_status()
+            logger.info(f"Downloading file from URL: {url}")
             
-            # 确定文件后缀
+            # Check if it is a local file service URL
+            parsed_url = urlparse(url)
+            is_local_file = await _is_local_file_url(url)
+            
+            if is_local_file:
+                # Get file content directly from local file service
+                file_content, content_type = await _get_local_file_content(url)
+            else:
+                # Download external file using asynchronous HTTP client
+                file_content, content_type = await _download_external_file(url, cookies)
+            
+            # Determine file suffix
             file_suffix = suffix
             if not file_suffix:
-                # 尝试从 URL 推断后缀
-                from urllib.parse import urlparse
-                parsed_url = urlparse(url)
+                # Try to infer suffix from URL
                 filename = os.path.basename(parsed_url.path)
                 if filename and '.' in filename:
                     file_suffix = '.' + filename.split('.')[-1]
                 else:
-                    # 如果从URL路径无法获取扩展名，尝试从响应头获取
-                    file_suffix = get_ext_from_content_type(response.headers.get('Content-Type', ''))
+                    # If the extension cannot be obtained from the URL path, try to get it from the response header
+                    file_suffix = get_ext_from_content_type(content_type or '')
                     if not file_suffix:
-                        file_suffix = '.tmp'  # 默认后缀
+                        file_suffix = '.tmp'  # Default suffix
             
             with tempfile.NamedTemporaryFile(delete=False, suffix=file_suffix, dir=TEMP_DIR) as temp_file:
-                temp_file.write(response.content)
+                temp_file.write(file_content)
                 temp_file.flush()
                 os.fsync(temp_file.fileno())
                 temp_file_paths.append(temp_file.name)
         
-        logger.info(f"已下载 {len(temp_file_paths)} 个文件到临时文件")
+        logger.info(f"Downloaded {len(temp_file_paths)} files to temporary files")
         
-        # 根据输入类型返回对应类型
+        # Return corresponding type based on input type
         if is_single_url:
             yield temp_file_paths[0]
         else:
             yield temp_file_paths
         
-    except requests.RequestException as e:
-        logger.error(f"下载文件失败: {str(e)}")
+    except (requests.RequestException, aiohttp.ClientError) as e:
+        logger.error(f"Download file failed: {str(e)}")
         raise
     except Exception as e:
-        logger.error(f"处理文件时发生错误: {str(e)}")
+        logger.error(f"Error occurred while processing files: {str(e)}")
         raise
     finally:
         if auto_cleanup:
@@ -96,22 +105,22 @@ def download_files(file_urls: Union[str, List[str]], suffix: str = None, auto_cl
 @contextmanager
 def create_temp_file(suffix: str = '.tmp') -> Generator[str, None, None]:
     """
-    创建临时文件的上下文管理器
+    Create a context manager for a temporary file.
     
     Args:
-        suffix: 临时文件后缀名
+        suffix: Temporary file suffix
         
     Yields:
-        str: 临时文件路径
+        str: Temporary file path
         
-    自动清理临时文件
+    Automatically clean up temporary files
     """
     temp_file_path = None
     try:        
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, dir=TEMP_DIR) as temp_file:
             temp_file_path = temp_file.name
         
-        logger.debug(f"创建临时文件: {temp_file_path}")
+        logger.debug(f"Created temporary file: {temp_file_path}")
         yield temp_file_path
         
     finally:
@@ -120,38 +129,78 @@ def create_temp_file(suffix: str = '.tmp') -> Generator[str, None, None]:
 
 
 def get_ext_from_content_type(content_type: str) -> str:
-    """从Content-Type响应头获取文件扩展名"""
+    """Get file extension from Content-Type response header"""
     if not content_type:
         return ""
     
-    # 解析Content-Type，去掉参数部分
+    # Parse Content-Type, remove parameters
     mime_type = content_type.split(';')[0].strip()
     
-    # 使用标准库的 mimetypes.guess_extension
+    # Use standard library's mimetypes.guess_extension
     ext = mimetypes.guess_extension(mime_type)
     
-    # 优化一些常见的扩展名（mimetypes有时返回不太常见的）
+    # Optimize some common extensions (mimetypes sometimes returns uncommon ones)
     if ext:
-        # 优化JPEG扩展名
+        # Optimize JPEG extension
         if mime_type == 'image/jpeg' and ext in ['.jpe', '.jpeg']:
             ext = '.jpg'
-        # 优化TIFF扩展名  
+        # Optimize TIFF extension  
         elif mime_type == 'image/tiff' and ext == '.tiff':
             ext = '.tif'
         
-        logger.debug(f"从Content-Type '{content_type}' 获取到扩展名: {ext}")
+        logger.debug(f"Get extension from Content-Type '{content_type}': {ext}")
         return ext
     else:
         logger.debug(f"未知的Content-Type: {content_type}")
         return ""
 
 
+async def _is_local_file_url(url: str) -> bool:
+    """Check if it is a local file service URL"""
+    from pixelle.settings import settings
+    local_base_url = f"http://{settings.host}:{settings.port}"
+    return url.startswith(local_base_url) and "/files/" in url
+
+
+async def _get_local_file_content(url: str) -> tuple[bytes, str]:
+    """Get file content directly from local file service, avoid HTTP request loop"""
+    from pixelle.upload.file_service import file_service
+    
+    # Extract file ID from URL
+    parsed_url = urlparse(url)
+    path_parts = parsed_url.path.strip('/').split('/')
+    if len(path_parts) >= 2 and path_parts[0] == 'files':
+        file_id = path_parts[1]
+        
+        # Get file content and information directly from file service
+        file_content = await file_service.get_file(file_id)
+        file_info = await file_service.get_file_info(file_id)
+        
+        if file_content is None:
+            raise Exception(f"File not found: {file_id}")
+            
+        content_type = file_info.content_type if file_info else "application/octet-stream"
+        return file_content, content_type
+    
+    raise Exception(f"Invalid local file URL: {url}")
+
+
+async def _download_external_file(url: str, cookies: dict = None) -> tuple[bytes, str]:
+    """Download external file using asynchronous HTTP client"""
+    async with aiohttp.ClientSession(cookies=cookies, timeout=aiohttp.ClientTimeout(total=30)) as session:
+        async with session.get(url) as response:
+            response.raise_for_status()
+            content = await response.read()
+            content_type = response.headers.get('Content-Type', '')
+            return content, content_type
+
+
 def cleanup_temp_files(file_paths: Union[str, List[str]]) -> None:
     """
-    清理临时文件的工具函数
+    Clean up temporary files.
     
     Args:
-        file_paths: 单个文件路径或文件路径列表
+        file_paths: Single file path or file path list
     """
     if isinstance(file_paths, str):
         file_paths = [file_paths]
@@ -160,6 +209,6 @@ def cleanup_temp_files(file_paths: Union[str, List[str]]) -> None:
         if os.path.exists(file_path):
             try:
                 os.unlink(file_path)
-                logger.debug(f"已清理临时文件: {file_path}")
+                logger.debug(f"Cleaned up temporary file: {file_path}")
             except Exception as e:
-                logger.warning(f"清理临时文件失败 {file_path}: {str(e)}") 
+                logger.warning(f"Failed to clean up temporary file {file_path}: {str(e)}") 

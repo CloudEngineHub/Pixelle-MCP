@@ -98,7 +98,7 @@ class ComfyUIExecutor(ABC):
         # 解析 ComfyUI cookies，用于下载需要认证的文件
         cookies = await self._parse_comfyui_cookies()
 
-        def transfer_urls(urls: List[str]) -> List[str]:
+        async def transfer_urls(urls: List[str]) -> List[str]:
             # 去重，保留顺序
             unique_urls = []
             seen = set()
@@ -110,24 +110,29 @@ class ComfyUIExecutor(ABC):
             # 下载并上传未缓存的url
             uncached_urls = [url for url in unique_urls if url not in url_cache]
             if uncached_urls:
-                with download_files(uncached_urls, cookies=cookies) as temp_files:
+                async with download_files(uncached_urls, cookies=cookies) as temp_files:
                     for temp_file, url in zip(temp_files, uncached_urls):
                         new_url = upload(temp_file)
                         url_cache[url] = new_url
             
             return [url_cache.get(url, url) for url in urls]
 
-        def transfer_dict_urls(d: Dict[str, List[str]]) -> Dict[str, List[str]]:
-            return {k: transfer_urls(v) for k, v in d.items()} if d else d
+        async def transfer_dict_urls(d: Dict[str, List[str]]) -> Dict[str, List[str]]:
+            if d:
+                result = {}
+                for k, v in d.items():
+                    result[k] = await transfer_urls(v)
+                return result
+            return d
 
         # 构造新数据
         data = result.model_dump()
         for field in ["images", "audios", "videos"]:
             if data.get(field):
-                data[field] = transfer_urls(data[field])
+                data[field] = await transfer_urls(data[field])
         for field in ["images_by_var", "audios_by_var", "videos_by_var"]:
             if data.get(field):
-                data[field] = transfer_dict_urls(data[field])
+                data[field] = await transfer_dict_urls(data[field])
         
         # texts是原生字符串，不需要转存
         for field in ["texts"]:
