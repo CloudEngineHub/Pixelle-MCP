@@ -13,6 +13,7 @@ temp
 
 # Scripts
 redeploy.sh
+publish*.sh
 
 .idea
 

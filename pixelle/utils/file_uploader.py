@@ -58,7 +58,7 @@ class LocalFileUploader:
     
     def _get_file_url(self, file_id: str) -> str:
         """generate file access URL"""
-        return f"{settings.get_read_url()}/api/files/{file_id}"
+        return f"{settings.get_read_url()}/files/{file_id}"
     
     def _process_input(self, data: Union[bytes, str, Path], filename: Optional[str] = None) -> Tuple[bytes, str]:
         """process different types of input data"""
