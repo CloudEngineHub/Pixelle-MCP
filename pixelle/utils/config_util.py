@@ -67,7 +67,7 @@ def build_env_lines(
         f"COMFYUI_BASE_URL={comfyui_config['url']}",
         "# ComfyUI API Key (required if API Nodes are used in workflows,",
         "# get it from: https://platform.comfy.org/profile/api-keys)",
-        "COMFYUI_API_KEY=\"\"",
+        f"COMFYUI_API_KEY=\"{comfyui_config.get('api_key', '')}\"",
         "# Cookies used when calling ComfyUI interface, configure if ComfyUI service requires authentication",
         "COMFYUI_COOKIES=\"\"",
         "# Executor type for calling ComfyUI interface, supports websocket and http (both are generally supported)",

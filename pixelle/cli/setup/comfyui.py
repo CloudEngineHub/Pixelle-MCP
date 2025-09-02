@@ -39,4 +39,16 @@ def setup_comfyui(default_url: str = None) -> Optional[Dict]:
         return None
     
     console.print(f"✅ ComfyUI address set to: {url}")
-    return {"url": url}
+    
+    # API Key配置 (可选)
+    api_key = questionary.password(
+        "ComfyUI API Key (optional, for ComfyUI API Nodes):",
+        instruction="(Leave empty if not using API Nodes)"
+    ).ask()
+    
+    config = {"url": url}
+    if api_key:
+        config["api_key"] = api_key
+        console.print("✅ ComfyUI API Key configured")
+    
+    return config
