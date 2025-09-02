@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install uv
 
 # Copy project files
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 COPY pixelle/ ./pixelle/
 COPY workflows/ ./workflows/
 
