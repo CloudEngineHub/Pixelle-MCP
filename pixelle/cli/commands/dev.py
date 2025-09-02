@@ -166,7 +166,7 @@ def dev_command():
             console.print("\n✅ [bold green]All services are running normally![/bold green]")
         else:
             console.print(f"\n⚠️  [bold yellow]{running_services}/{total_services} services are running normally[/bold yellow]")
-            console.print("💡 If any service is not running, please check the configuration or restart the service")
+            console.print("💡 If any service is not running, please check the configuration or use [cyan]pixelle start --force[/cyan] (or [cyan]-f[/cyan]) to restart")
             
     except Exception as e:
         console.print(f"  [yellow]Service status check unavailable: {e}[/yellow]")

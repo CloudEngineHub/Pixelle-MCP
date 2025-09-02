@@ -87,64 +87,75 @@ cp -r pixelle/workflows/* pixelle/data/custom_workflows/
 docker compose up -d
 ```
 
-#### 🛠️ 3.2 One-click Script Start
+#### 🛠️ 3.2 CLI Start (Recommended)
 
 Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) environment.
 
-**Linux/macOS users:**
+**Cross-platform CLI commands:**
 ```shell
-# Start all services (foreground)
-./run.sh
+# Interactive mode (recommended for first-time users)
+uv run pixelle
 
-# Or
+# Direct start in foreground
+uv run pixelle start
 
-# Start all services (background)
-./run.sh start --daemon
+# Start in background daemon mode
+uv run pixelle start --daemon
+
+# Force start (kill conflicting processes and start)
+uv run pixelle start --force
+
+# Combine options: background + force
+uv run pixelle start --daemon --force
+# Or use short form: uv run pixelle start -df
 ```
 
-**Windows users:**
-
-Simply double-click the `run.bat` script in the root directory
-
-#### 🛠️ 3.3 Manual Service Start
-
-Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) environment.
-
-**Start Basic Service (mcp-base):**
+**Service management:**
 ```shell
-cd mcp-base
+# Check service status
+uv run pixelle status
+
+# Stop service
+uv run pixelle stop
+
+# View logs
+uv run pixelle logs
+
+# Follow logs in real-time
+uv run pixelle logs --follow
+```
+
+#### 🛠️ 3.3 Development Mode (Advanced)
+
+For development purposes, you can also run the service directly:
+
+```shell
 # Install dependencies (only needed on first run or after updates)
 uv sync
-# Start service
-uv run upload_api.py
+
+# Start service directly (equivalent to pixelle start)
+uv run python -m pixelle.main
+
+# Or run with development mode
+uv run python -m pixelle.main --reload
 ```
 
-**Start Server (mcp-server):**
-```shell
-cd pixelle
-# Install dependencies (only needed on first run or after updates)
-uv sync
-# Start service
-uv run upload_api.py
-```
-
-**Start Client (mcp-client):**
-```shell
-cd mcp-client
-# Install dependencies (only needed on first run or after updates)
-uv sync
-# Start service (for hot-reload in dev mode: uv run chainlit run upload_api.py -w --port 9003)
-uv run upload_api.py
-```
+**Note:** For production use, it's recommended to use the CLI commands above for better process management and logging.
 
 
 ### 🌐 4. Access the Services
 
-After startup, the service addresses are as follows:
+After startup, you can access the Pixelle MCP service:
 
-- **Client**: 🌐 http://localhost:9003 (Chainlit Web UI, default username and password are both `dev`, can be changed in [`auth.py`](pixelle/web/auth/auth.py))
-- **Server**: 🗄️ http://localhost:9002/sse (MCP Server)
-- **Base Service**: 🔧 http://localhost:9001/docs (File storage and basic API)
+#### CLI Mode (Recommended)
+- **Web Interface**: 🌐 http://localhost:9004 (Chainlit Web UI, default username and password are both `dev`, can be changed in [`auth.py`](pixelle/web/auth/auth.py))
+- **MCP Endpoint**: 🔌 http://localhost:9004/pixelle/mcp (For MCP clients to connect)
+
+**Note:** The default port is 9004, but you can configure it in your `.env` file with `PORT=your_preferred_port`.
+
+#### Docker Mode
+- **Web Interface**: 🌐 http://localhost:9004
+- **MCP Endpoint**: 🔌 http://localhost:9004/pixelle/mcp
 
 ## 🛠️ Add Your Own MCP Tool
 

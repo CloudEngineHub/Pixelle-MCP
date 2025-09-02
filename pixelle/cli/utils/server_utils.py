@@ -3,7 +3,7 @@
 
 """Server management utility functions."""
 
-import questionary
+import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -23,7 +23,7 @@ from pixelle.utils.network_util import (
 console = Console()
 
 
-def start_pixelle_server():
+def start_pixelle_server(daemon: bool = False, force: bool = False):
     """Start Pixelle server"""
     console.print("\n🚀 [bold]Starting Pixelle MCP...[/bold]")
     
@@ -37,53 +37,129 @@ def start_pixelle_server():
         # Check if port is in use
         if check_port_in_use(port):
             process_info = get_process_using_port(port)
+            
+            if not force:
+                # Without --force, report error and exit
+                console.print(f"❌ [bold red]Port {port} is already in use[/bold red]")
+                if process_info:
+                    console.print(f"Occupied by process: {process_info}")
+                console.print(f"💡 Use [cyan]pixelle start --force[/cyan] (or [cyan]-f[/cyan]) to terminate the existing process and start")
+                console.print(f"💡 Or use [cyan]pixelle stop[/cyan] to stop the existing service first")
+                raise typer.Exit(1)
+            
+            # With --force, attempt to kill existing process
+            console.print(f"🔄 [bold yellow]Force mode: Terminating existing process on port {port}[/bold yellow]")
             if process_info:
-                console.print(f"⚠️  [bold yellow]Port {port} is in use[/bold yellow]")
-                console.print(f"Occupied process: {process_info}")
-                
-                kill_service = questionary.confirm(
-                    "Terminate existing service and restart?",
-                    default=True,
-                    instruction="(Y/n)"
-                ).ask()
-                
-                if kill_service:
-                    console.print("🔄 Terminating existing service...")
-                    if kill_process_on_port(port):
-                        console.print("✅ Existing service terminated")
-                        import time
-                        time.sleep(1)  # Wait for port to be released
-                    else:
-                        console.print("❌ Cannot terminate existing service, launch may fail")
-                        proceed = questionary.confirm(
-                            "Still try to launch?",
-                            default=False,
-                            instruction="(y/N)"
-                        ).ask()
-                        if not proceed:
-                            console.print("❌ Launch cancelled")
-                            return
-                else:
-                    console.print("❌ Launch cancelled")
-                    return
+                console.print(f"Target process: {process_info}")
+            
+            if kill_process_on_port(port):
+                console.print("✅ Existing process terminated")
+                import time
+                time.sleep(2)  # Wait for port to be released
             else:
-                console.print(f"⚠️  [bold yellow]Port {port} is in use, but cannot determine the occupied process[/bold yellow]")
-                console.print("Launch may fail, suggest changing port or manually handle")
+                console.print("❌ [bold red]Failed to terminate existing process[/bold red]")
+                console.print("💡 You may need to manually stop the conflicting service")
+                raise typer.Exit(1)
         
         # Start service
-        console.print(Panel(
-            f"🌐 Web interface: http://localhost:{settings.port}/\n"
-            f"🔌 MCP endpoint: http://localhost:{settings.port}/pixelle/mcp\n"
-            f"📁 Loaded workflow directory: data/custom_workflows/",
-            title="🎉 Pixelle MCP is running!",
-            border_style="green"
-        ))
-        
-        console.print("\nPress [bold]Ctrl+C[/bold] to stop service\n")
-        
-        # Import and start main
-        from pixelle.main import main as start_main
-        start_main()
+        if daemon:
+            # Daemon mode
+            import subprocess
+            import sys
+            import os
+            from pathlib import Path
+            
+            # Get project root and create necessary directories
+            from pixelle.utils.os_util import get_pixelle_root_path
+            root_path = Path(get_pixelle_root_path())
+            logs_dir = root_path / "logs"
+            logs_dir.mkdir(exist_ok=True)
+            
+            pid_file = root_path / ".pixelle.pid"
+            log_file = logs_dir / "pixelle.log"
+            
+            # Check if already running
+            if pid_file.exists():
+                try:
+                    with open(pid_file, 'r') as f:
+                        existing_pid = int(f.read().strip())
+                    # Check if process is still running
+                    import psutil
+                    if psutil.pid_exists(existing_pid):
+                        if not force:
+                            console.print(f"❌ [bold red]Pixelle daemon is already running (PID: {existing_pid})[/bold red]")
+                            console.print("💡 Use [cyan]pixelle start --force[/cyan] (or [cyan]-f[/cyan]) to terminate and restart")
+                            console.print("💡 Or use [cyan]pixelle stop[/cyan] to stop the existing service first")
+                            raise typer.Exit(1)
+                        else:
+                            # Force mode: terminate existing daemon
+                            console.print(f"🔄 [bold yellow]Force mode: Terminating existing daemon (PID: {existing_pid})[/bold yellow]")
+                            try:
+                                process = psutil.Process(existing_pid)
+                                process.terminate()
+                                try:
+                                    process.wait(timeout=10)
+                                    console.print("✅ Existing daemon terminated")
+                                except psutil.TimeoutExpired:
+                                    process.kill()
+                                    process.wait()
+                                    console.print("✅ Existing daemon force killed")
+                            except psutil.NoSuchProcess:
+                                console.print("ℹ️  Process already stopped")
+                            
+                            # Clean up PID file
+                            pid_file.unlink()
+                            import time
+                            time.sleep(1)  # Wait for cleanup
+                except (ValueError, FileNotFoundError):
+                    pass  # Invalid or missing PID file, continue
+            
+            # Start daemon process
+            with open(log_file, 'w') as log:
+                process = subprocess.Popen(
+                    [sys.executable, "-m", "pixelle.main"],
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    cwd=root_path,
+                    start_new_session=True  # Detach from parent
+                )
+            
+            # Save PID
+            with open(pid_file, 'w') as f:
+                f.write(str(process.pid))
+            
+            console.print(Panel(
+                f"🌐 Web interface: http://localhost:{settings.port}/\n"
+                f"🔌 MCP endpoint: http://localhost:{settings.port}/pixelle/mcp\n"
+                f"📁 Loaded workflow directory: data/custom_workflows/\n"
+                f"📋 PID: {process.pid}\n"
+                f"📄 Log file: {log_file}",
+                title="🎉 Pixelle MCP started in daemon mode!",
+                border_style="green"
+            ))
+            
+            console.print(f"\n💡 [bold]Management commands:[/bold]")
+            console.print("  • [cyan]pixelle status[/cyan] - Check service status")
+            console.print("  • [cyan]pixelle stop[/cyan] - Stop the service")
+            console.print("  • [cyan]pixelle start --force --daemon[/cyan] (or [cyan]-fd[/cyan]) - Force restart")
+            console.print(f"  • [cyan]pixelle logs --follow[/cyan] (or [cyan]-f[/cyan]) - Follow logs")
+            console.print(f"  • [cyan]tail -f {log_file}[/cyan] - View logs (alternative)")
+            
+        else:
+            # Foreground mode
+            console.print(Panel(
+                f"🌐 Web interface: http://localhost:{settings.port}/\n"
+                f"🔌 MCP endpoint: http://localhost:{settings.port}/pixelle/mcp\n"
+                f"📁 Loaded workflow directory: data/custom_workflows/",
+                title="🎉 Pixelle MCP is running!",
+                border_style="green"
+            ))
+            
+            console.print("\nPress [bold]Ctrl+C[/bold] to stop service\n")
+            
+            # Import and start main
+            from pixelle.main import main as start_main
+            start_main()
         
     except KeyboardInterrupt:
         console.print("\n👋 Pixelle MCP stopped")

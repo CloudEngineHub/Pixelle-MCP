@@ -90,64 +90,75 @@ cp -r pixelle/workflows/* pixelle/data/custom_workflows/
 docker compose up -d
 ```
 
-#### 🛠️ 3.2 一键脚本启动
+#### 🛠️ 3.2 CLI 启动（推荐）
 
 需要先安装 [uv](https://docs.astral.sh/uv/getting-started/installation/) 环境。
 
-**Linux/macOS 用户**：
+**跨平台 CLI 命令**：
 ```shell
-# 启动所有服务（前台运行）
-./run.sh
+# 交互模式（首次使用推荐）
+uv run pixelle
 
-# 或
+# 直接前台启动
+uv run pixelle start
 
-# 启动所有服务（后台运行）
-./run.sh start --daemon
+# 后台守护进程模式启动
+uv run pixelle start --daemon
+
+# 强制启动（杀死冲突进程并启动）
+uv run pixelle start --force
+
+# 组合选项：后台 + 强制启动
+uv run pixelle start --daemon --force
+# 或使用简写形式：uv run pixelle start -df
 ```
 
-**Windows 用户**：
-
-直接双击根目录下的 `run.bat` 脚本
-
-#### 🛠️ 3.3 手动启动服务
-
-需要先安装 [uv](https://docs.astral.sh/uv/getting-started/installation/) 环境。
-
-**启动基础服务（mcp-base）**：
+**服务管理**：
 ```shell
-cd mcp-base
+# 检查服务状态
+uv run pixelle status
+
+# 停止服务
+uv run pixelle stop
+
+# 查看日志
+uv run pixelle logs
+
+# 实时跟踪日志
+uv run pixelle logs --follow
+```
+
+#### 🛠️ 3.3 开发模式启动（高级）
+
+用于开发调试，也可以直接运行服务：
+
+```shell
 # 安装依赖（仅首次或更新时需要）
 uv sync
-# 启动服务
-uv run upload_api.py
+
+# 直接启动服务（等同于 pixelle start）
+uv run python -m pixelle.main
+
+# 或运行开发模式
+uv run python -m pixelle.main --reload
 ```
 
-**启动服务端（mcp-server）**：
-```shell
-cd pixelle
-# 安装依赖（仅首次或更新时需要）
-uv sync
-# 启动服务
-uv run upload_api.py
-```
-
-**启动客户端（mcp-client）**：
-```shell
-cd mcp-client
-# 安装依赖（仅首次或更新时需要）
-uv sync
-# 启动服务（开发模式需要热更新时，运行：uv run chainlit run upload_api.py -w --port 9003）
-uv run upload_api.py
-```
+**注意**：生产环境建议使用上述 CLI 命令，以获得更好的进程管理和日志功能。
 
 
 ### 🌐 4. 访问服务
 
-启动完成后，各服务地址如下：
+启动完成后，可以访问 Pixelle MCP 服务：
 
-- **客户端**: 🌐 http://localhost:9003 (Chainlit Web UI，默认用户名密码均为`dev`，可以在 [`auth.py`](pixelle/web/auth/auth.py) 中更改)
-- **服务端**: 🗄️ http://localhost:9002/sse (MCP Server)
-- **基础服务**: 🔧 http://localhost:9001/docs (文件存储和基础API)
+#### CLI 模式（推荐）
+- **Web 界面**: 🌐 http://localhost:9004 (Chainlit Web UI，默认用户名密码均为`dev`，可以在 [`auth.py`](pixelle/web/auth/auth.py) 中更改)
+- **MCP 端点**: 🔌 http://localhost:9004/pixelle/mcp (供 MCP 客户端连接)
+
+**注意**：默认端口为 9004，你可以在 `.env` 文件中通过 `PORT=你的端口` 来配置端口。
+
+#### Docker 模式
+- **Web 界面**: 🌐 http://localhost:9004
+- **MCP 端点**: 🔌 http://localhost:9004/pixelle/mcp
 
 ## 🛠️ 添加自己的MCP Tool
 

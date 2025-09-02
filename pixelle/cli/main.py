@@ -7,6 +7,9 @@ import typer
 
 from pixelle.cli.commands.interactive import interactive_command
 from pixelle.cli.commands.start import start_command
+from pixelle.cli.commands.stop import stop_command
+from pixelle.cli.commands.status import status_command
+from pixelle.cli.commands.logs import logs_command
 from pixelle.cli.commands.init import init_command
 from pixelle.cli.commands.edit import edit_command
 from pixelle.cli.commands.help import help_command
@@ -20,6 +23,9 @@ app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - A simple soluti
 # Add commands
 app.command("interactive", hidden=False)(interactive_command)
 app.command("start")(start_command)
+app.command("stop")(stop_command)
+app.command("status")(status_command)
+app.command("logs")(logs_command)
 app.command("init")(init_command)
 app.command("edit")(edit_command)
 app.command("help")(help_command)

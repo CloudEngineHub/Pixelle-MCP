@@ -12,7 +12,10 @@ from pixelle.cli.utils.server_utils import start_pixelle_server
 console = Console()
 
 
-def start_command():
+def start_command(
+    daemon: bool = typer.Option(False, "--daemon", "-d", help="Run in background daemon mode"),
+    force: bool = typer.Option(False, "--force", "-f", help="Force start by terminating existing processes"),
+):
     """🚀 Start Pixelle MCP server directly (non-interactive)"""
     
     # Show current root path
@@ -35,4 +38,4 @@ def start_command():
         raise typer.Exit(1)
     
     # Start server directly
-    start_pixelle_server()
+    start_pixelle_server(daemon=daemon, force=force)
