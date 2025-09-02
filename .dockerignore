@@ -49,6 +49,11 @@ data/
 dist/
 *.log
 
+# Legacy microservice directories (no longer needed)
+mcp-base/
+mcp-server/
+mcp-client/
+
 # Documentation and examples  
 LICENSE
 NOTICE
