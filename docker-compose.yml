@@ -7,8 +7,8 @@ services:
     ports:
       - "9004:9004"
     volumes:
-      - ./data:/app/data
-      - ./.env:/app/.env:ro
+      - ./data:/root/.pixelle/data
+      - ./.env:/root/.pixelle/.env:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9004/health"]
       interval: 30s
