@@ -33,24 +33,50 @@ app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - A simple soluti
 console = Console()
 
 
-def main(
-    root_path: Optional[str] = typer.Option(
-        None, 
-        "--root-path", 
-        help="Root path for Pixelle MCP (default: ~/.pixelle)"
-    )
-):
-    """🎨 Pixelle MCP - A simple tool to convert ComfyUI workflow to MCP tool"""
-    
-    # Set root path if provided
-    if root_path and isinstance(root_path, str):
-        set_root_path(root_path)
+# Add a default command for interactive mode
+@app.command("interactive", hidden=False)
+def interactive_command():
+    """🎨 Run in interactive mode (default when no command specified)"""
     
     # Always show current root path for debugging
     from pixelle.utils.os_util import get_pixelle_root_path
     current_root_path = get_pixelle_root_path()
     console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
     
+    # Run interactive mode
+    run_interactive_mode()
+
+
+def main():
+    """Main entry point - detect if running interactively or with command args"""
+    import sys
+    
+    # If no command-line arguments (except script name), run interactive mode
+    if len(sys.argv) == 1:
+        # Run interactive mode directly
+        run_interactive_mode()
+    else:
+        # Let typer handle command parsing
+        app()
+
+
+def get_command_prefix():
+    """Get the correct command prefix based on how the script was invoked"""
+    import sys
+    script_name = sys.argv[0]
+    
+    if "uvx" in script_name or "pixelle-mcp" in script_name:
+        return "uvx pixelle-mcp@latest"
+    elif script_name.endswith("cli.py"):
+        return f"python {script_name}"
+    elif "__main__.py" in script_name or "-m" in sys.argv:
+        return "python -m pixelle.cli"
+    else:
+        return "pixelle"
+
+
+def run_interactive_mode():
+    """Run interactive mode with welcome message and menu"""
     # Show welcome message
     show_welcome()
     
@@ -682,14 +708,17 @@ def show_main_menu():
     console.print("\n📋 [bold]Current configuration status[/bold]")
     show_current_config()
     
+    # Get the correct command prefix based on how the script was invoked
+    cmd_prefix = get_command_prefix()
+    
     action = questionary.select(
         "Please select the action to perform:",
         choices=[
-            questionary.Choice("🚀 Start Pixelle MCP", "start"),
-            questionary.Choice("🔄 Reconfigure Pixelle MCP", "reconfig"),
-            questionary.Choice("📝 Manual edit configuration", "manual"),
-            questionary.Choice("📋 Check status", "status"),
-            questionary.Choice("❓ Help", "help"),
+            questionary.Choice(f"🚀 Start Pixelle MCP ({cmd_prefix} start)", "start"),
+            questionary.Choice(f"🔄 Reconfigure Pixelle MCP ({cmd_prefix} reconfig)", "reconfig"),
+            questionary.Choice(f"📝 Manual edit configuration ({cmd_prefix} manual)", "manual"),
+            questionary.Choice(f"📋 Check status ({cmd_prefix} status)", "status"),
+            questionary.Choice(f"❓ Help ({cmd_prefix} help)", "help"),
             questionary.Choice("❌ Exit", "exit")
         ]
     ).ask()
@@ -1021,5 +1050,176 @@ def show_help():
     console.print("• 📦 Installation guide: https://github.com/AIDC-AI/Pixelle-MCP/blob/main/INSTALL.md")
 
 
+# Sub-commands for non-interactive usage
+@app.command("start")
+def start_command():
+    """🚀 Start Pixelle MCP server directly (non-interactive)"""
+    
+    # Show current root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    current_root_path = get_pixelle_root_path()
+    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+    
+    # Check if configuration exists
+    config_status = detect_config_status()
+    
+    # Get command prefix for error messages
+    cmd_prefix = get_command_prefix()
+    
+    if config_status == "first_time":
+        console.print("❌ [bold red]No configuration found![/bold red]")
+        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] to configure first")
+        console.print(f"💡 Or run [bold]{cmd_prefix}[/bold] for interactive setup")
+        raise typer.Exit(1)
+    elif config_status == "incomplete":
+        console.print("❌ [bold red]Configuration is incomplete![/bold red]")
+        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] to fix configuration")
+        console.print(f"💡 Or run [bold]{cmd_prefix} manual[/bold] to edit manually")
+        raise typer.Exit(1)
+    
+    # Start server directly
+    start_pixelle_server()
+
+
+@app.command("reconfig")
+def reconfig_command():
+    """🔄 Reconfigure Pixelle MCP (non-interactive setup wizard)"""
+    
+    # Show current root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    current_root_path = get_pixelle_root_path()
+    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+    
+    console.print("🔄 [bold]Running configuration wizard...[/bold]")
+    
+    try:
+        # Step 1: ComfyUI config
+        comfyui_config = setup_comfyui()
+        if not comfyui_config:
+            console.print("⚠️  ComfyUI config skipped, using default config")
+            comfyui_config = {"url": "http://localhost:8188"}  # Use default value
+        
+        # Step 2: LLM config (can be configured multiple)
+        llm_configs = setup_multiple_llm_providers()
+        if not llm_configs:
+            console.print("❌ At least one LLM provider is required")
+            raise typer.Exit(1)
+        
+        # Step 3: Select default model (based on selected providers and models)
+        all_models = collect_all_selected_models(llm_configs)
+        selected_default_model = select_default_model_interactively(all_models)
+
+        # Step 4: Service config
+        service_config = setup_service_config()
+        if not service_config:
+            console.print("⚠️  Service config skipped, using default config")
+            service_config = {"port": "9004", "host": "localhost"}  # Use default value
+        
+        # Step 5: Save config
+        save_unified_config(comfyui_config, llm_configs, service_config, selected_default_model)
+        
+        console.print("\n✅ [bold green]Configuration completed![/bold green]")
+        console.print("💡 Run [bold]pixelle start[/bold] to start the server")
+            
+    except KeyboardInterrupt:
+        console.print("\n\n❌ Configuration cancelled (Ctrl+C pressed)")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"\n❌ Error during configuration: {e}")
+        raise typer.Exit(1)
+
+
+@app.command("status") 
+def status_command():
+    """📋 Check service status (non-interactive)"""
+    
+    # Show current root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    current_root_path = get_pixelle_root_path()
+    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+    
+    # Check configuration first
+    config_status = detect_config_status()
+    
+    # Get command prefix for error messages
+    cmd_prefix = get_command_prefix()
+    
+    if config_status == "first_time":
+        console.print("❌ [bold red]No configuration found![/bold red]")
+        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] to configure first")
+        raise typer.Exit(1)
+    elif config_status == "incomplete":
+        console.print("❌ [bold red]Configuration is incomplete![/bold red]")
+        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] to fix configuration")
+        raise typer.Exit(1)
+    
+    # Reload config to ensure we have latest settings
+    reload_config()
+    
+    # Check service status
+    check_service_status()
+
+
+@app.command("manual")
+def manual_command():
+    """📝 Show manual configuration guide (non-interactive)"""
+    
+    # Show current root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    current_root_path = get_pixelle_root_path()
+    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+    
+    # Show configuration file path and instructions
+    from pathlib import Path
+    pixelle_root = get_pixelle_root_path()
+    env_path = Path(pixelle_root) / ".env"
+    
+    # Get command prefix for messages
+    cmd_prefix = get_command_prefix()
+    
+    console.print(Panel(
+        "✏️ [bold]Manual edit configuration[/bold]\n\n"
+        "Configuration file contains detailed comments, you can directly edit to customize the configuration.\n"
+        f"Configuration file location: {env_path.absolute()}\n\n"
+        f"💡 If you need to completely reconfigure, delete the .env file and run '{cmd_prefix} reconfig'\n"
+        f"💡 After editing, run '{cmd_prefix} status' to check configuration",
+        title="Manual configuration guide",
+        border_style="green"
+    ))
+    
+    if not env_path.exists():
+        console.print("\n⚠️  [bold yellow]Configuration file does not exist![/bold yellow]")
+        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] first to create the configuration")
+        raise typer.Exit(1)
+    
+    console.print("\n📝 Common configuration modifications:")
+    console.print("• Change port: modify PORT=9004")
+    console.print("• Add new LLM: configure the corresponding API_KEY")
+    console.print("• Disable LLM: delete or clear the corresponding API_KEY")
+    console.print("• Change ComfyUI: modify COMFYUI_BASE_URL")
+    
+    console.print(f"\n📁 [bold]Configuration file path:[/bold] {env_path.absolute()}")
+
+
+@app.command("help")
+def help_command():
+    """❓ Show help information (non-interactive)"""
+    show_help()
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    
+    # If no command-line arguments (except script name), run interactive mode
+    if len(sys.argv) == 1:
+        # Run interactive mode directly without going through typer
+        # Always show current root path for debugging
+        from pixelle.utils.os_util import get_pixelle_root_path
+        current_root_path = get_pixelle_root_path()
+        console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+        
+        # Run interactive mode
+        run_interactive_mode()
+    else:
+        # Let typer handle command parsing
+        app()
