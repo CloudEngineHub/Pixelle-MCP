@@ -45,14 +45,12 @@ Thumbs.db
 # Project specific
 temp/
 logs/
-data/files/
-data/temp/
+data/
 dist/
 *.log
 
 # Documentation and examples
 docs/
-README*.md
 LICENSE
 NOTICE
 
