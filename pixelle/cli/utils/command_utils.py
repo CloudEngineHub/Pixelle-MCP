@@ -19,6 +19,20 @@ def detect_config_status() -> str:
     if not env_file.exists():
         return "first_time"
     
+    # Check if .env is a directory (common Docker issue)
+    if env_file.is_dir():
+        from rich.console import Console
+        console = Console()
+        console.print("\n❌ [bold red]Configuration Error: .env is a directory![/bold red]")
+        console.print("💡 This happens when Docker creates a directory instead of mounting a file")
+        console.print("\n🔧 [bold]Fix steps:[/bold]")
+        console.print("   1. Stop container: [cyan]docker compose down[/cyan]")
+        console.print("   2. Remove .env directory: [cyan]rm -rf .env[/cyan]") 
+        console.print("   3. Create .env file with configuration")
+        console.print("   4. Restart: [cyan]docker compose up[/cyan]")
+        console.print("\n💡 Use .env.example as template")
+        raise SystemExit(1)
+    
     # Check required configs
     required_configs = [
         "COMFYUI_BASE_URL",
