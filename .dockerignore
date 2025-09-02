@@ -49,8 +49,7 @@ data/
 dist/
 *.log
 
-# Documentation and examples
-docs/
+# Documentation and examples  
 LICENSE
 NOTICE
 

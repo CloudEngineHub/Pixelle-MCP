@@ -16,6 +16,7 @@ RUN pip install uv
 COPY pyproject.toml uv.lock README.md ./
 COPY pixelle/ ./pixelle/
 COPY workflows/ ./workflows/
+COPY docs/ ./docs/
 
 # Install Python dependencies using uv
 RUN uv sync --frozen
