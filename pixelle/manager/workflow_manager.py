@@ -18,7 +18,7 @@ CUSTOM_WORKFLOW_DIR = get_data_path("custom_workflows")
 os.makedirs(CUSTOM_WORKFLOW_DIR, exist_ok=True)
 
 class WorkflowManager:
-    """工作流管理器，支持动态加载和热更新"""
+    """Workflow manager, support dynamic loading and hot update"""
     
     def __init__(self, workflows_dir: str = CUSTOM_WORKFLOW_DIR):
         self.workflows_dir = Path(workflows_dir)
@@ -26,36 +26,36 @@ class WorkflowManager:
 
     
     def parse_workflow_metadata(self, workflow_path: Path, tool_name: str = None) -> Optional[WorkflowMetadata]:
-        """使用新的工作流解析器解析工作流元数据"""
+        """Parse workflow metadata using new workflow parser"""
         parser = WorkflowParser()
         metadata = parser.parse_workflow_file(str(workflow_path), tool_name)
         return metadata
     
     def _generate_params_str(self, params: Dict[str, Any]) -> str:
-        """生成函数参数字符串"""
-        # 分离必需参数和可选参数，确保参数顺序正确
+        """Generate function parameter string"""
+        # Separate required parameters and optional parameters, ensure parameter order is correct
         required_params = []
         optional_params = []
         
         for param_name, param in params.items():
-            # 直接使用用户提供的description
+            # Directly use user-provided description
             description = param.description or ''
             
-            # 生成 Field 参数列表
+            # Generate Field parameter list
             field_args = [f"description={repr(description)}"]
             if param.default is not None:
                 field_args.append(f"default={repr(param.default)}")
             
-            # 生成完整的参数定义
+            # Generate complete parameter definition
             param_str = f"{param_name}: {param.type} = Field({', '.join(field_args)})"
             
-            # 根据是否有默认值分类
+            # Classify parameters based on whether they have default values
             if param.default is not None:
                 optional_params.append(param_str)
             else:
                 required_params.append(param_str)
         
-        # 必需参数在前，可选参数在后
+        # Required parameters first, optional parameters last
         return ", ".join(required_params + optional_params)
     
     def _generate_workflow_function(self, title: str, params_str: str) -> tuple[str, str]:
@@ -95,89 +95,89 @@ class WorkflowManager:
 
 
     def _register_workflow(self, title: str, workflow_handler, metadata: WorkflowMetadata) -> None:
-        """注册并记录工作流"""
+        """Register and record workflow"""
         
-        # 注册为MCP工具
+        # Register as MCP tool
         mcp.tool(workflow_handler)
         
-        # 记录工作流信息
+        # Record workflow information
         self.loaded_workflows[title] = {
             "function": workflow_handler,
             "metadata": metadata.model_dump(),
             "loaded_at": datetime.now()
         }
         
-        logger.info(f"成功加载工作流: {title}")
+        logger.info(f"Successfully loaded workflow: {title}")
     
     def _save_workflow_if_needed(self, workflow_path: Path, title: str):
-        """如果需要，保存工作流文件到工作流目录"""
+        """If needed, save workflow file to workflow directory"""
         target_workflow_path = self.workflows_dir / f"{title}.json"
         try:
-            # 确保工作流目录存在
+            # Ensure workflow directory exists
             self.workflows_dir.mkdir(parents=True, exist_ok=True)
 
-            # 如果源文件和目标文件是同一个文件，直接跳过
+            # Skip if source and target file are the same
             if os.path.abspath(str(workflow_path)) == os.path.abspath(str(target_workflow_path)):
-                logger.debug(f"工作流文件已存在且路径相同，无需复制: {target_workflow_path}")
+                logger.debug(f"Workflow file already exists and path is the same, no need to copy: {target_workflow_path}")
                 return
 
-            # 复制工作流文件到工作流目录
+            # Copy workflow file to workflow directory
             import shutil
             shutil.copy2(workflow_path, target_workflow_path)
-            logger.info(f"工作流文件已保存到: {target_workflow_path}")
+            logger.info(f"Workflow file saved to: {target_workflow_path}")
         except Exception as e:
-            logger.warning(f"保存工作流文件失败: {e}")
+            logger.warning(f"Failed to save workflow file: {e}")
         
 
     def load_workflow(self, workflow_path: Path | str, tool_name: str = None) -> Dict:
-        """加载单个工作流
+        """Load single workflow
         
         Args:
-            workflow_path: 工作流文件路径
-            tool_name: 工具名称，优先级高于工作流文件名
-            save_workflow_if_not_exists: 是否将工作流文件保存到工作流目录（如果目标文件不存在）
+            workflow_path: Workflow file path
+            tool_name: Tool name, priority higher than workflow file name
+            save_workflow_if_not_exists: Whether to save workflow file to workflow directory (if target file does not exist)
         """
         try:
             if isinstance(workflow_path, str):
                 workflow_path = Path(workflow_path)
             
-            # 检查文件是否存在
+            # Check if file exists
             if not workflow_path.exists():
-                logger.error(f"工作流文件不存在: {workflow_path}")
+                logger.error(f"Workflow file does not exist: {workflow_path}")
                 return {
                     "success": False,
-                    "error": f"工作流文件不存在: {workflow_path}"
+                    "error": f"Workflow file does not exist: {workflow_path}"
                 }
             
-            # 使用新的解析器解析工作流元数据
+            # Use new parser to parse workflow metadata
             metadata = self.parse_workflow_metadata(workflow_path, tool_name)
             if not metadata:
-                logger.error(f"无法解析工作流元数据: {workflow_path}")
+                logger.error(f"Cannot parse workflow metadata: {workflow_path}")
                 return {
                     "success": False,
-                    "error": f"无法解析工作流元数据: {workflow_path}"
+                    "error": f"Cannot parse workflow metadata: {workflow_path}"
                 }
 
             title = metadata.title
             
             
-            # 验证title格式
+            # Verify title format
             if not re.match(r'^[a-zA-Z0-9_\.-]+$', title):
-                logger.error(f"工具名称 '{title}' 格式无效。只允许使用字母、数字、下划线、点和连字符。")
+                logger.error(f"Tool name '{title}' format is invalid. Only letters, digits, underscores, dots, and hyphens are allowed.")
                 return {
                     "success": False,
-                    "error": f"工具名称 '{title}' 格式无效。只允许使用字母、数字、下划线、点和连字符。"
+                    "error": f"Tool name '{title}' format is invalid. Only letters, digits, underscores, dots, and hyphens are allowed."
                 }
             
-            # 生成参数字符串
+            # Generate parameter string
             params_str = self._generate_params_str(metadata.params)
             
-            # 创建工具处理函数
+            # Create tool handler function
             exec_locals = {}
             
-            # 生成工作流执行函数
+            # Generate workflow execution function
             func_def, target_workflow_path = self._generate_workflow_function(title, params_str)
-            # 执行函数定义，将工作流路径作为变量传入执行环境
+            # Execute function definition, pass workflow path as variable to execution environment
             exec(func_def, {
                 "metadata": metadata, 
                 "logger": logger, 
@@ -190,75 +190,75 @@ class WorkflowManager:
             if metadata.description:
                 dynamic_function.__doc__ = metadata.description
             
-            # 注册并记录工作流
+            # Register and record workflow
             self._register_workflow(title, dynamic_function, metadata)
             
-            # 保存工作流文件到工作流目录
+            # Save workflow file to workflow directory
             self._save_workflow_if_needed(workflow_path, title)
             
-            logger.debug(f"工作流 '{title}' 已成功加载为MCP工具")
+            logger.debug(f"Workflow '{title}' successfully loaded as MCP tool")
             return {
                 "success": True,
                 "workflow": title,
                 "metadata": metadata.model_dump(),
-                "message": f"工作流 '{title}' 已成功加载为MCP工具"
+                "message": f"Workflow '{title}' successfully loaded as MCP tool"
             }
             
         except Exception as e:
-            logger.error(f"加载工作流失败 {workflow_path}: {e}", exc_info=True)
+            logger.error(f"Failed to load workflow {workflow_path}: {e}", exc_info=True)
             return {
                 "success": False,
-                "error": f"加载工作流失败: {str(e)}"
+                "error": f"Failed to load workflow: {str(e)}"
             }
             
     
     def unload_workflow(self, workflow_name: str) -> Dict:
-        """卸载工作流"""
+        """Unload workflow"""
         if workflow_name not in self.loaded_workflows:
             return {
                 "success": False,
-                "error": f"工作流 '{workflow_name}' 不存在或未加载"
+                "error": f"Workflow '{workflow_name}' does not exist or not loaded"
             }
         
         try:
-            # 从MCP服务器中移除
+            # Remove from MCP server
             mcp.remove_tool(workflow_name)
             
-            # 删除工作流文件
+            # Delete workflow file
             workflow_path = os.path.join(CUSTOM_WORKFLOW_DIR, f"{workflow_name}.json")
             if os.path.exists(workflow_path):
                 os.remove(workflow_path)
             
-            # 从记录中删除
+            # Delete from record
             del self.loaded_workflows[workflow_name]
             
-            logger.info(f"成功卸载工作流: {workflow_name}")
+            logger.info(f"Successfully unloaded workflow: {workflow_name}")
             
             return {
                 "success": True,
                 "workflow": workflow_name,
-                "message": f"工作流 '{workflow_name}' 已卸载"
+                "message": f"Workflow '{workflow_name}' successfully unloaded"
             }
                 
         except Exception as e:
-            logger.error(f"卸载工作流失败 {workflow_name}: {e}")
+            logger.error(f"Failed to unload workflow {workflow_name}: {e}")
             return {
                 "success": False,
-                "error": f"卸载工作流失败: {str(e)}"
+                "error": f"Failed to unload workflow: {str(e)}"
             }
     
     
     def load_all_workflows(self) -> Dict:
-        """加载所有工作流"""
+        """Load all workflows"""
         results = {
             "success": [],
             "failed": []
         }
         
-        # 确保目录存在
+        # Ensure directory exists
         self.workflows_dir.mkdir(parents=True, exist_ok=True)
         
-        # 加载所有JSON文件
+        # Load all JSON files
         for json_file in self.workflows_dir.glob("*.json"):
             result = self.load_workflow(json_file)
             if result["success"]:
@@ -272,7 +272,7 @@ class WorkflowManager:
         return results
     
     def get_workflow_status(self) -> Dict:
-        """获取所有工作流状态"""
+        """Get all workflow status"""
         return {
             "total_loaded": len(self.loaded_workflows),
             "workflows": {
@@ -285,26 +285,26 @@ class WorkflowManager:
         }
     
     def reload_all_workflows(self) -> Dict:
-        """手动重新加载所有工作流"""
-        logger.info("开始手动重新加载所有工作流")
+        """Manually reload all workflows"""
+        logger.info("Start manually reloading all workflows")
         
-        # 清除所有已加载的工作流
+        # Clear all loaded workflows
         for workflow_name in list(self.loaded_workflows.keys()):
             try:
                 mcp.remove_tool(workflow_name)
             except:
-                pass  # 忽略移除失败的情况
+                pass  # Ignore remove failure
         
         self.loaded_workflows.clear()
         
-        # 重新加载所有工作流
+        # Reload all workflows
         results = self.load_all_workflows()
         
-        logger.info(f"手动重新加载完成: 成功 {len(results['success'])}，失败 {len(results['failed'])}")
+        logger.info(f"Manually reloading completed: success {len(results['success'])}, failed {len(results['failed'])}")
         
         return {
             "success": True,
-            "message": f"重新加载完成: 成功 {len(results['success'])}，失败 {len(results['failed'])}",
+            "message": f"Manually reloading completed: success {len(results['success'])}, failed {len(results['failed'])}",
             "results": results
         }
     
@@ -312,12 +312,12 @@ class WorkflowManager:
 
 
 
-# 创建工作流管理器实例
+# Create workflow manager instance
 workflow_manager = WorkflowManager()
 
-# 初始加载所有工作流
+# Initial load all workflows
 load_results = workflow_manager.load_all_workflows()
-logger.info(f"初始工作流加载结果: {load_results}")
+logger.info(f"Initial workflow load results: {load_results}")
 
-# 导出模块级别的变量和实例
+# Export module-level variables and instance
 __all__ = ['workflow_manager', 'WorkflowManager', 'CUSTOM_WORKFLOW_DIR'] 

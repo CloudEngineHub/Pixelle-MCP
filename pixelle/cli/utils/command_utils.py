@@ -9,20 +9,6 @@ from rich.console import Console
 console = Console()
 
 
-def get_command_prefix():
-    """Get the correct command prefix based on how the script was invoked"""
-    import sys
-    script_name = sys.argv[0]
-    
-    if "uvx" in script_name or "pixelle-mcp" in script_name:
-        return "uvx pixelle-mcp@latest"
-    elif script_name.endswith("cli.py"):
-        return f"python {script_name}"
-    elif "__main__.py" in script_name or "-m" in sys.argv:
-        return "python -m pixelle.cli"
-    else:
-        return "pixelle"
-
 
 def detect_config_status() -> str:
     """Detect current config status"""

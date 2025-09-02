@@ -121,22 +121,13 @@ def check_service_status():
     )
     
     # Check Web interface
-    if settings.chainlit_auth_enabled:
-        web_status = check_url_status(pixelle_url)
-        status_table.add_row(
-            "Web interface",
-            pixelle_url,
-            "🟢 Available" if web_status else "🔴 Unavailable",
-            "Chat interface" if web_status else "Please start the service first"
-        )
-    else:
-        web_status = True  # If disabled, consider it as normal status
-        status_table.add_row(
-            "Web interface",
-            "Disabled",
-            "⚪ Disabled",
-            "Disabled in configuration"
-        )
+    web_status = check_url_status(pixelle_url)
+    status_table.add_row(
+        "Web interface",
+        pixelle_url,
+        "🟢 Available" if web_status else "🔴 Unavailable",
+        "Chat interface" if web_status else "Please start the service first"
+    )
     
     # Check ComfyUI
     comfyui_status = test_comfyui_connection(settings.comfyui_base_url)

@@ -7,10 +7,11 @@ import typer
 
 from pixelle.cli.commands.interactive import interactive_command
 from pixelle.cli.commands.start import start_command
-from pixelle.cli.commands.reconfig import reconfig_command
-from pixelle.cli.commands.status import status_command
-from pixelle.cli.commands.manual import manual_command
+from pixelle.cli.commands.init import init_command
+from pixelle.cli.commands.edit import edit_command
 from pixelle.cli.commands.help import help_command
+from pixelle.cli.commands.workflow import workflow_command
+from pixelle.cli.commands.dev import dev_command
 from pixelle.cli.interactive.welcome import run_interactive_mode
 
 # Create typer app
@@ -19,10 +20,11 @@ app = typer.Typer(add_completion=False, help="🎨 Pixelle MCP - A simple soluti
 # Add commands
 app.command("interactive", hidden=False)(interactive_command)
 app.command("start")(start_command)
-app.command("reconfig")(reconfig_command)
-app.command("status")(status_command)
-app.command("manual")(manual_command)
+app.command("init")(init_command)
+app.command("edit")(edit_command)
 app.command("help")(help_command)
+app.command("workflow")(workflow_command)
+app.command("dev")(dev_command)
 
 
 def main():

@@ -89,8 +89,14 @@ def setup_multiple_llm_providers() -> Optional[List[Dict]]:
             choices=remaining_providers
         ).ask()
         
+        if provider is None:  # User pressed Ctrl+C (questionary returns None)
+            return None
+            
         if provider == "cancel":
-            if questionary.confirm("Are you sure you want to cancel configuration?", default=False, instruction="(y/N)").ask():
+            cancel_confirm = questionary.confirm("Are you sure you want to cancel configuration?", default=False, instruction="(y/N)").ask()
+            if cancel_confirm is None:  # User pressed Ctrl+C during confirmation
+                return None
+            if cancel_confirm:
                 console.print("❌ Configuration cancelled")
                 return None
             else:
@@ -121,7 +127,10 @@ def setup_multiple_llm_providers() -> Optional[List[Dict]]:
             # remaining_providers has already filtered out configured providers, and will add "done" and "cancel" options
             actual_remaining = len([p for p in remaining_providers if p.value not in ["done", "cancel"]])
             if actual_remaining > 0:
-                if not questionary.confirm("Continue configuring other LLM providers?", default=False, instruction="(y/N)").ask():
+                continue_confirm = questionary.confirm("Continue configuring other LLM providers?", default=False, instruction="(y/N)").ask()
+                if continue_confirm is None:  # User pressed Ctrl+C
+                    return None
+                if not continue_confirm:
                     break
             else:
                 # All providers are configured, automatically enter next step
@@ -170,4 +179,6 @@ def select_default_model_interactively(all_models: List[str]) -> Optional[str]:
         instruction="Use arrow keys to navigate, press Enter to confirm",
     ).ask()
 
+    if selected is None:  # User pressed Ctrl+C
+        return None
     return selected or default_choice_value

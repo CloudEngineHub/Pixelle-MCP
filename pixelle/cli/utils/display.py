@@ -54,10 +54,6 @@ def show_current_config():
     else:
         table.add_row("LLM providers", "[red]Not configured[/red]")
     
-    # Web interface
-    web_status = "Enabled" if settings.chainlit_auth_enabled else "Disabled"
-    table.add_row("Web interface", web_status)
-    
     console.print(table)
 
 

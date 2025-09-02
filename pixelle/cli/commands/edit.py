@@ -8,13 +8,13 @@ from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 
-from pixelle.cli.utils.command_utils import get_command_prefix
+
 
 console = Console()
 
 
-def manual_command():
-    """📝 Show manual configuration guide (non-interactive)"""
+def edit_command():
+    """📝 Show configuration file location and editing guide (non-interactive)"""
     
     # Show current root path
     from pixelle.utils.os_util import get_pixelle_root_path
@@ -25,22 +25,19 @@ def manual_command():
     pixelle_root = get_pixelle_root_path()
     env_path = Path(pixelle_root) / ".env"
     
-    # Get command prefix for messages
-    cmd_prefix = get_command_prefix()
-    
     console.print(Panel(
         "✏️ [bold]Manual edit configuration[/bold]\n\n"
         "Configuration file contains detailed comments, you can directly edit to customize the configuration.\n"
         f"Configuration file location: {env_path.absolute()}\n\n"
-        f"💡 If you need to completely reconfigure, delete the .env file and run '{cmd_prefix} reconfig'\n"
-        f"💡 After editing, run '{cmd_prefix} status' to check configuration",
+        "💡 If you need to completely reconfigure, delete the .env file and run 'pixelle init'\n"
+        "💡 After editing, run 'pixelle status' to check configuration",
         title="Manual configuration guide",
         border_style="green"
     ))
     
     if not env_path.exists():
         console.print("\n⚠️  [bold yellow]Configuration file does not exist![/bold yellow]")
-        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] first to create the configuration")
+        console.print("💡 Please run [bold]pixelle init[/bold] first to create the configuration")
         raise typer.Exit(1)
     
     console.print("\n📝 Common configuration modifications:")

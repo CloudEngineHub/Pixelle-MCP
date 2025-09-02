@@ -31,23 +31,31 @@ def init_command():
     try:
         # Step 1: ComfyUI config
         comfyui_config = setup_comfyui()
-        if not comfyui_config:
+        if comfyui_config is None:  # User cancelled (questionary returns None on Ctrl+C)
+            raise KeyboardInterrupt()
+        if not comfyui_config:  # Empty config
             console.print("⚠️  ComfyUI config skipped, using default config")
             comfyui_config = {"url": "http://localhost:8188"}  # Use default value
         
         # Step 2: LLM config (can be configured multiple)
         llm_configs = setup_multiple_llm_providers()
-        if not llm_configs:
+        if llm_configs is None:  # User cancelled
+            raise KeyboardInterrupt()
+        if not llm_configs:  # Empty config
             console.print("❌ At least one LLM provider is required")
             raise typer.Exit(1)
         
         # Step 3: Select default model (based on selected providers and models)
         all_models = collect_all_selected_models(llm_configs)
         selected_default_model = select_default_model_interactively(all_models)
+        if selected_default_model is None:  # User cancelled
+            raise KeyboardInterrupt()
 
         # Step 4: Service config
         service_config = setup_service_config()
-        if not service_config:
+        if service_config is None:  # User cancelled
+            raise KeyboardInterrupt()
+        if not service_config:  # Empty config
             console.print("⚠️  Service config skipped, using default config")
             service_config = {"port": "9004", "host": "localhost"}  # Use default value
         

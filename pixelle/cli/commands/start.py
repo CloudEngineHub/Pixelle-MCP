@@ -6,7 +6,7 @@
 import typer
 from rich.console import Console
 
-from pixelle.cli.utils.command_utils import detect_config_status, get_command_prefix
+from pixelle.cli.utils.command_utils import detect_config_status
 from pixelle.cli.utils.server_utils import start_pixelle_server
 
 console = Console()
@@ -23,18 +23,15 @@ def start_command():
     # Check if configuration exists
     config_status = detect_config_status()
     
-    # Get command prefix for error messages
-    cmd_prefix = get_command_prefix()
-    
     if config_status == "first_time":
         console.print("❌ [bold red]No configuration found![/bold red]")
-        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] to configure first")
-        console.print(f"💡 Or run [bold]{cmd_prefix}[/bold] for interactive setup")
+        console.print("💡 Please run [bold]pixelle init[/bold] to configure first")
+        console.print("💡 Or run [bold]pixelle[/bold] for interactive setup")
         raise typer.Exit(1)
     elif config_status == "incomplete":
         console.print("❌ [bold red]Configuration is incomplete![/bold red]")
-        console.print(f"💡 Please run [bold]{cmd_prefix} reconfig[/bold] to fix configuration")
-        console.print(f"💡 Or run [bold]{cmd_prefix} manual[/bold] to edit manually")
+        console.print("💡 Please run [bold]pixelle init[/bold] to fix configuration")
+        console.print("💡 Or run [bold]pixelle edit[/bold] to edit manually")
         raise typer.Exit(1)
     
     # Start server directly

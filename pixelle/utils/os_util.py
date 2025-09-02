@@ -45,8 +45,6 @@ def ensure_pixelle_root_path() -> str:
     root_path_obj.mkdir(parents=True, exist_ok=True)
     (root_path_obj / 'data').mkdir(exist_ok=True)
     (root_path_obj / 'data' / 'custom_workflows').mkdir(exist_ok=True)
-    (root_path_obj / 'temp').mkdir(exist_ok=True)
-    (root_path_obj / 'logs').mkdir(exist_ok=True)
     
     return root_path
 

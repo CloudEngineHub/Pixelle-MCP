@@ -8,6 +8,8 @@ import questionary
 from rich.console import Console
 from rich.panel import Panel
 
+
+
 console = Console()
 
 
@@ -33,7 +35,7 @@ def setup_comfyui(default_url: str = None) -> Optional[Dict]:
         instruction="(press Enter to use default, or input custom address)"
     ).ask()
     
-    if not url:
+    if not url:  # User entered empty string
         return None
     
     console.print(f"✅ ComfyUI address set to: {url}")

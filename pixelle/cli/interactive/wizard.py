@@ -67,18 +67,18 @@ def run_fresh_setup_wizard():
     from rich.panel import Panel
     
     console.print(Panel(
-        "🔄 [bold]Reconfigure Pixelle MCP[/bold]\n\n"
+        "🔄 [bold]Initialize/reconfigure Pixelle MCP[/bold]\n\n"
         "This will start a fresh configuration process, which is the same as the initial setup.\n"
         "Existing configuration will be replaced.",
-        title="Reconfigure Pixelle MCP",
+        title="Initialize/reconfigure Pixelle MCP",
         border_style="yellow"
     ))
     
-    if not questionary.confirm("Are you sure you want to reconfigure Pixelle MCP?", default=True, instruction="(Y/n)").ask():
-        console.print("❌ Reconfigure cancelled")
+    if not questionary.confirm("Are you sure you want to initialize/reconfigure Pixelle MCP?", default=True, instruction="(Y/n)").ask():
+        console.print("❌ Initialization cancelled")
         return
     
-    console.print("\n🚀 [bold]Start reconfiguration wizard[/bold]\n")
+    console.print("\n🚀 [bold]Start initialization wizard[/bold]\n")
     
     try:
         # Step 1: ComfyUI configuration

@@ -9,7 +9,6 @@ from rich.console import Console
 from rich.panel import Panel
 
 from pixelle.cli.utils.display import show_current_config, show_help
-from pixelle.cli.utils.command_utils import get_command_prefix
 from pixelle.cli.utils.server_utils import start_pixelle_server, check_service_status
 from pixelle.cli.interactive.wizard import run_fresh_setup_wizard
 
@@ -21,29 +20,31 @@ def show_main_menu():
     console.print("\n📋 [bold]Current configuration status[/bold]")
     show_current_config()
     
-    # Get the correct command prefix based on how the script was invoked
-    cmd_prefix = get_command_prefix()
-    
     action = questionary.select(
         "Please select the action to perform:",
         choices=[
-            questionary.Choice(f"🚀 Start Pixelle MCP ({cmd_prefix} start)", "start"),
-            questionary.Choice(f"🔄 Reconfigure Pixelle MCP ({cmd_prefix} reconfig)", "reconfig"),
-            questionary.Choice(f"📝 Manual edit configuration ({cmd_prefix} manual)", "manual"),
-            questionary.Choice(f"📋 Check status ({cmd_prefix} status)", "status"),
-            questionary.Choice(f"❓ Help ({cmd_prefix} help)", "help"),
+            questionary.Choice("🚀 [start] Start Pixelle MCP", "start"),
+            questionary.Choice("🔄 [init] Initialize/reconfigure Pixelle MCP", "init"),
+            questionary.Choice("📝 [edit] Edit configuration", "edit"),
+            questionary.Choice("🔧 [workflow] View workflow information", "workflow"),
+            questionary.Choice("🐛 [dev] Development & system status", "dev"),
+            questionary.Choice("❓ [help] Help", "help"),
             questionary.Choice("❌ Exit", "exit")
         ]
     ).ask()
     
     if action == "start":
         start_pixelle_server()
-    elif action == "reconfig":
+    elif action == "init":
         run_fresh_setup_wizard()
-    elif action == "manual":
-        guide_manual_edit()
-    elif action == "status":
-        check_service_status()
+    elif action == "edit":
+        guide_edit_config()
+    elif action == "workflow":
+        from pixelle.cli.commands.workflow import workflow_command
+        workflow_command()
+    elif action == "dev":
+        from pixelle.cli.commands.dev import dev_command
+        dev_command()
     elif action == "help":
         show_help()
     elif action == "exit":
@@ -52,8 +53,8 @@ def show_main_menu():
         console.print(f"Feature {action} is under development...")
 
 
-def guide_manual_edit():
-    """Guide user to manually edit configuration"""
+def guide_edit_config():
+    """Guide user to edit configuration"""
     console.print(Panel(
         "✏️ [bold]Manual edit configuration[/bold]\n\n"
         "Configuration file contains detailed comments, you can directly edit to customize the configuration.\n"
@@ -73,14 +74,14 @@ def guide_manual_edit():
     if not env_path.exists():
         console.print("\n⚠️  Configuration file does not exist!")
         console.print("💡 Please run the interactive guide first: select '🔄 Reconfigure Pixelle MCP' from the menu")
-        console.print("💡 Or exit and rerun [bold]pixelle[/bold] for initial configuration")
+        console.print("💡 Or exit and rerun [bold cyan]pixelle[/bold cyan] for initial configuration")
         return
     
     # Provide some common editors suggestions
     console.print("\n💡 Recommended editors:")
-    console.print("• VS Code: code .env")
-    console.print("• Nano: nano .env") 
-    console.print("• Vim: vim .env")
+    console.print("• VS Code: [bold cyan]code .env[/bold cyan]")
+    console.print("• Nano: [bold cyan]nano .env[/bold cyan]") 
+    console.print("• Vim: [bold cyan]vim .env[/bold cyan]")
     console.print("• Or any text editor")
     
     console.print("\n📝 Common configuration modifications:")
@@ -107,5 +108,5 @@ def guide_manual_edit():
             console.print(f"❌ Cannot open automatically: {e}")
             console.print("💡 Please manually edit the file")
     
-    console.print("\n📋 After configuration, rerun [bold]pixelle[/bold] to apply the configuration")
-    console.print("🗑️  If you need to completely reconfigure, delete the .env file and rerun [bold]pixelle[/bold]")
+    console.print("\n📋 After configuration, rerun [bold cyan]pixelle[/bold cyan] to apply the configuration")
+    console.print("🗑️  If you need to completely reconfigure, delete the .env file and rerun [bold cyan]pixelle[/bold cyan]")
