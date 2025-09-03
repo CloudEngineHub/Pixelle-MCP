@@ -57,16 +57,22 @@ def show_current_config():
     console.print(table)
 
 
-def show_help():
-    """Show help information"""
+def show_enhanced_help(ctx=None):
+    """Show enhanced help information combining command list and help resources"""
+    import typer
+    
+    # Show standard command help if context is available
+    if ctx:
+        console.print(ctx.get_help())
+    
+    # Show additional help resources
     console.print(Panel(
-        "❓ [bold]Get help[/bold]\n\n"
-        "Opening Pixelle MCP GitHub page...",
-        title="Help",
-        border_style="blue"
+        "📚 [bold]More Help Resources[/bold]",
+        title="Help Resources",
+        border_style="blue",
+        padding=(0, 1)
     ))
     
     console.print("• 📚 Documentation: https://github.com/AIDC-AI/Pixelle-MCP")
     console.print("• 🐛 Issue feedback: https://github.com/AIDC-AI/Pixelle-MCP/issues")
     console.print("• 💬 Community discussion: https://github.com/AIDC-AI/Pixelle-MCP#-community")
-    console.print("• 📦 Installation guide: https://github.com/AIDC-AI/Pixelle-MCP/blob/main/INSTALL.md")

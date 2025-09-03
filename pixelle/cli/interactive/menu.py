@@ -8,7 +8,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 
-from pixelle.cli.utils.display import show_current_config, show_help
+from pixelle.cli.utils.display import show_current_config, show_enhanced_help
 from pixelle.cli.utils.server_utils import start_pixelle_server, check_service_status
 from pixelle.cli.interactive.wizard import run_fresh_setup_wizard
 
@@ -46,7 +46,7 @@ def show_main_menu():
         from pixelle.cli.commands.dev import dev_command
         dev_command()
     elif action == "help":
-        show_help()
+        show_enhanced_help()
     elif action == "exit":
         console.print("👋 Goodbye!")
     else:
