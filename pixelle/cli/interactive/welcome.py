@@ -24,12 +24,21 @@ def run_interactive_mode():
         console.print("\n🎯 [bold blue]Detect this is your first time using Pixelle MCP![/bold blue]")
         console.print("We will guide you through a simple configuration process...\n")
         
+        # Show root path info
+        from pixelle.utils.os_util import get_pixelle_root_path
+        current_root_path = get_pixelle_root_path()
+        console.print(f"📁 [bold]Data will be stored in:[/bold] {current_root_path}")
+        console.print("💡 To use a custom path, set the [cyan]PIXELLE_ROOT_PATH[/cyan] environment variable:")
+        console.print("   • Linux/macOS: [cyan]export PIXELLE_ROOT_PATH=/your/path[/cyan]")
+        console.print("   • Windows: [cyan]set PIXELLE_ROOT_PATH=C:\\your\\path[/cyan]")
+        console.print("   • Or add it to your shell profile for permanent use\n")
+        
         import questionary
         if questionary.confirm("Start configuration wizard?", default=True, instruction="(Y/n)").ask():
             from pixelle.cli.interactive.wizard import run_full_setup_wizard
             run_full_setup_wizard()
         else:
-            console.print("❌ Configuration cancelled. You can always run [bold]pixelle[/bold] to configure.")
+            console.print("❌ Configuration cancelled.")
             return
             
     elif config_status == "incomplete":

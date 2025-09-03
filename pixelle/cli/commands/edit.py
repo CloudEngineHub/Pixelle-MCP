@@ -29,15 +29,14 @@ def edit_command():
         "✏️ [bold]Manual edit configuration[/bold]\n\n"
         "Configuration file contains detailed comments, you can directly edit to customize the configuration.\n"
         f"Configuration file location: {env_path.absolute()}\n\n"
-        "💡 If you need to completely reconfigure, delete the .env file and run 'pixelle init'\n"
-        "💡 After editing, run 'pixelle status' to check configuration",
+"",
         title="Manual configuration guide",
         border_style="green"
     ))
     
     if not env_path.exists():
         console.print("\n⚠️  [bold yellow]Configuration file does not exist![/bold yellow]")
-        console.print("💡 Please run [bold]pixelle init[/bold] first to create the configuration")
+
         raise typer.Exit(1)
     
     console.print("\n📝 Common configuration modifications:")

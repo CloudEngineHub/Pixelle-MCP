@@ -28,13 +28,13 @@ def start_command(
     
     if config_status == "first_time":
         console.print("❌ [bold red]No configuration found![/bold red]")
-        console.print("💡 Please run [bold]pixelle init[/bold] to configure first")
-        console.print("💡 Or run [bold]pixelle[/bold] for interactive setup")
+
+
         raise typer.Exit(1)
     elif config_status == "incomplete":
         console.print("❌ [bold red]Configuration is incomplete![/bold red]")
-        console.print("💡 Please run [bold]pixelle init[/bold] to fix configuration")
-        console.print("💡 Or run [bold]pixelle edit[/bold] to edit manually")
+
+
         raise typer.Exit(1)
     
     # Start server directly

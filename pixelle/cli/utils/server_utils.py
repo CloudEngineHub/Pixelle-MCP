@@ -28,9 +28,16 @@ def start_pixelle_server(daemon: bool = False, force: bool = False):
     console.print("\n🚀 [bold]Starting Pixelle MCP...[/bold]")
     
     try:
-        # Reload environment variables
+        # Reload environment variables from root path
         from dotenv import load_dotenv
-        load_dotenv(override=True)
+        from pathlib import Path
+        from pixelle.utils.os_util import get_pixelle_root_path
+        
+        # Load from .env file in root path
+        root_path = get_pixelle_root_path()
+        env_path = Path(root_path) / ".env"
+        if env_path.exists():
+            load_dotenv(env_path, override=True)
         
         port = int(settings.port)
         

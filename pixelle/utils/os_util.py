@@ -9,32 +9,9 @@ import os
 # Package installation path (for accessing package resources)
 SRC_PATH = Path(pixelle.__file__).parent
 
-# Global root path override
-_root_path_override = None
-
-def set_root_path(root_path: str) -> None:
-    """Set global root path override"""
-    global _root_path_override
-    _root_path_override = root_path
-
 def get_pixelle_root_path() -> str:
-    """Get Pixelle root path based on priority:
-    1. Global override (set via CLI --root-path)
-    2. Environment variable PIXELLE_ROOT_PATH
-    3. Default user directory ~/.pixelle
-    """
-    # 1. Global override from CLI
-    if _root_path_override:
-        return _root_path_override
-    
-    # 2. Environment variable
-    env_root_path = os.getenv('PIXELLE_ROOT_PATH')
-    if env_root_path:
-        return env_root_path
-    
-    # 3. Default user directory
-    default_dir = str(Path.home() / '.pixelle')
-    return default_dir
+    """Get Pixelle root path from environment variable or default"""
+    return os.getenv('PIXELLE_ROOT_PATH', str(Path.home() / '.pixelle'))
 
 def ensure_pixelle_root_path() -> str:
     """Ensure Pixelle root path exists and return the path"""

@@ -59,8 +59,7 @@ def guide_edit_config():
         "✏️ [bold]Manual edit configuration[/bold]\n\n"
         "Configuration file contains detailed comments, you can directly edit to customize the configuration.\n"
         "Configuration file location: .env\n\n"
-        "💡 If you need to completely reconfigure, delete the .env file and rerun 'pixelle'\n"
-        "💡 After editing, rerun 'pixelle' to apply the configuration",
+"",
         title="Manual configuration guide",
         border_style="green"
     ))
@@ -73,8 +72,8 @@ def guide_edit_config():
     
     if not env_path.exists():
         console.print("\n⚠️  Configuration file does not exist!")
-        console.print("💡 Please run the interactive guide first: select '🔄 Reconfigure Pixelle MCP' from the menu")
-        console.print("💡 Or exit and rerun [bold cyan]pixelle[/bold cyan] for initial configuration")
+
+
         return
     
     # Provide some common editors suggestions

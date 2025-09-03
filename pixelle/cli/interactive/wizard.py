@@ -56,10 +56,10 @@ def run_full_setup_wizard():
             
     except KeyboardInterrupt:
         console.print("\n\n❌ Configuration cancelled (Ctrl+C pressed)")
-        console.print("💡 You can always run [bold]pixelle[/bold] to configure")
+
     except Exception as e:
         console.print(f"\n❌ Error during configuration: {e}")
-        console.print("💡 You can always run [bold]pixelle[/bold] to try again")
+
 
 
 def run_fresh_setup_wizard():
@@ -113,7 +113,7 @@ def run_fresh_setup_wizard():
             
     except KeyboardInterrupt:
         console.print("\n\n❌ Reconfiguration cancelled (Ctrl+C pressed)")
-        console.print("💡 You can always rerun [bold]pixelle[/bold] to configure")
+
     except Exception as e:
         console.print(f"\n❌ Error occurred during configuration: {e}")
-        console.print("💡 You can rerun [bold]pixelle[/bold] to try again")
+

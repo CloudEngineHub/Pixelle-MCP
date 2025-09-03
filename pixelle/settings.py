@@ -17,7 +17,10 @@ def load_env_from_root_path():
     if env_path.exists():
         load_dotenv(env_path)
 
-load_env_from_root_path()
+# Only load once on module import
+if not os.getenv('PIXELLE_ENV_LOADED'):
+    load_env_from_root_path()
+    os.environ['PIXELLE_ENV_LOADED'] = 'true'
 
 
 class Settings(BaseSettings):

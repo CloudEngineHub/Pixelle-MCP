@@ -27,11 +27,11 @@ def dev_command():
     
     if config_status == "first_time":
         console.print("❌ [bold red]No configuration found![/bold red]")
-        console.print("💡 Please run [bold]pixelle init[/bold] to configure first")
+
         raise typer.Exit(1)
     elif config_status == "incomplete":
         console.print("❌ [bold red]Configuration is incomplete![/bold red]")
-        console.print("💡 Please run [bold]pixelle init[/bold] to fix configuration")
+
         raise typer.Exit(1)
     
     # Core Directory Information
@@ -166,7 +166,7 @@ def dev_command():
             console.print("\n✅ [bold green]All services are running normally![/bold green]")
         else:
             console.print(f"\n⚠️  [bold yellow]{running_services}/{total_services} services are running normally[/bold yellow]")
-            console.print("💡 If any service is not running, please check the configuration or use [cyan]pixelle start --force[/cyan] (or [cyan]-f[/cyan]) to restart")
+
             
     except Exception as e:
         console.print(f"  [yellow]Service status check unavailable: {e}[/yellow]")
