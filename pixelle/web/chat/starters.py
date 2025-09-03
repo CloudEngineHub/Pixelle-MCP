@@ -11,6 +11,8 @@ import uuid
 import asyncio
 import random
 
+from pixelle.utils.os_util import get_data_path
+
 ReplyHandler = Callable[[cl.Message], Awaitable[None]]
 
 class StarterModel(BaseModel):
@@ -61,7 +63,7 @@ TYPING_EFFECT_CONFIG = {
 
 # 文件操作相关函数
 SYSTEM_STARTERS_DIR = Path("./starters")
-CUSTOM_STARTERS_DIR = Path("./data/custom_starters")
+CUSTOM_STARTERS_DIR = Path(get_data_path("custom_starters"))
 
 def ensure_starters_dirs():
     """确保系统和用户 starters 目录都存在"""
