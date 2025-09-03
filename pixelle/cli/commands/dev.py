@@ -16,6 +16,13 @@ console = Console()
 def dev_command():
     """🔧 Display development and debugging information"""
     
+    # Show version information
+    try:
+        from pixelle import __version__
+        console.print(f"🚀 [bold green]Pixelle Version:[/bold green] {__version__}")
+    except ImportError:
+        console.print("🚀 [bold yellow]Pixelle Version:[/bold yellow] unknown")
+    
     # Show current root path
     from pixelle.utils.os_util import get_pixelle_root_path
     current_root_path = get_pixelle_root_path()
@@ -74,17 +81,17 @@ def dev_command():
     try:
         env_path = Path(current_root_path) / ".env"
         if env_path.exists():
-            env_vars = {}
+            env_vars = []  # Use list to preserve order
             with open(env_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith('#') and '=' in line:
                         key, value = line.split('=', 1)
-                        env_vars[key.strip()] = value.strip().strip('"\'')
+                        env_vars.append((key.strip(), value.strip().strip('"\'')))
             
             if env_vars:
                 env_tree = Tree(".env Configuration")
-                for key, value in sorted(env_vars.items()):
+                for key, value in env_vars:  # Keep original order from .env file
                     # Handle sensitive values with better visibility for debugging
                     if 'API_KEY' in key.upper() or 'SECRET' in key.upper():
                         if not value:

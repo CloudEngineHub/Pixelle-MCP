@@ -52,6 +52,7 @@ include = [
   "LICENSE",
   "workflows/**",
   "docs/**",
+  "pyproject.toml",
 ]
 
 [tool.hatch.build.targets.wheel]
