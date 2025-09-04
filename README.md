@@ -93,8 +93,8 @@ uv run pixelle
 #### 🔧 3. Add Custom Workflows (Optional)
 
 ```bash
-# Copy example workflows to data directory
-cp -r workflows/* ~/.pixelle/data/custom_workflows/
+# Copy example workflows to data directory (run this in your desired project directory)
+cp -r workflows/* ./data/custom_workflows/
 ```
 
 **⚠️ Important**: Make sure to test workflows in ComfyUI first to ensure they run properly, otherwise execution will fail.

@@ -93,8 +93,8 @@ uv run pixelle
 #### 🔧 3. 添加自定义工作流（可选）
 
 ```bash
-# 复制示例工作流到数据目录
-cp -r workflows/* ~/.pixelle/data/custom_workflows/
+# 复制示例工作流到数据目录（在您希望的项目目录中运行此命令）
+cp -r workflows/* ./data/custom_workflows/
 ```
 
 **⚠️ 重要**：务必先在ComfyUI中测试工作流能正常运行，否则后续执行会失败。

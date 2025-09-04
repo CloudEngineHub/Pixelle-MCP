@@ -21,8 +21,9 @@ COPY docs/ ./docs/
 # Install Python dependencies using uv
 RUN uv sync --frozen
 
-# Create pixelle config directory
-RUN mkdir -p /root/.pixelle
+# Create pixelle working directory and data structure
+WORKDIR /app
+RUN mkdir -p /app/data/custom_workflows /app/data/custom_starters
 
 # Set default port
 ENV PORT=9004
