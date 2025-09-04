@@ -18,7 +18,7 @@
 #### pip install 方式
 ```bash
 # 安装
-pip install pixelle
+pip install -U pixelle
 
 # 使用
 pixelle [命令] [选项]

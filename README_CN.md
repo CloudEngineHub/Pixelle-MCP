@@ -60,7 +60,7 @@ uvx pixelle@latest
 
 ```bash
 # 安装到系统
-pip install pixelle
+pip install -U pixelle
 
 # 启动服务
 pixelle

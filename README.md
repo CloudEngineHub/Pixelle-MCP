@@ -60,7 +60,7 @@ uvx pixelle@latest
 
 ```bash
 # Install to system
-pip install pixelle
+pip install -U pixelle
 
 # Start service
 pixelle

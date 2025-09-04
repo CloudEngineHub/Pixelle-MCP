@@ -18,7 +18,7 @@ This document provides detailed information about all Pixelle MCP CLI commands a
 #### pip install Method
 ```bash
 # Install
-pip install pixelle
+pip install -U pixelle
 
 # Use
 pixelle [command] [options]
