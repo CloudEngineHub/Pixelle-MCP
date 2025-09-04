@@ -13,6 +13,7 @@ from chainlit.server import app as chainlit_app
 
 from pixelle.utils.dynamic_util import load_modules
 from pixelle.utils.os_util import get_src_path
+from pixelle.utils.openapi_util import create_custom_openapi_function
 from pixelle.mcp_core import mcp
 from pixelle.api.files_api import router as files_router
 
@@ -69,9 +70,17 @@ app.mount("/pixelle", mcp_app)
 for middleware in chainlit_app.user_middleware:
     app.add_middleware(middleware.cls, **middleware.kwargs)
 
-# Copy all routes that are in Chainlit's app into our app
+# Copy all routes that are in Chainlit's app into our app, excluding duplicates
+fastapi_standard_paths = {'/openapi.json', '/docs', '/docs/oauth2-redirect', '/redoc'}
 for route in chainlit_app.routes:
+    # Skip routes that would conflict with FastAPI's standard documentation routes
+    if hasattr(route, 'path') and route.path in fastapi_standard_paths:
+        continue
     app.router.routes.append(route)
+
+
+# Override the default OpenAPI generation with custom function
+app.openapi = create_custom_openapi_function(app)
 
 
 def main():
