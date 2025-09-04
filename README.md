@@ -54,6 +54,8 @@ Choose the deployment method that best suits your needs, from simple to complex:
 uvx pixelle@latest
 ```
 
+📚 **[View uvx CLI Reference →](docs/CLI.md#uvx)**
+
 #### 📦 Persistent Installation
 
 ```bash
@@ -63,6 +65,8 @@ pip install pixelle
 # Start service
 pixelle
 ```
+
+📚 **[View pip CLI Reference →](docs/CLI.md#pip-install)**
 
 After startup, it will automatically enter the **configuration wizard** to guide you through ComfyUI connection and LLM configuration.
 
@@ -80,18 +84,11 @@ cd Pixelle-MCP
 #### 🚀 2. Start Service
 
 ```bash
-# Interactive mode (recommended for first use, includes configuration wizard)
+# Interactive mode (recommended)
 uv run pixelle
-
-# Direct start (when already configured)
-uv run pixelle start
-
-# Background operation
-uv run pixelle start --daemon
-
-# Force start (terminate conflicting processes)
-uv run pixelle start --force
 ```
+
+📚 **[View Complete CLI Reference →](docs/CLI.md#uv-run)**
 
 #### 🔧 3. Add Custom Workflows (Optional)
 
@@ -101,51 +98,6 @@ cp -r workflows/* ~/.pixelle/data/custom_workflows/
 ```
 
 **⚠️ Important**: Make sure to test workflows in ComfyUI first to ensure they run properly, otherwise execution will fail.
-
-### 🎛️ CLI Commands
-
-All startup methods support the same subcommands, but with different invocation methods:
-
-#### 📦 pip install Method
-```bash
-# Enter interactive mode when no parameters
-pixelle
-
-# Service management commands
-pixelle start
-pixelle status
-pixelle stop
-pixelle logs
-pixelle logs --follow
-```
-
-#### 🚀 uvx Method
-```bash
-# Enter interactive mode when no parameters
-uvx pixelle@latest
-
-# Service management commands
-uvx pixelle@latest start
-uvx pixelle@latest status
-uvx pixelle@latest stop
-uvx pixelle@latest logs
-uvx pixelle@latest logs --follow
-```
-
-#### 🛠️ uv run Method
-```bash
-# Enter interactive mode when no parameters
-uv run pixelle
-
-# Service management commands
-uv run pixelle start
-uv run pixelle status
-uv run pixelle stop
-uv run pixelle logs
-uv run pixelle logs --follow
-```
-
-**💡 Tip**: All methods default to interactive mode when no subcommand is provided
 
 ### 🐳 Method 3: Docker Deployment
 

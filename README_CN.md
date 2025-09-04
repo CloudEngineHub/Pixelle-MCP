@@ -54,6 +54,8 @@ Pixelle MCP 采用**统一架构设计**，将MCP服务端、Web界面和文件�
 uvx pixelle@latest
 ```
 
+📚 **[查看uvx完整命令手册 →](docs/CLI_CN.md#uvx)**
+
 #### 📦 持久安装
 
 ```bash
@@ -63,6 +65,8 @@ pip install pixelle
 # 启动服务
 pixelle
 ```
+
+📚 **[查看pip完整命令手册 →](docs/CLI_CN.md#pip-install)**
 
 启动后会自动进入**配置向导**，引导你完成ComfyUI连接和LLM配置。
 
@@ -80,18 +84,11 @@ cd Pixelle-MCP
 #### 🚀 2. 启动服务
 
 ```bash
-# 交互模式（首次使用，包含配置向导）
+# 交互模式（推荐）
 uv run pixelle
-
-# 直接启动（已配置好的情况下）
-uv run pixelle start
-
-# 后台运行
-uv run pixelle start --daemon
-
-# 强制启动（终止冲突进程）
-uv run pixelle start --force
 ```
+
+📚 **[查看完整CLI命令手册 →](docs/CLI_CN.md#uv-run)**
 
 #### 🔧 3. 添加自定义工作流（可选）
 
@@ -101,51 +98,6 @@ cp -r workflows/* ~/.pixelle/data/custom_workflows/
 ```
 
 **⚠️ 重要**：务必先在ComfyUI中测试工作流能正常运行，否则后续执行会失败。
-
-### 🎛️ CLI命令说明
-
-所有启动方式都支持相同的子命令，但调用方式不同：
-
-#### 📦 pip install 方式
-```bash
-# 无参数时进入交互模式
-pixelle
-
-# 服务管理命令
-pixelle start
-pixelle status
-pixelle stop
-pixelle logs
-pixelle logs --follow
-```
-
-#### 🚀 uvx 方式
-```bash
-# 无参数时进入交互模式
-uvx pixelle@latest
-
-# 服务管理命令
-uvx pixelle@latest start
-uvx pixelle@latest status
-uvx pixelle@latest stop
-uvx pixelle@latest logs
-uvx pixelle@latest logs --follow
-```
-
-#### 🛠️ uv run 方式
-```bash
-# 无参数时进入交互模式
-uv run pixelle
-
-# 服务管理命令
-uv run pixelle start
-uv run pixelle status
-uv run pixelle stop
-uv run pixelle logs
-uv run pixelle logs --follow
-```
-
-**💡 提示**：无论哪种方式，不带子命令时都会默认进入交互模式
 
 ### 🐳 方式3：Docker部署（生产环境）
 
