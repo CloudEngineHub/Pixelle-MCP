@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     chainlit_chat_default_model: str = "gpt-4o-mini"
     
     def get_configured_llm_providers(self) -> list[str]:
-        """获取已配置的LLM提供商列表"""
+        """Get list of configured LLM providers"""
         providers = []
         if self.openai_api_key:
             providers.append("openai")
@@ -92,7 +92,7 @@ class Settings(BaseSettings):
         return providers
     
     def get_all_available_models(self) -> list[str]:
-        """获取所有可用模型列表"""
+        """Get list of all available models"""
         models = []
         
         if self.openai_api_key and self.chainlit_chat_openai_models:

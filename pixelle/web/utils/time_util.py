@@ -3,30 +3,30 @@
 
 def format_duration(duration_seconds: float) -> str:
     """
-    将秒数格式化为人类友好的时间字符串
+    Convert seconds to a human-friendly time string
     
     Args:
-        duration_seconds: 时长（秒）
+        duration_seconds: Duration (seconds)
         
     Returns:
-        格式化后的时间字符串，如：1h23m45s, 2m30s, 1.5s, 500ms
+        Formatted time string, such as: 1h23m45s, 2m30s, 1.5s, 500ms
     """
     if duration_seconds < 0:
         return "0ms"
     
-    # 转换为毫秒
+    # Convert to milliseconds
     total_ms = int(duration_seconds * 1000)
     
-    # 如果小于1秒，显示毫秒
+    # If less than 1 second, display milliseconds
     if total_ms < 1000:
         return f"{total_ms}ms"
     
-    # 转换为各个时间单位
+    # Convert to each time unit
     hours = int(duration_seconds // 3600)
     minutes = int((duration_seconds % 3600) // 60)
     seconds = duration_seconds % 60
     
-    # 构建时间字符串
+    # Build the time string
     time_parts = []
     
     if hours > 0:
@@ -35,14 +35,14 @@ def format_duration(duration_seconds: float) -> str:
     if minutes > 0:
         time_parts.append(f"{minutes}m")
     
-    # 对于秒，如果有小数部分且总时长小于10秒，保留1位小数
+    # For seconds, if there is a decimal part and the total duration is less than 10 seconds, keep 1 decimal place
     if seconds > 0:
         if duration_seconds < 10 and seconds != int(seconds):
             time_parts.append(f"{seconds:.1f}s")
         else:
             time_parts.append(f"{int(seconds)}s")
     
-    # 如果没有任何时间部分（理论上不应该发生），返回0ms
+    # If there are no time parts (theoretically should not happen), return 0ms
     if not time_parts:
         return "0ms"
     

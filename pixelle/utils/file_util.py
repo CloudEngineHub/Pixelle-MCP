@@ -37,7 +37,7 @@ async def download_files(file_urls: Union[str, List[str]], suffix: str = None, a
         file_urls: Single URL string or URL list
         suffix: Temporary file suffix, if not specified, try to infer from URL
         auto_cleanup: Whether to automatically clean up temporary files, default is True
-        cookies: 请求时使用的 cookies，默认为 None
+        cookies: Cookies used when requesting
         
     Yields:
         str: If input is str, return temporary file path
@@ -151,7 +151,7 @@ def get_ext_from_content_type(content_type: str) -> str:
         logger.debug(f"Get extension from Content-Type '{content_type}': {ext}")
         return ext
     else:
-        logger.debug(f"未知的Content-Type: {content_type}")
+        logger.debug(f"Unknown Content-Type: {content_type}")
         return ""
 
 

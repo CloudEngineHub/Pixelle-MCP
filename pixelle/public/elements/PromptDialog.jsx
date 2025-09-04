@@ -45,13 +45,13 @@ export default function PromptDialog() {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Save className="h-5 w-5" />
-                        {props.title || "输入信息"}
+                        {props.title || "Input"}
                     </DialogTitle>
                 </DialogHeader>
                 
                 <div className="py-2">
                     <div className="text-sm text-foreground mb-2">
-                        {props.message || "请输入内容："}
+                        {props.message || "Please input content:"}
                     </div>
                     <Input
                         value={inputValue}
@@ -66,14 +66,14 @@ export default function PromptDialog() {
                 <DialogFooter className="gap-2">
                     <Button variant="outline" onClick={handleCancel}>
                         <X className="h-4 w-4 mr-1" />
-                        取消
+                        Cancel
                     </Button>
                     <Button 
                         onClick={handleConfirm}
                         disabled={!inputValue.trim()}
                     >
                         <Save className="h-4 w-4 mr-1" />
-                        确认
+                        Confirm
                     </Button>
                 </DialogFooter>
             </DialogContent>

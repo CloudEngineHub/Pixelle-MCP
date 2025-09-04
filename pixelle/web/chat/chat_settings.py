@@ -10,7 +10,7 @@ from pixelle.web.core.prompt import DEFAULT_SYSTEM_PROMPT
 
 
 async def setup_chat_settings():
-    # 文档：https://docs.chainlit.io/api-reference/chat-settings#usage
+    # Documentation: https://docs.chainlit.io/api-reference/chat-settings#usage
     
     settings = await cl.ChatSettings(
         [

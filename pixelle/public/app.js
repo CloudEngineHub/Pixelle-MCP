@@ -3,7 +3,7 @@
  This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 */
 
-// 定义基础服务地址常量
+// Define base service address constant
 const MCP_SERVER_BASE_URL = "http://localhost:9004";
 
 function initMcp() {

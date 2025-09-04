@@ -34,10 +34,10 @@ async def chat_profile(user: cl.User | None) -> list[cl.ChatProfile]:
 
 @cl.on_chat_start
 async def start():
-    """初始化聊天会话"""
+    """Initialize chat session"""
     await setup_chat_settings()
     
-    # 从settings中获取系统提示词，如果没有则使用默认值
+    # Get system prompt from settings, if not exists, use default value
     settings = cl.user_session.get("settings", {})
     system_prompt = settings.get("system_prompt", DEFAULT_SYSTEM_PROMPT)
     
@@ -53,22 +53,22 @@ async def on_settings_update(settings):
 
 @cl.on_mcp_connect
 async def on_mcp(connection: McpConnection, session: ClientSession) -> None:
-    """处理 MCP 连接"""
+    """Handle MCP connection"""
     await handle_mcp_connect(connection, session, tools_from_chaintlit_to_openai)
     cl.user_session.set("mcp_session", session)
 
 
 @cl.on_mcp_disconnect
 async def on_mcp_disconnect(name: str, session: ClientSession):
-    """MCP 连接断开时调用"""
-    logger.info(f"MCP 连接已断开: {name}")
+    """Called when MCP connection is disconnected"""
+    logger.info(f"MCP connection is disconnected: {name}")
     await handle_mcp_disconnect(name)
 
 
 @cl.on_message
 async def on_message(message: cl.Message):
-    """处理用户消息"""
-    # 检查是否为starter消息，如果已处理则直接返回
+    """Handle user message"""
+    # Check if it is a starter message, if it is handled, return directly
     is_handled = await starters.hook_by_starters(message)
     if is_handled:
         return
@@ -88,7 +88,7 @@ async def on_message(message: cl.Message):
     cl_messages = cl.chat_context.get()
     messages = messages_from_chaintlit_to_openai(cl_messages)
     
-    # 使用工具处理器处理流式响应和工具调用
+    # Use tool processor to process streaming response and tool calls
     chat_profile = cl.user_session.get("chat_profile")
     model_info = llm_util.get_model_info_by_name(chat_profile)
     await tool_handler.process_streaming_response(

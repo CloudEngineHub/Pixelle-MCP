@@ -7,7 +7,7 @@ from fastapi.responses import Response
 from pixelle.upload.file_service import file_service
 from pixelle.upload.base import FileInfo
 
-# 创建路由器
+# Create router
 router = APIRouter(
     tags=["files"],
     responses={404: {"description": "Not found"}},
@@ -17,13 +17,13 @@ router = APIRouter(
 @router.post("/upload", response_model=FileInfo)
 async def upload_file(file: UploadFile = File(...)):
     """
-    上传文件
+    Upload file
     
     Args:
-        file: 上传的文件
+        file: Uploaded file
         
     Returns:
-        FileInfo: 文件信息
+        FileInfo: File information
     """
     return await file_service.upload_file(file)
 
@@ -31,25 +31,25 @@ async def upload_file(file: UploadFile = File(...)):
 @router.get("/{file_id}")
 async def get_file(file_id: str):
     """
-    获取文件
+    Get file
     
     Args:
-        file_id: 文件ID
+        file_id: File ID
         
     Returns:
-        文件内容
+        File content
     """
-    # 获取文件信息
+    # Get file information
     file_info = await file_service.get_file_info(file_id)
     if not file_info:
         raise HTTPException(status_code=404, detail="File not found")
 
-    # 获取文件内容
+    # Get file content
     file_content = await file_service.get_file(file_id)
     if not file_content:
         raise HTTPException(status_code=404, detail="File content not found")
 
-    # 返回文件流
+    # Return file stream
     return Response(
         content=file_content,
         media_type=file_info.content_type,
@@ -62,13 +62,13 @@ async def get_file(file_id: str):
 @router.get("/{file_id}/info", response_model=FileInfo)
 async def get_file_info(file_id: str):
     """
-    获取文件信息
+    Get file information
     
     Args:
-        file_id: 文件ID
+        file_id: File ID
         
     Returns:
-        FileInfo: 文件信息
+        FileInfo: File information
     """
     file_info = await file_service.get_file_info(file_id)
     if not file_info:
@@ -76,17 +76,17 @@ async def get_file_info(file_id: str):
     return file_info
 
 
-# 暂不开放, 防止数据丢失
+# Not open for now, to prevent data loss
 # @router.delete("/{file_id}")
 async def delete_file(file_id: str):
     """
-    删除文件
+    Delete file
     
     Args:
-        file_id: 文件ID
+        file_id: File ID
         
     Returns:
-        删除结果
+        Delete result
     """
     success = await file_service.delete_file(file_id)
     if not success:
@@ -97,13 +97,13 @@ async def delete_file(file_id: str):
 @router.get("/{file_id}/exists")
 async def check_file_exists(file_id: str):
     """
-    检查文件是否存在
+    Check if file exists
     
     Args:
-        file_id: 文件ID
+        file_id: File ID
         
     Returns:
-        存在性检查结果
+        Existence check result
     """
     exists = await file_service.file_exists(file_id)
     return {"exists": exists}

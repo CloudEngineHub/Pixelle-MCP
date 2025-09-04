@@ -13,25 +13,25 @@ from pixelle.comfyui.models import ExecuteResult
 
 
 class HttpExecutor(ComfyUIExecutor):
-    """HTTP 方式的 ComfyUI 执行器"""
+    """HTTP executor for ComfyUI"""
     
     def __init__(self, base_url: str = None):
         super().__init__(base_url)
 
     async def _queue_prompt(self, workflow: Dict[str, Any], client_id: str, prompt_ext_params: Optional[Dict[str, Any]] = None) -> str:
-        """将工作流提交到队列"""
+        """Submit workflow to queue"""
         prompt_data = {
             "prompt": workflow,
             "client_id": client_id
         }
         
-        # 更新prompt_data与prompt_ext_params的所有参数
+        # Update all parameters of prompt_data and prompt_ext_params
         if prompt_ext_params:
             prompt_data.update(prompt_ext_params)
         
         json_data = json.dumps(prompt_data)
         
-        # 使用aiohttp发送请求
+        # Use aiohttp to send request
         prompt_url = f"{self.base_url}/prompt"
         async with self.get_comfyui_session() as session:
             async with session.post(
@@ -41,38 +41,38 @@ class HttpExecutor(ComfyUIExecutor):
                 ) as response:
                 if response.status != 200:
                     response_text = await response.text()
-                    raise Exception(f"提交工作流失败: [{response.status}] {response_text}")
+                    raise Exception(f"Submit workflow failed: [{response.status}] {response_text}")
                 
                 result = await response.json()
                 prompt_id = result.get("prompt_id")
                 if not prompt_id:
-                    raise Exception(f"获取prompt_id失败: {result}")
-                logger.info(f"任务已提交: {prompt_id}")
+                    raise Exception(f"Get prompt_id failed: {result}")
+                logger.info(f"Task submitted: {prompt_id}")
                 return prompt_id
 
     async def _wait_for_results(self, prompt_id: str, client_id: str, timeout: Optional[int] = None, output_id_2_var: Optional[Dict[str, str]] = None) -> ExecuteResult:
-        """等待工作流执行结果（HTTP方式）"""
+        """Wait for workflow execution result (HTTP way)"""
         start_time = time.time()
-        logger.info(f"HTTP方式等待执行结果，prompt_id: {prompt_id}, client_id: {client_id}")
+        logger.info(f"HTTP way to wait for execution result, prompt_id: {prompt_id}, client_id: {client_id}")
         result = ExecuteResult(
             status="processing",
             prompt_id=prompt_id
         )
 
-        # 获取基础URL
+        # Get base URL
         base_url = self.base_url
 
         while True:
-            # 检查超时
+            # Check timeout
             if timeout is not None and timeout > 0:
                 duration = time.time() - start_time
                 if duration > timeout:
-                    logger.warning(f"超时: {duration} 秒")
+                    logger.warning(f"Timeout: {duration} seconds")
                     result.status = "timeout"
                     result.duration = duration
                     return result
 
-            # 使用HTTP API获取历史记录
+            # Use HTTP API to get history
             history_url = f"{self.base_url}/history/{prompt_id}"
             async with self.get_comfyui_session() as session:
                 async with session.get(history_url) as response:
@@ -97,7 +97,7 @@ class HttpExecutor(ComfyUIExecutor):
                             ]
                             error_message = "\n".join(errors)
                         else:
-                            error_message = "未知错误"
+                            error_message = "Unknown error"
                         result.msg = error_message
                         result.duration = time.time() - start_time
                         return result
@@ -106,7 +106,7 @@ class HttpExecutor(ComfyUIExecutor):
                         result.outputs = prompt_history["outputs"]
                         result.status = "completed"
 
-                        # 按文件扩展名收集所有图片、视频、音频和文本输出
+                        # Collect all images, videos, audios and texts outputs by file extension
                         output_id_2_images = {}
                         output_id_2_videos = {}
                         output_id_2_audios = {}
@@ -121,7 +121,7 @@ class HttpExecutor(ComfyUIExecutor):
                             if audios:
                                 output_id_2_audios[node_id] = audios
                             
-                            # 收集文本输出
+                            # Collect text outputs
                             if "text" in node_output:
                                 texts = node_output["text"]
                                 if isinstance(texts, str):
@@ -130,7 +130,7 @@ class HttpExecutor(ComfyUIExecutor):
                                     texts = [str(texts)]
                                 output_id_2_texts[node_id] = texts
 
-                        # 如果有映射则按变量名映射
+                        # If there is a mapping, map by variable name
                         if output_id_2_images:
                             result.images_by_var = self._map_outputs_by_var(output_id_2_var or {}, output_id_2_images)
                             result.images = self._extend_flat_list_from_dict(result.images_by_var)
@@ -143,49 +143,49 @@ class HttpExecutor(ComfyUIExecutor):
                             result.audios_by_var = self._map_outputs_by_var(output_id_2_var or {}, output_id_2_audios)
                             result.audios = self._extend_flat_list_from_dict(result.audios_by_var)
 
-                        # 处理texts/texts_by_var
+                        # Process texts/texts_by_var
                         if output_id_2_texts:
                             result.texts_by_var = self._map_outputs_by_var(output_id_2_var or {}, output_id_2_texts)
                             result.texts = self._extend_flat_list_from_dict(result.texts_by_var)
 
-                        # 设置执行耗时
+                        # Set execution duration
                         result.duration = time.time() - start_time
                         return result
             await asyncio.sleep(1.0)
 
     async def execute_workflow(self, workflow_file: str, params: Dict[str, Any] = None) -> ExecuteResult:
-        """执行工作流（HTTP方式）"""
+        """Execute workflow (HTTP way)"""
         try:
             if not os.path.exists(workflow_file):
-                logger.error(f"工作流文件不存在: {workflow_file}")
-                return ExecuteResult(status="error", msg=f"工作流文件不存在: {workflow_file}")
+                logger.error(f"Workflow file does not exist: {workflow_file}")
+                return ExecuteResult(status="error", msg=f"Workflow file does not exist: {workflow_file}")
             
-            # 获取工作流元数据
+            # Get workflow metadata
             metadata = self.get_workflow_metadata(workflow_file)
             if not metadata:
-                return ExecuteResult(status="error", msg="无法解析工作流元数据")
+                return ExecuteResult(status="error", msg="Cannot parse workflow metadata")
             
-            # 加载工作流JSON
+            # Load workflow JSON
             with open(workflow_file, 'r', encoding='utf-8') as f:
                 workflow_data = json.load(f)
             
             if not workflow_data:
-                return ExecuteResult(status="error", msg="工作流数据缺失")
+                return ExecuteResult(status="error", msg="Workflow data is missing")
             
-            # 使用新的参数映射逻辑
+            # Use new parameter mapping logic
             if params:
                 workflow_data = await self._apply_params_to_workflow(workflow_data, metadata, params)
             else:
-                # 即使没有传入参数，也需要应用默认值
+                # Even if no parameters are passed, default values need to be applied
                 workflow_data = await self._apply_params_to_workflow(workflow_data, metadata, {})
             
-            # 从元数据提取输出节点信息
+            # Extract output node information from metadata
             output_id_2_var = self._extract_output_nodes(metadata)
             
-            # 生成客户端ID
+            # Generate client ID
             client_id = str(uuid.uuid4())
             
-            # 准备额外参数
+            # Prepare extra parameters
             prompt_ext_params = {}
             if COMFYUI_API_KEY:
                 prompt_ext_params = {
@@ -194,23 +194,23 @@ class HttpExecutor(ComfyUIExecutor):
                     }
                 }
             else:
-                logger.warning("COMFYUI_API_KEY 未设置")
+                logger.warning("COMFYUI_API_KEY is not set")
             
-            # 提交工作流到ComfyUI队列
+            # Submit workflow to ComfyUI queue
             try:
                 prompt_id = await self._queue_prompt(workflow_data, client_id, prompt_ext_params)
             except Exception as e:
-                error_message = f"提交工作流失败: [{type(e)}] {str(e)}"
+                error_message = f"Submit workflow failed: [{type(e)}] {str(e)}"
                 logger.error(error_message)
                 return ExecuteResult(status="error", msg=error_message)
             
-            # 等待结果
+            # Wait for result
             result = await self._wait_for_results(prompt_id, client_id, None, output_id_2_var)
             
-            # 转存结果文件
+            # Transfer result files
             result = await self.transfer_result_files(result)
             return result
             
         except Exception as e:
-            logger.error(f"执行工作流出错: {str(e)}", exc_info=True)
+            logger.error(f"Execute workflow failed: {str(e)}", exc_info=True)
             return ExecuteResult(status="error", msg=str(e)) 

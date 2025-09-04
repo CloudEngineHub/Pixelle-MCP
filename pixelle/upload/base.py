@@ -2,8 +2,7 @@
 # This project is licensed under the MIT License (SPDX-License-identifier: MIT).
 
 """
-存储抽象基类
-定义存储后端的统一接口
+Storage backend abstract base class
 """
 
 from abc import ABC, abstractmethod
@@ -13,7 +12,7 @@ from dataclasses import dataclass
 
 @dataclass
 class FileInfo:
-    """文件信息"""
+    """File information"""
     file_id: str
     filename: str
     content_type: str
@@ -22,7 +21,7 @@ class FileInfo:
 
 
 class StorageBackend(ABC):
-    """存储后端抽象基类"""
+    """Storage backend abstract base class"""
     
     @abstractmethod
     async def upload(
@@ -32,66 +31,66 @@ class StorageBackend(ABC):
         content_type: str
     ) -> FileInfo:
         """
-        上传文件
+        Upload file
         
         Args:
-            file_data: 文件数据流
-            filename: 文件名
-            content_type: 文件MIME类型
+            file_data: File data stream
+            filename: File name
+            content_type: File MIME type
             
         Returns:
-            FileInfo: 文件信息
+            FileInfo: File information
         """
         pass
     
     @abstractmethod
     async def download(self, file_id: str) -> Optional[bytes]:
         """
-        下载文件
+        Download file
         
         Args:
-            file_id: 文件ID
+            file_id: File ID
             
         Returns:
-            bytes: 文件内容，如果文件不存在返回None
+            bytes: File content, return None if file not exists
         """
         pass
     
     @abstractmethod
     async def delete(self, file_id: str) -> bool:
         """
-        删除文件
+        Delete file
         
         Args:
-            file_id: 文件ID
+            file_id: File ID
             
         Returns:
-            bool: 是否删除成功
+            bool: Whether delete successfully
         """
         pass
     
     @abstractmethod
     async def exists(self, file_id: str) -> bool:
         """
-        检查文件是否存在
+        Check if file exists
         
         Args:
-            file_id: 文件ID
+            file_id: File ID
             
         Returns:
-            bool: 文件是否存在
+            bool: Whether file exists
         """
         pass
     
     @abstractmethod
     async def get_file_info(self, file_id: str) -> Optional[FileInfo]:
         """
-        获取文件信息
+        Get file information
         
         Args:
-            file_id: 文件ID
+            file_id: File ID
             
         Returns:
-            FileInfo: 文件信息，如果文件不存在返回None
+            FileInfo: File information, return None if file not exists
         """
         pass 

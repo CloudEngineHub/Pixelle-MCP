@@ -48,7 +48,7 @@ export default function AlertDialog() {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         {getIcon()}
-                        {props.title || "提示"}
+                        {props.title || "Alert"}
                     </DialogTitle>
                 </DialogHeader>
                 
@@ -64,7 +64,7 @@ export default function AlertDialog() {
                         onClick={handleClose}
                         className="w-full"
                     >
-                        确定
+                        Confirm
                     </Button>
                 </DialogFooter>
             </DialogContent>
