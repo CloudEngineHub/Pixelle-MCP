@@ -24,13 +24,13 @@ pip install pixelle
 pixelle [command] [options]
 ```
 
-#### uvx Method (Recommended)
+#### uvx Method
 ```bash
 # Use directly without installation
 uvx pixelle@latest [command] [options]
 ```
 
-#### uv run Method (Development)
+#### uv run Method
 ```bash
 # Use in project directory
 uv run pixelle [command] [options]

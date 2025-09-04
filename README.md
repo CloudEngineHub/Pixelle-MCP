@@ -54,7 +54,7 @@ Choose the deployment method that best suits your needs, from simple to complex:
 uvx pixelle@latest
 ```
 
-📚 **[View uvx CLI Reference →](docs/CLI.md#uvx-method-recommended)**
+📚 **[View uvx CLI Reference →](docs/CLI.md#uvx-method)**
 
 #### 📦 Persistent Installation
 
@@ -88,7 +88,7 @@ cd Pixelle-MCP
 uv run pixelle
 ```
 
-📚 **[View Complete CLI Reference →](docs/CLI.md#uv-run-method-development)**
+📚 **[View Complete CLI Reference →](docs/CLI.md#uv-run-method)**
 
 #### 🔧 3. Add Custom Workflows (Optional)
 

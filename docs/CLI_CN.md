@@ -24,13 +24,13 @@ pip install pixelle
 pixelle [命令] [选项]
 ```
 
-#### uvx 方式（推荐）
+#### uvx 方式
 ```bash
 # 直接使用，无需安装
 uvx pixelle@latest [命令] [选项]
 ```
 
-#### uv run 方式（开发环境）
+#### uv run 方式
 ```bash
 # 在项目目录下使用
 uv run pixelle [命令] [选项]

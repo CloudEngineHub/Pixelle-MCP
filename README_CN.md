@@ -54,7 +54,7 @@ Pixelle MCP 采用**统一架构设计**，将MCP服务端、Web界面和文件�
 uvx pixelle@latest
 ```
 
-📚 **[查看uvx完整命令手册 →](docs/CLI_CN.md#uvx方式推荐)**
+📚 **[查看uvx完整命令手册 →](docs/CLI_CN.md#uvx-方式)**
 
 #### 📦 持久安装
 
@@ -88,7 +88,7 @@ cd Pixelle-MCP
 uv run pixelle
 ```
 
-📚 **[查看完整CLI命令手册 →](docs/CLI_CN.md#uv-run-方式开发环境)**
+📚 **[查看完整CLI命令手册 →](docs/CLI_CN.md#uv-run-方式)**
 
 #### 🔧 3. 添加自定义工作流（可选）
 
