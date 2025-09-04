@@ -18,10 +18,9 @@ def start_command(
 ):
     """🚀 Start Pixelle MCP server directly (non-interactive)"""
     
-    # Show current root path
-    from pixelle.utils.os_util import get_pixelle_root_path
-    current_root_path = get_pixelle_root_path()
-    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+    # Show header information
+    from pixelle.cli.utils.display import show_header_info
+    show_header_info()
     
     # Check if configuration exists
     config_status = detect_config_status()

@@ -18,10 +18,13 @@ console = Console()
 def workflow_command():
     """🔧 Display all current workflow files and tools information"""
     
-    # Show current root path
+    # Show header information
+    from pixelle.cli.utils.display import show_header_info
+    show_header_info()
+    
+    # Get root path for workflow directories
     from pixelle.utils.os_util import get_pixelle_root_path, get_data_path
     current_root_path = get_pixelle_root_path()
-    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
     
     # Get workflow directories
     builtin_workflows_dir = Path(current_root_path) / "workflows"

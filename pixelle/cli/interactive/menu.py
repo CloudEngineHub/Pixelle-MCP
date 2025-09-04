@@ -8,7 +8,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 
-from pixelle.cli.utils.display import show_current_config, show_enhanced_help
+from pixelle.cli.utils.display import show_header_info, show_current_config, show_enhanced_help
 from pixelle.cli.utils.server_utils import start_pixelle_server, check_service_status
 from pixelle.cli.interactive.wizard import run_fresh_setup_wizard
 
@@ -17,6 +17,10 @@ console = Console()
 
 def show_main_menu():
     """Show main menu"""
+    
+    # Show header information
+    show_header_info()
+    
     console.print("\n📋 [bold]Current configuration status[/bold]")
     show_current_config()
     

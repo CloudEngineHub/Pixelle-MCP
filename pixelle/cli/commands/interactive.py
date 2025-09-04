@@ -13,10 +13,5 @@ console = Console()
 def interactive_command():
     """🎨 Run in interactive mode (default when no command specified)"""
     
-    # Always show current root path for debugging
-    from pixelle.utils.os_util import get_pixelle_root_path
-    current_root_path = get_pixelle_root_path()
-    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
-    
     # Run interactive mode
     run_interactive_mode()

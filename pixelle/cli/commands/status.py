@@ -15,6 +15,10 @@ console = Console()
 def status_command():
     """📊 Check the status of Pixelle MCP service and dependencies"""
     
+    # Show header information
+    from pixelle.cli.utils.display import show_header_info
+    show_header_info()
+    
     console.print("📊 [bold]Checking Pixelle MCP service status...[/bold]\n")
     
     # Check daemon process status

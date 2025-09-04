@@ -10,19 +10,26 @@ import os
 SRC_PATH = Path(pixelle.__file__).parent
 
 def get_pixelle_root_path() -> str:
-    """Get Pixelle root path from environment variable or default"""
-    return os.getenv('PIXELLE_ROOT_PATH', str(Path.home() / '.pixelle'))
+    """Get Pixelle root path - current working directory"""
+    return str(Path.cwd())
 
 def ensure_pixelle_root_path() -> str:
     """Ensure Pixelle root path exists and return the path"""
     root_path = get_pixelle_root_path()
     root_path_obj = Path(root_path)
     
+    # Check if this is first time initialization in this directory
+    data_dir = root_path_obj / 'data'
+    if not data_dir.exists():
+        from rich.console import Console
+        console = Console()
+        console.print(f"🎯 [bold blue]Initializing Pixelle in root path:[/bold blue] {root_path}")
+        console.print("💡 This directory will store your configurations, workflows, and generated files.\n")
+    
     # Create directory structure if needed
-    root_path_obj.mkdir(parents=True, exist_ok=True)
-    (root_path_obj / 'data').mkdir(exist_ok=True)
-    (root_path_obj / 'data' / 'custom_workflows').mkdir(exist_ok=True)
-    (root_path_obj / 'data' / 'custom_starters').mkdir(exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / 'custom_workflows').mkdir(exist_ok=True)
+    (data_dir / 'custom_starters').mkdir(exist_ok=True)
     
     return root_path
 

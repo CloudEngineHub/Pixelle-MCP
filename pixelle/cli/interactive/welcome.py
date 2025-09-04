@@ -28,10 +28,9 @@ def run_interactive_mode():
         from pixelle.utils.os_util import get_pixelle_root_path
         current_root_path = get_pixelle_root_path()
         console.print(f"📁 [bold]Data will be stored in:[/bold] {current_root_path}")
-        console.print("💡 To use a custom path, set the [cyan]PIXELLE_ROOT_PATH[/cyan] environment variable:")
-        console.print("   • Linux/macOS: [cyan]export PIXELLE_ROOT_PATH=/your/path[/cyan]")
-        console.print("   • Windows: [cyan]set PIXELLE_ROOT_PATH=C:\\your\\path[/cyan]")
-        console.print("   • Or add it to your shell profile for permanent use\n")
+        console.print("💡 To use a different location, run Pixelle commands in your preferred directory")
+        console.print("   • Data and configurations will be stored in the directory where you run commands")
+        console.print("   • This allows you to create separate root paths for different projects\n")
         
         import questionary
         if questionary.confirm("Start configuration wizard?", default=True, instruction="(Y/n)").ask():

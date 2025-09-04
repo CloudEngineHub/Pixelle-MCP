@@ -21,12 +21,11 @@ console = Console()
 def init_command():
     """🔄 Initialize/reconfigure Pixelle MCP (non-interactive setup wizard)"""
     
-    # Show current root path
-    from pixelle.utils.os_util import get_pixelle_root_path
-    current_root_path = get_pixelle_root_path()
-    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+    # Show header information
+    from pixelle.cli.utils.display import show_header_info
+    show_header_info()
     
-    console.print("🔄 [bold]Running configuration wizard...[/bold]")
+    console.print("\n🔄 [bold]Running configuration wizard...[/bold]")
     
     try:
         # Step 1: ComfyUI config

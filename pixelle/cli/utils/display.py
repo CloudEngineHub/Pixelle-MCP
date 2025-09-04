@@ -30,6 +30,21 @@ A simple solution to convert ComfyUI workflow to MCP tool
     ))
 
 
+def show_header_info():
+    """Show version and root path information"""
+    # Show version information
+    try:
+        from pixelle import __version__
+        console.print(f"🚀 [bold green]Pixelle Version:[/bold green] {__version__}")
+    except ImportError:
+        console.print("🚀 [bold yellow]Pixelle Version:[/bold yellow] unknown")
+    
+    # Show current root path
+    from pixelle.utils.os_util import get_pixelle_root_path
+    current_root_path = get_pixelle_root_path()
+    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
+
+
 def show_current_config():
     """Show current configuration"""
     from pixelle.settings import settings

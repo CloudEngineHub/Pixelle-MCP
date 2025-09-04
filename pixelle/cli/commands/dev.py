@@ -16,17 +16,13 @@ console = Console()
 def dev_command():
     """🔧 Display development and debugging information"""
     
-    # Show version information
-    try:
-        from pixelle import __version__
-        console.print(f"🚀 [bold green]Pixelle Version:[/bold green] {__version__}")
-    except ImportError:
-        console.print("🚀 [bold yellow]Pixelle Version:[/bold yellow] unknown")
+    # Show header information
+    from pixelle.cli.utils.display import show_header_info
+    show_header_info()
     
-    # Show current root path
+    # Get current root path for directory information
     from pixelle.utils.os_util import get_pixelle_root_path
     current_root_path = get_pixelle_root_path()
-    console.print(f"🗂️  [bold blue]Root Path:[/bold blue] {current_root_path}")
     
     # Check configuration status first
     from pixelle.cli.utils.command_utils import detect_config_status
