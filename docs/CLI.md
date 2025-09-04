@@ -15,7 +15,7 @@ This document provides detailed information about all Pixelle MCP CLI commands a
 
 ### Installation Methods & Invocation
 
-#### 📦 pip install Method {#pip-install}
+#### pip install Method
 ```bash
 # Install
 pip install pixelle
@@ -24,13 +24,13 @@ pip install pixelle
 pixelle [command] [options]
 ```
 
-#### 🚀 uvx Method (Recommended) {#uvx}
+#### uvx Method (Recommended)
 ```bash
 # Use directly without installation
 uvx pixelle@latest [command] [options]
 ```
 
-#### 🛠️ uv run Method (Development) {#uv-run}
+#### uv run Method (Development)
 ```bash
 # Use in project directory
 uv run pixelle [command] [options]
