@@ -11,7 +11,7 @@ import uuid
 import asyncio
 import random
 
-from pixelle.utils.os_util import get_data_path
+from pixelle.utils.os_util import get_data_path, get_src_path
 
 ReplyHandler = Callable[[cl.Message], Awaitable[None]]
 
@@ -62,7 +62,7 @@ TYPING_EFFECT_CONFIG = {
 }
 
 # File operation related functions
-SYSTEM_STARTERS_DIR = Path("./starters")
+SYSTEM_STARTERS_DIR = Path(get_src_path("starters"))
 CUSTOM_STARTERS_DIR = Path(get_data_path("custom_starters"))
 
 def ensure_starters_dirs():

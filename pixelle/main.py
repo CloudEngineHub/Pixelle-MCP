@@ -11,7 +11,6 @@ from chainlit.config import load_module, config as chainlit_config
 from chainlit.server import lifespan as chainlit_lifespan
 from chainlit.server import app as chainlit_app
 
-from pixelle.utils.dynamic_util import load_modules
 from pixelle.utils.os_util import get_src_path
 from pixelle.utils.openapi_util import create_custom_openapi_function
 from pixelle.mcp_core import mcp
@@ -57,8 +56,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load tools module dynamically
-load_modules("tools")
+# Load tools modules manually (avoid loading residual files from old installations)
+from pixelle.tools import i_crop
+from pixelle.tools import workflow_manager_tool
 
 # Register files router
 app.include_router(files_router, prefix="/files")
