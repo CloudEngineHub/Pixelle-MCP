@@ -37,6 +37,7 @@ def setup_comfyui(default_url: str = None) -> Optional[Dict]:
     
     if not url:  # User entered empty string
         return None
+    url = url.strip().rstrip('/')
     
     console.print(f"✅ ComfyUI address set to: {url}")
     

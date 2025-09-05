@@ -61,9 +61,9 @@ def test_ollama_connection(base_url: str) -> bool:
 
 
 def get_openai_models(api_key: str, base_url: str) -> List[str]:
-    """Fetch available OpenAI(-compatible) models; returns filtered, sorted list.
+    """Fetch available OpenAI(-compatible) models; returns deduplicated list in original order.
 
-    Filters to chat/text-like models to avoid embeddings and others.
+    Returns all available models without filtering, letting users choose themselves.
     """
     try:
         headers = {"Authorization": f"Bearer {api_key}"}
@@ -71,12 +71,14 @@ def get_openai_models(api_key: str, base_url: str) -> List[str]:
         if response.status_code == 200:
             data = response.json()
             models = [model.get("id", "") for model in data.get("data", [])]
-            gpt_models = [
-                m for m in models if any(keyword in m.lower() for keyword in [
-                    "gpt", "chat", "davinci", "text"
-                ])
-            ]
-            return sorted(gpt_models)
+            # Remove duplicates while preserving order
+            seen = set()
+            deduplicated_models = []
+            for model in models:
+                if model and model not in seen:
+                    seen.add(model)
+                    deduplicated_models.append(model)
+            return deduplicated_models
     except Exception:
         pass
     return []

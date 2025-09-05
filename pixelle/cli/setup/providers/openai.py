@@ -22,13 +22,15 @@ def configure_openai() -> Optional[Dict]:
     api_key = questionary.password("Please input your OpenAI API Key:").ask()
     if not api_key:
         return None
+    api_key = api_key.strip()
     
     default_base_url = "https://api.openai.com/v1"
     base_url = questionary.text(
-        "API address:",
+        "OpenAI Base Url:",
         default=default_base_url,
-        instruction="(press Enter to use default, or input custom address)"
+        instruction="(press Enter to use default, or input custom base url)"
     ).ask()
+    base_url = base_url.strip().rstrip('/')
     
     # Try to get model list
     console.print("🔍 Getting available model list...")
@@ -36,6 +38,11 @@ def configure_openai() -> Optional[Dict]:
     
     if available_models:
         console.print(f"📋 Found {len(available_models)} available models")
+        
+        # Important warning about function calling support
+        console.print("\n⚠️  [bold yellow]Important:[/bold yellow] Please make sure to select models that support [bold]function calling[/bold]!")
+        console.print("   Function calling is required for this application to work properly.")
+        console.print("   Common models that support function calling include: GPT-4, GPT-4.1, etc.\n")
         
         # Create choices list with all available models
         choices = []
@@ -60,7 +67,7 @@ def configure_openai() -> Optional[Dict]:
     else:
         console.print("⚠️  Cannot get model list, please input models manually")
         models = questionary.text(
-            "Please input models:",
+            "Please input model list:",
             instruction="(multiple models separated by commas, e.g. gpt-4,gpt-3.5-turbo)"
         ).ask()
     
