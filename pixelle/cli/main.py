@@ -12,7 +12,7 @@ from pixelle.cli.commands.status import status_command
 from pixelle.cli.commands.logs import logs_command
 from pixelle.cli.commands.init import init_command
 from pixelle.cli.commands.edit import edit_command
-from pixelle.cli.commands.workflow import workflow_command
+from pixelle.cli.commands.workflow import workflow_app
 from pixelle.cli.commands.dev import dev_command
 from pixelle.cli.interactive.welcome import run_interactive_mode
 from pixelle.cli.utils.display import show_enhanced_help
@@ -54,7 +54,7 @@ app.command("status")(status_command)
 app.command("logs")(logs_command)
 app.command("init")(init_command)
 app.command("edit")(edit_command)
-app.command("workflow")(workflow_command)
+app.add_typer(workflow_app, name="workflow")
 app.command("dev")(dev_command)
 
 
