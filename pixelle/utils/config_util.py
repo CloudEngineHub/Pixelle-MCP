@@ -60,7 +60,7 @@ def build_env_lines(
         f"PORT={service_config['port']}",
         "# Optional, used to specify public access URL, generally not needed for local services,",
         "# configure when service is not on local machine",
-        "PUBLIC_READ_URL=\"\"",
+        f"PUBLIC_READ_URL=\"{service_config.get('public_read_url', '')}\"",
         "",
         "# ======== ComfyUI Integration Configuration ========",
         "# ComfyUI service address",
