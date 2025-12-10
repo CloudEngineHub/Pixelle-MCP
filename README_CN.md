@@ -331,3 +331,7 @@ $<参数名>.[~]<字段名>[!][:<描述信息>]
 
 ## License
 本项目基于MIT许可证（[LICENSE](LICENSE), SPDX-License-identifier: MIT）发布。
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=AIDC-AI/Pixelle-MCP&type=Date)](https://star-history.com/#AIDC-AI/Pixelle-MCP&Date)
